@@ -7,6 +7,7 @@ from itd.models.user import UserPost, UserNewPost
 from itd.models._text import TextObject
 from itd.models.file import PostAttach
 from itd.models.comment import Comment
+from itd.enums import SpanType
 
 
 class NewPollOption(BaseModel):

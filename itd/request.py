@@ -39,7 +39,7 @@ def fetch(token: str, method: str, url: str, params: dict = {}, files: dict[str,
             raise RateLimitExceeded(res.json()['error'].get('retryAfter', 0))
         if res.json().get('error', {}).get('code') == 'UNAUTHORIZED':
             raise Unauthorized()
-        if res.json().get('error', {}).get('code') == 'ACCOUNT_BANNED':
+        if res.json().get('error', {}).get('code') in ('ACCOUNT_BANNED', 'USER_BLOCKED'):
             raise AccountBanned()
         if res.json().get('error', {}).get('code') == 'PROFILE_REQUIRED':
             raise ProfileRequired()
