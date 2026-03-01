@@ -1,6 +1,6 @@
 test.py
 like.py
-venv/
+.venv/
 __pycache__/
 dist
 itd_sdk.egg-info
