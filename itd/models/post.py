@@ -97,6 +97,7 @@ class _Post(_PostCounts):
 
 class Post(_Post, _PostAuthor):
     poll: Poll | None = None
+    dominant: str | None = Field(None, alias='dominantEmoji')
 
 
 class NewPost(_Post):
