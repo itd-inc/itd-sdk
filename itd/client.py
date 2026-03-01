@@ -745,12 +745,13 @@ class Client:
         return Post.model_validate(res.json()['data'])
 
     @refresh_on_error
-    def edit_post(self, id: UUID, content: str) -> str:
+    def edit_post(self, id: UUID, content: str, spans: list[Span] = []) -> str:
         """Редактировать пост
 
         Args:
             id (UUID): UUID поста
             content (str): Содержимое
+            spans (list[Span], optional): Стилизация содержимого. Defaults to [].
 
         Raises:
             NotFound: Пост не найден
@@ -760,7 +761,7 @@ class Client:
         Returns:
             str: Новое содержимое
         """
-        res = edit_post(self.token, id, content)
+        res = edit_post(self.token, id, content, [span.model_dump(mode="json") for span in spans])
 
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('Post')

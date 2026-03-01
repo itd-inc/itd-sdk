@@ -24,8 +24,8 @@ def get_posts(token: str, cursor: int = 0, tab: PostsTab = PostsTab.POPULAR):
 def get_post(token: str, id: UUID):
     return fetch(token, 'get', f'posts/{id}')
 
-def edit_post(token: str, id: UUID, content: str):
-    return fetch(token, 'put', f'posts/{id}', {'content': content})
+def edit_post(token: str, id: UUID, content: str, spans: list[dict] = []):
+    return fetch(token, 'put', f'posts/{id}', {'content': content, 'spans': spans})
 
 def delete_post(token: str, id: UUID):
     return fetch(token, 'delete', f'posts/{id}')
