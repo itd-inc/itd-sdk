@@ -142,3 +142,7 @@ class VideoRequiresVerification(Exception):
 class InvalidFileType(Exception):
     def __str__(self) -> str:
         return 'Invalid file extension'
+
+class EditExpired(Exception):
+    def __str__(self) -> str:
+        return 'Editing allowed only in first 48 hours after posting'

@@ -41,7 +41,7 @@ from itd.exceptions import (
     PendingRequestExists, Forbidden, UsernameTaken, CantFollowYourself, Unauthorized,
     CantRepostYourPost, AlreadyReposted, AlreadyReported, TooLarge, PinNotOwned, NoContent,
     AlreadyFollowing, NotFoundOrForbidden, OptionsNotBelong, NotMultipleChoice, EmptyOptions,
-    VideoRequiresVerification, InvalidFileType
+    VideoRequiresVerification, InvalidFileType, EditExpired
 )
 
 
@@ -764,6 +764,7 @@ class Client:
             NotFound: Пост не найден
             Forbidden: Нет доступа
             ValidationError: Ошибка валидации
+            EditExpired: Редактирование доступно только в течение 48 часов после публикации
 
         Returns:
             str: Новое содержимое
@@ -774,6 +775,8 @@ class Client:
             raise NotFound('Post')
         if res.json().get('error', {}).get('code') == 'FORBIDDEN':
             raise Forbidden('edit post')
+        if res.json().get('error', {}).get('code') == 'EDIT_WINDOW_EXPIRED':
+            raise EditExpired()
         if res.status_code == 422 and 'found' in res.json():
             raise ValidationError(*list(res.json()['found'].items())[0])
         res.raise_for_status()
