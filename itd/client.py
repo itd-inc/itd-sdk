@@ -718,18 +718,19 @@ class Client:
         return Poll.model_validate(res.json()['data'])
 
     @refresh_on_error
-    def get_posts(self, cursor: int = 0, tab: PostsTab = PostsTab.POPULAR) -> tuple[list[Post], PostsPagintaion]:
+    def get_posts(self, cursor: int = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR) -> tuple[list[Post], PostsPagintaion]:
         """Получить список постов
 
         Args:
             cursor (int, optional): Страница. Defaults to 0.
+            limit (int, optional): Лимит. Defaults to 20.
             tab (PostsTab, optional): Вкладка (популярное или подписки). Defaults to PostsTab.POPULAR.
 
         Returns:
             list[Post]: Список постов
             Pagination: Пагинация
         """
-        res = get_posts(self.token, cursor, tab)
+        res = get_posts(self.token, cursor, limit, tab)
         res.raise_for_status()
         data = res.json()['data']
 
