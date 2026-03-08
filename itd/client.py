@@ -35,7 +35,7 @@ from itd.models.file import File
 from itd.models.pin import Pin
 from itd.models.event import StreamConnect, StreamNotification
 
-from itd.enums import PostsTab, ReportTargetType, ReportTargetReason, UserPostSorting
+from itd.enums import PostsTab, ReportTargetType, ReportTargetReason, UserPostSorting, Unset
 from itd.request import set_cookies
 from itd.exceptions import (
     NoCookie, NoAuthData, SamePassword, InvalidOldPassword, NotFound, ValidationError, UserBanned,
@@ -172,14 +172,14 @@ class Client:
         return self.get_user('me')
 
     @refresh_on_error
-    def update_profile(self, username: str | None = None, display_name: str | None = None, bio: str | None = None, banner_id: UUID | None = None) -> UserProfileUpdate:
+    def update_profile(self, username: str | None = None, display_name: str | None = None, bio: str | None = None, banner_id: UUID | Unset | None = None) -> UserProfileUpdate:
         """Обновить профиль
 
         Args:
             username (str | None, optional): username. Defaults to None.
             display_name (str | None, optional): Отображаемое имя. Defaults to None.
             bio (str | None, optional): Биография (о себе). Defaults to None.
-            banner_id (UUID | None, optional): UUID баннера. Defaults to None.
+            banner_id (UUID | Unset | None, optional): UUID баннера. Defaults to None.
 
         Raises:
             ValidationError: Ошибка валидации

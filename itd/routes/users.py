@@ -2,21 +2,22 @@ from uuid import UUID
 
 from itd.request import fetch
 from itd.models.user import UserPrivacyData
+from itd.enums import Unset, UNSET
 
 
 def get_user(token: str, username: str):
     return fetch(token, 'get', f'users/{username}')
 
-def update_profile(token: str, bio: str | None = None, display_name: str | None = None, username: str | None = None, banner_id: UUID | None = None):
+def update_profile(token: str, bio: str | None = None, display_name: str | None = None, username: str | None = None, banner_id: UUID | Unset | None = None):
     data = {}
-    if bio:
+    if bio is not None:
         data['bio'] = bio
     if display_name:
         data['displayName'] = display_name
     if username:
         data['username'] = username
-    if banner_id:
-        data['bannerId'] = str(banner_id)
+    if banner_id is not None:
+        data['bannerId'] = str(banner_id) if banner_id != UNSET else None
     return fetch(token, 'put', 'users/me', data)
 
 def update_privacy(token: str, wall_closed: bool = False, private: bool = False):
