@@ -1,5 +1,6 @@
 # itd-sdk
 Клиент ITD для python
+Документация (beta): https://firedotguy.github.io/itd-sdk
 
 ## Установка
 
