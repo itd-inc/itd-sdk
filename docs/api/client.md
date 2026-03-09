@@ -1,3 +1,3 @@
 # Client
 
-::: itd.client.Client
+::: itd.client

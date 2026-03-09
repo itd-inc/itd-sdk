@@ -1,0 +1,3 @@
+# Пагинация
+
+::: itd.models.pagination

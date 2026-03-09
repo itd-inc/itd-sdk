@@ -1,0 +1,3 @@
+# Эвент
+
+::: itd.models.event

@@ -6,7 +6,7 @@ from itd.models.post import Span
 from itd.enums import SpanType
 
 
-class HTMLSpanParser(HTMLParser):
+class _HTMLSpanParser(HTMLParser):
     """Парсер HTML для извлечения текста и spans с форматированием."""
 
     TAG_MAP = {
@@ -77,12 +77,12 @@ def parse_html(text: str) -> tuple[str, list[Span]]:
         str: чистая строка
         list[Span]: список спанов
     """
-    parser = HTMLSpanParser()
+    parser = _HTMLSpanParser()
     parser.feed(text)
     return parser.get_text(), parser.get_spans()
 
 
-DELIMITERS = {
+_DELIMITERS = {
     '**': SpanType.BOLD,
     '*': SpanType.ITALIC,
     '~~': SpanType.STRIKE,
@@ -94,7 +94,7 @@ DELIMITERS = {
 
 
 def _split_with_delimiters(s: str):
-    escaped_delimiters = [re.escape(d) for d in sorted(DELIMITERS.keys(), key=len, reverse=True)]
+    escaped_delimiters = [re.escape(d) for d in sorted(_DELIMITERS.keys(), key=len, reverse=True)]
     link_pattern = r'\[[^\]]+\]\([^\)]+\)'
     pattern = '(' + '|'.join([r'\\.', link_pattern] + escaped_delimiters) + ')'
     return list(filter(len, re.split(pattern, s)))
@@ -135,9 +135,9 @@ def parse_md(s: str) -> tuple[str, list[Span]]:
             spans.append(Span(
                 offset=start,
                 length=len(result) - start,
-                type=DELIMITERS[token]
+                type=_DELIMITERS[token]
             ))
-        elif token in DELIMITERS:
+        elif token in _DELIMITERS:
             starts[token] = len(result)
         elif match := re.match(r'\[([^\]]+)\]\(([^\)]+)\)', token):
             spans.append(Span(
