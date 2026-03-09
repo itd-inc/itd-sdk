@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from itd.request import fetch
-from itd.enums import PostsTab
+from itd.enums import PostsTab, UserPostSorting
 from itd.models.post import NewPoll
 
 def create_post(token: str, content: str | None = None, spans: list[dict] = [], wall_recipient_id: UUID | None = None, attachment_ids: list[UUID] = [], poll: NewPoll | None = None):
@@ -18,8 +18,8 @@ def create_post(token: str, content: str | None = None, spans: list[dict] = [], 
 
     return fetch(token, 'post', 'posts', data)
 
-def get_posts(token: str, cursor: int = 0, tab: PostsTab = PostsTab.POPULAR):
-    return fetch(token, 'get', 'posts', {'cursor': cursor, 'tab': tab.value})
+def get_posts(token: str, cursor: int = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR):
+    return fetch(token, 'get', 'posts', {'cursor': cursor, 'limit': limit, 'tab': tab.value})
 
 def get_post(token: str, id: UUID):
     return fetch(token, 'get', f'posts/{id}')
@@ -45,8 +45,8 @@ def view_post(token: str, id: UUID):
 def get_liked_posts(token: str, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None):
     return fetch(token, 'get', f'posts/user/{username_or_id}/liked', {'limit': limit, 'cursor': cursor})
 
-def get_user_posts(token: str, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None):
-    return fetch(token, 'get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor})
+def get_user_posts(token: str, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW):
+    return fetch(token, 'get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor, 'pinnedPostId': pinned_post_id, 'sort': sort.value})
 
 def restore_post(token: str, id: UUID):
     return fetch(token, "post", f"posts/{id}/restore",)

@@ -33,6 +33,11 @@ class AttachType(Enum):
 class PostsTab(Enum):
     FOLLOWING = 'following'
     POPULAR = 'popular'
+    CLAN = 'clan'
+
+class UserPostSorting(Enum):
+    POPULAR = 'popular'
+    NEW = 'new'
 
 class AccessType(Enum):
     """Типы разрешений для видимости лайков и записей на стене"""
@@ -52,3 +57,7 @@ class SpanType(Enum):
     LINK = 'link' # ссылка
     QUOTE = 'quote' # цитата
     MENTION = 'mention' # упоминание (появляется только при получении постов, при создании нету)
+
+
+class Unset: pass
+UNSET = Unset()

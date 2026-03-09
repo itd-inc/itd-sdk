@@ -4,8 +4,9 @@ from typing import cast, Iterator
 from datetime import datetime
 from json import JSONDecodeError, loads
 from time import sleep
+from functools import wraps
 
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import HTTPError
 from sseclient import SSEClient
 
 from itd.routes.users import get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy, update_privacy_new
@@ -34,7 +35,7 @@ from itd.models.file import File
 from itd.models.pin import Pin
 from itd.models.event import StreamConnect, StreamNotification
 
-from itd.enums import PostsTab, ReportTargetType, ReportTargetReason
+from itd.enums import PostsTab, ReportTargetType, ReportTargetReason, UserPostSorting, Unset
 from itd.request import set_cookies
 from itd.exceptions import (
     NoCookie, NoAuthData, SamePassword, InvalidOldPassword, NotFound, ValidationError, UserBanned,
@@ -46,13 +47,15 @@ from itd.exceptions import (
 
 
 def refresh_on_error(func):
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         if self.cookies:
             try:
                 return func(self, *args, **kwargs)
-            except (Unauthorized, ConnectionError, HTTPError):
-                self.refresh_auth()
-                return func(self, *args, **kwargs)
+            except HTTPError as e:
+                if e.response.status_code == 401:
+                    self.refresh_auth()
+                    return func(self, *args, **kwargs)
         else:
             return func(self, *args, **kwargs)
     return wrapper
@@ -169,14 +172,14 @@ class Client:
         return self.get_user('me')
 
     @refresh_on_error
-    def update_profile(self, username: str | None = None, display_name: str | None = None, bio: str | None = None, banner_id: UUID | None = None) -> UserProfileUpdate:
+    def update_profile(self, username: str | None = None, display_name: str | None = None, bio: str | None = None, banner_id: UUID | Unset | None = None) -> UserProfileUpdate:
         """Обновить профиль
 
         Args:
             username (str | None, optional): username. Defaults to None.
             display_name (str | None, optional): Отображаемое имя. Defaults to None.
             bio (str | None, optional): Биография (о себе). Defaults to None.
-            banner_id (UUID | None, optional): UUID баннера. Defaults to None.
+            banner_id (UUID | Unset | None, optional): UUID баннера. Defaults to None.
 
         Raises:
             ValidationError: Ошибка валидации
@@ -718,18 +721,19 @@ class Client:
         return Poll.model_validate(res.json()['data'])
 
     @refresh_on_error
-    def get_posts(self, cursor: int = 0, tab: PostsTab = PostsTab.POPULAR) -> tuple[list[Post], PostsPagintaion]:
+    def get_posts(self, cursor: int = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR) -> tuple[list[Post], PostsPagintaion]:
         """Получить список постов
 
         Args:
             cursor (int, optional): Страница. Defaults to 0.
+            limit (int, optional): Лимит. Defaults to 20.
             tab (PostsTab, optional): Вкладка (популярное или подписки). Defaults to PostsTab.POPULAR.
 
         Returns:
             list[Post]: Список постов
             Pagination: Пагинация
         """
-        res = get_posts(self.token, cursor, tab)
+        res = get_posts(self.token, cursor, limit, tab)
         res.raise_for_status()
         data = res.json()['data']
 
@@ -876,13 +880,15 @@ class Client:
         res.raise_for_status()
 
     @refresh_on_error
-    def get_user_posts(self, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None) -> tuple[list[Post], LikedPostsPagintaion]:
+    def get_user_posts(self, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW) -> tuple[list[Post], LikedPostsPagintaion]:
         """Получить список постов пользователя
 
         Args:
             username_or_id (str | UUID): UUID или username пользователя
             limit (int, optional): Лимит. Defaults to 20.
             cursor (datetime | None, optional): Сдвиг (next_cursor). Defaults to None.
+            pinned_post_id (UUID | None, optional): UUID закрепленного поста. Defaults to None.
+            sort (UserPostSorting | None, optional): Сортировка. Defaults to UserPostSorting.NEW.
 
         Raises:
             NotFound: Пользователь не найден
@@ -891,7 +897,7 @@ class Client:
             list[Post]: Список постов
             LikedPostsPagintaion: Пагинация
         """
-        res = get_user_posts(self.token, username_or_id, limit, cursor)
+        res = get_user_posts(self.token, username_or_id, limit, cursor, pinned_post_id, sort)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         res.raise_for_status()

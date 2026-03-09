@@ -90,5 +90,5 @@ class User(UserSearch, _UserPrivacy):
     is_followed: bool | None = Field(None, alias='isFollowedBy') # none for me
 
     created_at: datetime = Field(alias='createdAt')
-    last_seen_at: datetime | None = Field(None, alias='lastSeen')
+    last_seen_at: datetime | dict | None = Field(None, alias='lastSeen')
     online: bool = False

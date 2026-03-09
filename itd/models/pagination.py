@@ -13,7 +13,7 @@ class Pagination(BaseModel):
 
 class PostsPagintaion(BaseModel):
     limit: int = 20
-    next_cursor: int | None = Field(1, alias='nextCursor')
+    next_cursor: int | datetime | None = Field(1, alias='nextCursor')
     has_more: bool = Field(True, alias='hasMore')
 
 
