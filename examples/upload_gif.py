@@ -2,7 +2,7 @@ from itd import ITDClient
 
 c = ITDClient(cookies=input('token: '))
 
-with open('d:/projects/archive/itd/nowkie.gif', 'rb') as f:
+with open('ПУТЬ/ДО/ГИФКИ.gif', 'rb') as f:
     file_data = f.read()
 
 file_data = file_data.replace(b'\x00\x3b', b'\xee\x3b') # можно менять "\xff" (диапазон 00-ff, например 9b)
