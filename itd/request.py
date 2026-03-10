@@ -1,14 +1,17 @@
 from _io import BufferedReader
 
-from requests import Session
+from requests import Response, Session
 from requests.exceptions import JSONDecodeError
 
-from itd.exceptions import InvalidToken, InvalidCookie, RateLimitExceeded, Unauthorized, AccountBanned, ProfileRequired
+from itd.exceptions import (
+    InvalidToken, InvalidCookie, RateLimitExceeded, Unauthorized, AccountBanned, ProfileRequired,
+    TargetUserBanned
+)
 
 s = Session()
 
 
-def fetch(token: str, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}):
+def fetch(token: str, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}) -> Response:
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -21,6 +24,12 @@ def fetch(token: str, method: str, url: str, params: dict = {}, files: dict[str,
     else:
         res = s.request(method.upper(), base, timeout=120 if files else 20, json=params, headers=headers, files=files)
 
+    if res.status_code == 204:
+        return res
+
+    if not res.ok:
+        print(res.text)
+
     try:
         if res.json().get('error') == 'Too Many Requests':
             raise RateLimitExceeded(0)
@@ -28,15 +37,15 @@ def fetch(token: str, method: str, url: str, params: dict = {}, files: dict[str,
             raise RateLimitExceeded(res.json()['error'].get('retryAfter', 0))
         if res.json().get('error', {}).get('code') == 'UNAUTHORIZED':
             raise Unauthorized()
-        if res.json().get('error', {}).get('code') in ('ACCOUNT_BANNED', 'USER_BLOCKED'):
+        if res.json().get('error', {}).get('code') == 'ACCOUNT_BANNED':
             raise AccountBanned()
+        if res.json().get('error', {}).get('code') == 'USER_BLOCKED':
+            raise TargetUserBanned()
         if res.json().get('error', {}).get('code') == 'PROFILE_REQUIRED':
             raise ProfileRequired()
     except (JSONDecodeError, AttributeError):
-        pass # todo
+        print('fail to parse json')
 
-    if not res.ok:
-        print(res.text)
     return res
 
 
@@ -53,9 +62,9 @@ def fetch_stream(token: str, url: str):
 
 def set_cookies(cookies: str):
     for cookie in cookies.split('; '):
-        s.cookies.set(cookie.split('=')[0], cookie.split('=')[-1], path='/', domain='xn--d1ah4a.com.com')
+        s.cookies.set(cookie.split('=')[0], cookie.split('=')[-1], path='/', domain='xn--d1ah4a.com')
 
-def auth_fetch(cookies: str, method: str, url: str, params: dict = {}, token: str | None = None):
+def auth_fetch(cookies: str, method: str, url: str, params: dict = {}, token: str | None = None) -> Response:
     headers = {
         "Host": "xn--d1ah4a.com",
         "Accept": "*/*",

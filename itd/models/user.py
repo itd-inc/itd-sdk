@@ -41,26 +41,34 @@ class UserPrivacyData:
         return data
 
 
-class UserProfileUpdate(BaseModel):
-    id: UUID
+class _UserBase(BaseModel):
     username: str | None = None
     display_name: str = Field(alias='displayName')
-    bio: str | None = None
 
+class _UserId(_UserBase):
+    id: UUID
+
+
+class UserProfileUpdate(_UserId):
+    bio: str | None = None
     updated_at: datetime | None = Field(None, alias='updatedAt')
 
 
-class UserNewPost(BaseModel):
-    username: str | None = None
-    display_name: str = Field(alias='displayName')
+class _UserAvatar(_UserBase):
+    verified: bool = False
     avatar: str
+
+
+class UserBlock(_UserAvatar):
+    blocked_at: datetime = Field(alias='blockedAt')
+
+
+class UserNewPost(_UserAvatar):
     pin: ShortPin | None = None
 
-    verified: bool = False
 
-
-class UserNotification(UserNewPost):
-    id: UUID
+class UserNotification(UserNewPost, _UserId):
+    pass
 
 
 class UserPost(UserNotification, UserNewPost):

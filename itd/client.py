@@ -9,12 +9,24 @@ from functools import wraps
 from requests.exceptions import HTTPError
 from sseclient import SSEClient
 
-from itd.routes.users import get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy, update_privacy_new, delete_account, restore_account
+from itd.routes.users import (
+    get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy,
+    update_privacy_new, delete_account, restore_account, block, unblock, get_blocked
+)
 from itd.routes.etc import get_top_clans, get_who_to_follow, get_platform_status
-from itd.routes.comments import get_comments, add_comment, delete_comment, like_comment, unlike_comment, add_reply_comment, get_replies
+from itd.routes.comments import (
+    get_comments, add_comment, delete_comment, like_comment, unlike_comment, add_reply_comment,
+    get_replies
+)
 from itd.routes.hashtags import get_hashtags, get_posts_by_hashtag
-from itd.routes.notifications import get_notifications, mark_as_read, mark_all_as_read, get_unread_notifications_count, stream_notifications
-from itd.routes.posts import create_post, get_posts, get_post, edit_post, delete_post, pin_post, repost, view_post, get_liked_posts, restore_post, like_post, unlike_post, get_user_posts, vote
+from itd.routes.notifications import (
+    get_notifications, mark_as_read, mark_all_as_read, get_unread_notifications_count,
+    stream_notifications
+)
+from itd.routes.posts import (
+    create_post, get_posts, get_post, edit_post, delete_post, pin_post, repost, view_post,
+    get_liked_posts, restore_post, like_post, unlike_post, get_user_posts, vote
+)
 from itd.routes.reports import report
 from itd.routes.search import search
 from itd.routes.files import upload_file, get_file, delete_file
@@ -27,8 +39,10 @@ from itd.models.notification import Notification
 from itd.models.post import Post, NewPost, PollData, Poll, Span
 from itd.models.clan import Clan
 from itd.models.hashtag import Hashtag
-from itd.models.user import User, UserProfileUpdate, UserPrivacy, UserFollower, UserWhoToFollow, UserPrivacyData
-from itd.models.pagination import Pagination, PostsPagintaion, LikedPostsPagintaion
+from itd.models.user import (
+    User, UserProfileUpdate, UserPrivacy, UserFollower, UserWhoToFollow, UserPrivacyData, UserBlock
+)
+from itd.models.pagination import Pagination, PostsPagintaion, LikedPostsPagintaion, PagePagination
 from itd.models.verification import Verification, VerificationStatus
 from itd.models.report import NewReport
 from itd.models.file import File
@@ -42,7 +56,8 @@ from itd.exceptions import (
     PendingRequestExists, Forbidden, UsernameTaken, CantFollowYourself, Unauthorized,
     CantRepostYourPost, AlreadyReposted, AlreadyReported, TooLarge, PinNotOwned, NoContent,
     AlreadyFollowing, NotFoundOrForbidden, OptionsNotBelong, NotMultipleChoice, EmptyOptions,
-    RequiresVerification, InvalidFileType, EditExpired, UploadError, AccountNotDeleted, AccountAlreadyDeleted
+    RequiresVerification, InvalidFileType, EditExpired, UploadError, AccountNotDeleted,
+    AccountAlreadyDeleted, AlreadyBlocked, NotBlocked, CantBlockYourself
 )
 
 
@@ -324,20 +339,77 @@ class Client:
         return [UserFollower.model_validate(user) for user in res.json()['data']['users']], Pagination.model_validate(res.json()['data']['pagination'])
 
     @refresh_on_error
-    def delete_account(self):
+    def delete_account(self) -> datetime:
+        """Удалить аккаунт
+
+        Raises:
+            AccountAlreadyDeleted: Аккаунт уже удален
+
+        Returns:
+            datetime: Время удаления (сегодня + 30 дней)
+        """
         res = delete_account(self.token)
         if res.json().get('error', {}).get('code') == 'ALREADY_DELETED':
             raise AccountAlreadyDeleted()
         res.raise_for_status()
 
-        return res.json()['restoreDeadline']
+        return datetime.fromisoformat(res.json()['restoreDeadline'])
 
     @refresh_on_error
     def restore_account(self):
+        """Восстановить аккаунт
+
+        Raises:
+            AccountNotDeleted: Аккаунт итак не удален
+        """
         res = restore_account(self.token)
         if res.json().get('error', {}).get('code') == 'NOT_DELETED':
             raise AccountNotDeleted()
         res.raise_for_status()
+
+    @refresh_on_error
+    def block(self, username_or_id: str | UUID):
+        """Заблокировать пользователя
+
+        Args:
+            username_or_id (str | UUID): username или ID пользователя
+
+        Raises:
+            AlreadyBlocked: Пользователь уже заблокирован
+            NotFound: Пользователь не найден
+            CantBlockYourself: Невозможно заблокировать самого себя
+        """
+        res = block(self.token, username_or_id)
+        if res.json().get('error', {}).get('code') == 'CONFLICT':
+            raise AlreadyBlocked()
+        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
+            raise NotFound('User')
+        if res.json().get('error', {}).get('message') == 'Cannot block yourself':
+            raise CantBlockYourself()
+        res.raise_for_status()
+
+    @refresh_on_error
+    def unblock(self, username_or_id: str | UUID):
+        """Разблокировать пользователя
+
+        Args:
+            username_or_id (str | UUID): username или ID пользователя
+
+        Raises:
+            NotBlocked: Пользователь итак не заблокирован
+        """
+        res = unblock(self.token, username_or_id)
+        if res.json().get('error', {}).get('code') == 'CONFLICT':
+            raise NotBlocked()
+        res.raise_for_status()
+
+    @refresh_on_error
+    def get_blocked(self, limit: int = 20, page: int = 1):
+        res = get_blocked(self.token, limit, page)
+        res.raise_for_status()
+
+        data = res.json()['data']
+        return [UserBlock.model_validate(user) for user in data['users']], PagePagination.model_validate(data['pagination'])
 
     @refresh_on_error
     def verify(self, file_url: str) -> Verification:

@@ -48,3 +48,12 @@ def delete_account(token: str):
 
 def restore_account(token: str):
     return fetch(token, 'post', 'users/me/restore')
+
+def block(token: str, username_or_id: str | UUID):
+    return fetch(token, 'post', f'users/{username_or_id}/block')
+
+def unblock(token: str, username_or_id: str | UUID):
+    return fetch(token, 'delete', f'users/{username_or_id}/block')
+
+def get_blocked(token: str, limit: int = 20, page: int = 1):
+    return fetch(token, 'get', 'users/me/blocked', {'limit': limit, 'page': page})
