@@ -10,10 +10,10 @@ from sseclient import SSEClient
 
 from itd.routes.users import (
     get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy,
-    update_privacy_new, delete_account, restore_account, block, unblock, get_blocked,
+    delete_account, restore_account, block, unblock, get_blocked,
     get_follow_status
 )
-from itd.routes.etc import get_top_clans, get_who_to_follow, get_platform_status
+from itd.routes.etc import get_top_clans, get_who_to_follow
 from itd.routes.comments import (
     get_comments, add_comment, delete_comment, like_comment, unlike_comment, add_reply_comment,
     get_replies
@@ -229,7 +229,7 @@ class Client:
         Returns:
             UserPrivacy: Обновленные данные приватности
         """
-        res = update_privacy_new(self.token, privacy)
+        res = update_privacy(self.token, privacy)
         res.raise_for_status()
 
         return UserPrivacy.model_validate(res.json())

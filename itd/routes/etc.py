@@ -5,6 +5,3 @@ def get_top_clans(token: str):
 
 def get_who_to_follow(token: str):
     return fetch(token, 'get', 'users/suggestions/who-to-follow')
-
-def get_platform_status(token: str):
-    return fetch(token, 'get', 'platform/status')

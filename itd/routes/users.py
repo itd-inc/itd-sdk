@@ -20,15 +20,7 @@ def update_profile(token: str, bio: str | None = None, display_name: str | None 
         data['bannerId'] = str(banner_id) if banner_id != UNSET else None
     return fetch(token, 'put', 'users/me', data)
 
-def update_privacy(token: str, wall_closed: bool = False, private: bool = False):
-    data = {}
-    if wall_closed is not None:
-        data['wallClosed'] = wall_closed
-    if private is not None:
-        data['isPrivate'] = private
-    return fetch(token, 'put', 'users/me/privacy', data)
-
-def update_privacy_new(token: str, privacy: UserPrivacyData):
+def update_privacy(token: str, privacy: UserPrivacyData):
     return fetch(token, 'put', 'users/me/privacy', privacy.to_dict())
 
 def follow(token: str, username: str):
