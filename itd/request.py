@@ -6,6 +6,8 @@ from typing import Any
 
 from requests import Response, Session
 from requests.exceptions import JSONDecodeError
+from websocket import create_connection#, enableTrace
+# enableTrace(True)
 
 from itd.exceptions import (
     InvalidToken, InvalidCookie, RateLimitExceeded, Unauthorized, AccountBanned, ProfileRequired
@@ -47,7 +49,7 @@ def is_token_expired(access_token: str) -> bool:
 
 
 def fetch(token: str, method: str, url: str, params: dict = {},
-          files: dict[str, tuple[str, BufferedReader | bytes]] = {}) -> Response:
+        files: dict[str, tuple[str, BufferedReader | bytes]] = {}) -> Response:
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -92,6 +94,23 @@ def fetch_stream(token: str, url: str):
         "Cache-Control": "no-cache"
     }
     return s.get(base, headers=headers, stream=True, timeout=None)
+
+def fetch_board(token: str) -> bytes:
+    res = s.get(
+        'https://pixel.xn--d1ah4a.com/api/board',
+        headers={"Authorization": 'Bearer ' + token},
+        timeout=30
+    )
+    res.raise_for_status()
+    return res.content
+
+
+def fetch_ws(token: str, url: str):
+    connection = create_connection(
+        f'wss://pixel.xn--d1ah4a.com/{url}'
+    )
+    connection.send(token)
+    return connection
 
 
 def set_cookies(cookies: str):

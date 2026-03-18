@@ -7,6 +7,7 @@ from time import sleep
 from functools import wraps
 
 from sseclient import SSEClient
+from msgpack import Unpacker
 
 from itd.routes.users import (
     get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy,
@@ -50,7 +51,7 @@ from itd.models.pin import Pin
 from itd.models.event import StreamConnect, StreamNotification
 
 from itd.enums import PostsTab, ReportTargetType, ReportTargetReason, UserPostSorting, Unset
-from itd.request import set_cookies, decode_jwt_payload
+from itd.request import set_cookies, decode_jwt_payload, fetch_ws, fetch_board
 from itd.exceptions import (
     NoCookie, NoAuthData, SamePassword, InvalidOldPassword, NotFound, ValidationError,
     PendingRequestExists, Forbidden, UsernameTaken, CantFollowYourself, Unauthorized,
@@ -1296,6 +1297,20 @@ class Client:
 
         return res.json()['pin']
 
+    def get_board(self) -> bytes:
+        """Получить текущее состояние холста.
+
+        Returns:
+            bytes: 1024×1024 байт, каждый байт — индекс цвета (0–31)
+        """
+        return fetch_board(self.token)
+
+    def stream_pixels(self) -> Iterator:
+        ws = fetch_ws(self.token, 'ws?platform=web&app_version=1.0.0&device_id=29052d8d-685c-4ade-b4e5-0fb9c99a0050')
+
+        while ws.connected:
+            msg = ws.recv()
+            yield decode_pixels(list(msg))
 
     @refresh_on_error
     def stream_notifications(self) -> Iterator[StreamConnect | StreamNotification]:
@@ -1394,3 +1409,34 @@ class Client:
         """
         print('stop event')
         self._stream_active = False
+
+
+PIXEL_COLORS = [
+    '#FFFFFF', '#C8C8C8', '#888888', '#4A4A4A', '#000000',
+    '#5C2E1A', '#9B6340', '#EBB89B', '#7A1535', '#B80040',
+    '#E80000', '#F00078', '#F5B5C5', '#DC6BA0', '#E88000',
+    '#D07000', '#F0D000', '#F5F0A0', '#1A5E00', '#00C800',
+    '#88D000', '#006060', '#0000E0', '#000080', '#80C0F0',
+    '#00B0B0', '#A0D8F0', '#2E0080', '#8000B0', '#C080F0',
+    '#C00080', '#404050'
+]
+
+
+def decode_pixels(data: list[int]) -> list[tuple[int, int, int, str]]:
+    """Декодировать бинарные данные пикселей из WebSocket.
+
+    Формат: uint32 LE, bits 0-9 = X, bits 10-19 = Y, bits 20-24 = color (0-31)
+
+    Returns:
+        list of (x, y, color_index, color_hex)
+    """
+    import struct
+    pixels = []
+    for i in range(0, len(data) - len(data) % 4, 4):
+        val = struct.unpack_from('<I', bytes(data[i:i+4]))[0]
+        x = val & 0x3FF
+        y = (val >> 10) & 0x3FF
+        color = (val >> 20) & 0x1F
+        hex_color = PIXEL_COLORS[color] if color < len(PIXEL_COLORS) else f'?({color})'
+        pixels.append((x, y, color, hex_color))
+    return pixels
