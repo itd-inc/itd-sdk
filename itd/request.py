@@ -6,6 +6,7 @@ from typing import Any
 
 from requests import Response, Session
 from requests.exceptions import JSONDecodeError
+from requests.utils import default_user_agent
 
 from itd.exceptions import (
     InvalidToken, InvalidCookie, RateLimitExceeded, Unauthorized, AccountBanned, ProfileRequired
@@ -105,9 +106,8 @@ def auth_fetch(cookies: str, method: str, url: str, params: dict = {}, token: st
         "Accept": "*/*",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
         "Referer": "https://xn--d1ah4a.com/",
-        "Content-Type": "application/json",
         "Origin": "https://xn--d1ah4a.com",
-        "Connection": "keep-alive",
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0', # TODO: set custom user agent
         "Cookie": cookies
     }
     if token:
