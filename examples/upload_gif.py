@@ -2,9 +2,9 @@ from itd import ITDClient
 from time import sleep
 from random import randint
 
-c = ITDClient(cookies='refresh_token=xxx')
+c = ITDClient(cookies='refresh_token=ТОКЕН')
 
-with open('nowkie.gif', 'rb') as f:
+with open('ИМЯ ФАЙЛА.gif', 'rb') as f:
     file_data = f.read()
 
 # file_data += b'\xbb\xff\x3b'
