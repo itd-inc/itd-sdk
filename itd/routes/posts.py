@@ -1,11 +1,27 @@
+from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
+from typing import TYPE_CHECKING
 
-from itd.request import fetch
 from itd.enums import PostsTab, UserPostSorting
-from itd.models.post import NewPoll
+from itd.poll import NewPoll
+from itd.exceptions import (
+    catch_errors, NotFound, Forbidden, RequiresVerification, ValidationError, AlreadyReposted,
+    CantRepostYourPost, NotPinned, EditExpired
+)
 
-def create_post(token: str, content: str | None = None, spans: list[dict] = [], wall_recipient_id: UUID | None = None, attachment_ids: list[UUID] = [], poll: NewPoll | None = None):
+if TYPE_CHECKING:
+    from itd.client import Client
+
+@catch_errors(NotFound('Wall recipient'), Forbidden('post - some files not owned'), RequiresVerification('Video uploading'), ValidationError())
+def create_post(
+    client: Client,
+    content: str | None = None,
+    spans: list[dict] = [],
+    wall_recipient_id: UUID | None = None,
+    attachment_ids: list[UUID] = [],
+    poll: NewPoll | None = None
+):
     data: dict = {'content': content or ''}
     if spans:
         data['spans'] = spans
@@ -14,48 +30,58 @@ def create_post(token: str, content: str | None = None, spans: list[dict] = [], 
     if attachment_ids:
         data['attachmentIds'] = list(map(str, attachment_ids))
     if poll:
-        data['poll'] = poll.model_dump()
+        data['poll'] = poll.poll.model_dump(mode='json')
 
-    return fetch(token, 'post', 'posts', data)
+    return client.request('post', 'posts', data)
 
-def get_posts(token: str, cursor: int | datetime = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR):
-    return fetch(token, 'get', 'posts', {'cursor': None if cursor == 0 else cursor, 'limit': limit, 'tab': tab.value})
+def get_posts(client: Client, cursor: int | datetime = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR):
+    return client.request('get', 'posts', {'cursor': None if cursor == 0 else cursor, 'limit': limit, 'tab': tab.value})
 
-def get_post(token: str, id: UUID):
-    return fetch(token, 'get', f'posts/{id}')
+@catch_errors(NotFound('Post'))
+def get_post(client: Client, id: UUID):
+    return client.request('get', f'posts/{id}')
 
-def edit_post(token: str, id: UUID, content: str, spans: list[dict] = []):
-    return fetch(token, 'put', f'posts/{id}', {'content': content, 'spans': spans})
+@catch_errors(NotFound('Post'), Forbidden('edit post'), EditExpired())
+def edit_post(client: Client, id: UUID, content: str, spans: list[dict] = []):
+    return client.request('put', f'posts/{id}', {'content': content, 'spans': spans})
 
-def delete_post(token: str, id: UUID):
-    return fetch(token, 'delete', f'posts/{id}')
+@catch_errors(NotFound('Post'), Forbidden('delete post'))
+def delete_post(client: Client, id: UUID):
+    return client.request('delete', f'posts/{id}')
 
-def pin_post(token: str, id: UUID):
-    return fetch(token, 'post', f'posts/{id}/pin')
+@catch_errors(NotFound('Post'), Forbidden('restore post'))
+def restore_post(client: Client, id: UUID):
+    return client.request('post', f'posts/{id}/restore')
 
-def repost(token: str, id: UUID, content: str | None = None):
+@catch_errors(NotFound('Post'), Forbidden('pin post'))
+def pin_post(client: Client, id: UUID):
+    return client.request('post', f'posts/{id}/pin')
+
+@catch_errors(NotPinned())
+def unpin_post(client: Client, id: UUID):
+    return client.request('delete', f'posts/{id}/pin')
+
+@catch_errors(NotFound('Post'), AlreadyReposted(), CantRepostYourPost(), ValidationError())
+def repost(client: Client, id: UUID, content: str | None = None):
     data = {}
     if content:
         data['content'] = content
-    return fetch(token, 'post', f'posts/{id}/repost', data)
+    return client.request('post', f'posts/{id}/repost', data)
 
-def view_post(token: str, id: UUID):
-    return fetch(token, 'post', f'posts/{id}/view')
+@catch_errors(NotFound('Post'))
+def view_post(client: Client, id: UUID):
+    return client.request('post', f'posts/{id}/view')
 
-def get_liked_posts(token: str, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None):
-    return fetch(token, 'get', f'posts/user/{username_or_id}/liked', {'limit': limit, 'cursor': cursor})
+def get_liked_posts(client: Client, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None):
+    return client.request('get', f'posts/user/{username_or_id}/liked', {'limit': limit, 'cursor': cursor})
 
-def get_user_posts(token: str, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW):
-    return fetch(token, 'get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor, 'pinnedPostId': pinned_post_id, 'sort': sort.value})
+def get_user_posts(client: Client, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW):
+    return client.request('get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor, 'pinnedPostId': pinned_post_id, 'sort': sort.value})
 
-def restore_post(token: str, id: UUID):
-    return fetch(token, "post", f"posts/{id}/restore",)
+@catch_errors(NotFound('Post'))
+def like_post(client: Client, id: UUID):
+    return client.request('post', f'posts/{id}/like')
 
-def like_post(token: str, id: UUID):
-    return fetch(token, "post", f"posts/{id}/like")
-
-def unlike_post(token: str, id: UUID):
-    return fetch(token, "delete", f"posts/{id}/like")
-
-def vote(token: str, id: UUID, options: list[UUID]):
-    return fetch(token, 'post', f'posts/{id}/poll/vote', {'optionIds': [str(option) for option in options]})
+@catch_errors(NotFound('Post'))
+def unlike_post(client: Client, id: UUID):
+    return client.request('delete', f'posts/{id}/like')

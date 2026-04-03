@@ -31,7 +31,7 @@ def board_to_ppm(data: bytes, path: str) -> None:
 
 if __name__ == '__main__':
     output = sys.argv[1] if len(sys.argv) > 1 else 'board.ppm'
-    client = ITDClient(cookies=COOKIES)
+    client = ITDClient(COOKIES)
     print('Загрузка холста...')
     data = client.get_board()
     board_to_ppm(data, output)

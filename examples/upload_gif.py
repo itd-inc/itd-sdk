@@ -2,8 +2,12 @@ from itd import ITDClient
 from itd.post import Post
 from time import sleep
 from random import randint
+from dotenv import load_dotenv
+from os import getenv
 
-c = ITDClient(input('token: '))
+load_dotenv()
+
+c = ITDClient(getenv('TOKEN'))
 
 with open('1.gif', 'rb') as f:
     file_data = f.read()
@@ -13,15 +17,19 @@ with open('1.gif', 'rb') as f:
 agreed = False
 file = None
 length = len(file_data)
+level = 13.0
+
 while not agreed:
-    rnd = randint(length - max(length, 100000), length)
-    file = c.upload_file('1.gif', file_data.replace(file_data[rnd:rnd + 3], b'\xff\xff\xff\xbb\x00'))
+    rnd = randint(length - length // 80, length)
+    file = c.upload_file('some.gif', file_data.replace(file_data[rnd:rnd + 3], (b'\xff' * round(level)) +  b'\xff\x00\x00\xb0\x00'))
     if file.mime_type == 'image/jpeg':
         print('not converted to GIF! Try again...')
         sleep(3)
+        level += 3
         continue
 
     print('check this out: ', file.url)
     agreed = input('? ') == 'y'
+    level -= 0.5
 
-Post.new('ахахаха', attachment_ids=[file.id])
+Post.new(attachment_ids=[file.id])

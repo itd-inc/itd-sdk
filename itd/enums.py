@@ -39,6 +39,11 @@ class UserPostSorting(Enum):
     POPULAR = 'popular'
     NEW = 'new'
 
+class CommentSorting(Enum): # actually it is not working (stupid itd api)
+    POPULAR = 'popular'
+    NEW = 'new'
+    OLD = 'old'
+
 class AccessType(Enum):
     """Типы разрешений для видимости лайков и записей на стене"""
     NOBODY = 'nobody' # никто
@@ -55,9 +60,17 @@ class SpanType(Enum):
     UNDERLINE = 'underline' # подчеркнутый
     HASHTAG = 'hashtag' # хэштэг (появляется только при получении постов, при создании нету)
     LINK = 'link' # ссылка
-    QUOTE = 'quote' # цитата
+    QUOTE = 'quote' # цитата (не работает)
     MENTION = 'mention' # упоминание (появляется только при получении постов, при создании нету)
+
+
+class Role(Enum):
+    USER = 'user'
+    ADMIN = 'admin'
 
 
 class Unset: pass
 UNSET = Unset()
+
+class All: pass
+ALL = All()

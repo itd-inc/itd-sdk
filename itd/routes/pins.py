@@ -1,10 +1,14 @@
-from itd.request import fetch
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-def get_pins(token: str):
-    return fetch(token, 'get', 'users/me/pins')
+if TYPE_CHECKING:
+    from itd.client import Client
 
-def remove_pin(token: str):
-    return fetch(token, 'delete', 'users/me/pin')
+def get_pins(client: Client):
+    return client.request('get', 'users/me/pins')
 
-def set_pin(token: str, slug: str):
-    return fetch(token, 'put', 'users/me/pin', {'slug': slug})
+def remove_pin(client: Client):
+    return client.request('delete', 'users/me/pin')
+
+def set_pin(client: Client, slug: str):
+    return client.request('put', 'users/me/pin', {'slug': slug})

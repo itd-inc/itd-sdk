@@ -1,19 +1,14 @@
-import base64
-import json
+from base64 import urlsafe_b64decode
+from json import loads
 from _io import BufferedReader
-import time
+from time import time
 from typing import Any
 
 from requests import Response, Session
 from requests.exceptions import JSONDecodeError
-from websocket import create_connection#, enableTrace
-# enableTrace(True)
-
 from itd.exceptions import (
     InvalidToken, InvalidCookie, RateLimitExceeded, Unauthorized, AccountBanned, ProfileRequired
 )
-
-s = Session()
 
 
 def decode_jwt_payload(jwt_token: str) -> dict[str, Any]:
@@ -30,8 +25,8 @@ def decode_jwt_payload(jwt_token: str) -> dict[str, Any]:
         raise ValueError("access токен состоит из трёх сегментов")
     payload = parts[1]
     payload += '=' * ((4 - len(payload) % 4) % 4)
-    decoded = base64.urlsafe_b64decode(payload).decode('utf-8')
-    return json.loads(decoded)
+    decoded = urlsafe_b64decode(payload).decode('utf-8')
+    return loads(decoded)
 
 
 def is_token_expired(access_token: str) -> bool:
@@ -41,26 +36,27 @@ def is_token_expired(access_token: str) -> bool:
         access_token: access токен
 
     Returns:
-         Истёк ли токен
+        Истёк ли токен
 
     """
     payload = decode_jwt_payload(access_token)
-    return time.time() - 1 >= payload['exp']
+    return time() - 1 >= payload['exp']
 
 
-def fetch(token: str, method: str, url: str, params: dict = {},
-        files: dict[str, tuple[str, BufferedReader | bytes]] = {}) -> Response:
+def fetch(token: str | None, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}, *, session: Session) -> Response:
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        "Authorization": 'Bearer ' + token
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0', # TODO: set custom user agent
     }
+    if token:
+        headers['Authorization'] = 'Bearer ' + token
     method = method.lower()
     if method == "get":
-        res = s.get(base, timeout=120 if files else 20, params=params, headers=headers)
+        res = session.get(base, timeout=120 if files else 20, params=params, headers=headers)
     else:
-        res = s.request(method.upper(), base, timeout=120 if files else 20, json=params, headers=headers, files=files)
+        res = session.request(method.upper(), base, timeout=120 if files else 20, json=params, headers=headers, files=files)
 
     if res.status_code == 204:
         return res
@@ -68,6 +64,8 @@ def fetch(token: str, method: str, url: str, params: dict = {},
     if not res.ok:
         print(res.text)
 
+    if res.text == 'UNAUTHORIZED':
+        raise InvalidToken()
     try:
         if res.json().get('error') == 'Too Many Requests':
             raise RateLimitExceeded(res.json().get('retry_after', 0))
@@ -79,63 +77,47 @@ def fetch(token: str, method: str, url: str, params: dict = {},
             raise AccountBanned()
         if res.json().get('error', {}).get('code') == 'PROFILE_REQUIRED':
             raise ProfileRequired()
+        if res.json().get('error', {}).get('code') in ('SESSION_NOT_FOUND', 'REFRESH_TOKEN_MISSING',
+                'SESSION_REVOKED', 'SESSION_EXPIRED'):
+            raise InvalidCookie(res.json()['error']['code'])
     except (JSONDecodeError, AttributeError):
         print('fail to parse json')
 
     return res
 
 
-def fetch_stream(token: str, url: str):
+def fetch_stream(token: str, url: str, *, session: Session):
     """Fetch для SSE streaming запросов"""
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
         "Accept": "text/event-stream",
         "Authorization": 'Bearer ' + token,
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        'Sec-WebSocket-Extensions': 'permessage-deflate',
+        'Sec-WebSocket-Key': '3tMaiXFWtq34tenKN/+T4Q==',
+        'Sec-WebSocket-Version': '13'
     }
-    return s.get(base, headers=headers, stream=True, timeout=None)
-
-def fetch_board(token: str) -> bytes:
-    res = s.get(
-        'https://pixel.xn--d1ah4a.com/api/board',
-        headers={"Authorization": 'Bearer ' + token},
-        timeout=30
-    )
-    res.raise_for_status()
-    return res.content
-
-
-def fetch_ws(token: str, url: str):
-    connection = create_connection(
-        f'wss://pixel.xn--d1ah4a.com/{url}'
-    )
-    connection.send(token)
-    return connection
-
-
-def set_cookies(cookies: str):
-    for cookie in cookies.split('; '):
-        s.cookies.set(cookie.split('=')[0], cookie.split('=')[-1], path='/', domain='xn--d1ah4a.com')
+    return session.get(base, headers=headers, stream=True, timeout=None)
 
 
 def auth_fetch(cookies: str, method: str, url: str, params: dict = {}, token: str | None = None) -> Response:
+    session = Session()
     headers = {
         "Host": "xn--d1ah4a.com",
         "Accept": "*/*",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
         "Referer": "https://xn--d1ah4a.com/",
-        "Content-Type": "application/json",
         "Origin": "https://xn--d1ah4a.com",
-        "Connection": "keep-alive",
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0', # TODO: set custom user agent
         "Cookie": cookies
     }
     if token:
         headers['Authorization'] = 'Bearer ' + token
 
     if method == 'get':
-        res = s.get(f'https://xn--d1ah4a.com/api/{url}', timeout=20, params=params, headers=headers)
+        res = session.get(f'https://xn--d1ah4a.com/api/{url}', timeout=20, params=params, headers=headers)
     else:
-        res = s.request(method, f'https://xn--d1ah4a.com/api/{url}', timeout=20, json=params, headers=headers)
+        res = session.request(method, f'https://xn--d1ah4a.com/api/{url}', timeout=20, json=params, headers=headers)
 
     if res.text == 'UNAUTHORIZED':
         raise InvalidToken()
@@ -144,8 +126,8 @@ def auth_fetch(cookies: str, method: str, url: str, params: dict = {}, token: st
             raise RateLimitExceeded(0)
         if res.json().get('error', {}).get('code') == 'RATE_LIMIT_EXCEEDED':
             raise RateLimitExceeded(res.json()['error'].get('retryAfter', 0))
-        if res.json().get('error', {}).get('code') in ('SESSION_NOT_FOUND', 'REFRESH_TOKEN_MISSING', 'SESSION_REVOKED',
-                                                       'SESSION_EXPIRED'):
+        if res.json().get('error', {}).get('code') in ('SESSION_NOT_FOUND', 'REFRESH_TOKEN_MISSING',
+                'SESSION_REVOKED', 'SESSION_EXPIRED'):
             raise InvalidCookie(res.json()['error']['code'])
         if res.json().get('error', {}).get('code') == 'UNAUTHORIZED':
             raise Unauthorized()

@@ -1,14 +1,26 @@
+from __future__ import annotations
 from uuid import UUID
+from typing import TYPE_CHECKING
 
-from itd.request import fetch
-from itd.models.user import UserPrivacyData
-from itd.enums import Unset, UNSET
+from itd.enums import Unset, UNSET, AccessType
+from itd.exceptions import (
+    catch_errors, NotFound, TooLarge, ValidationError, RequiresVerification, UsernameTaken,
+    AlreadyFollowing, AlreadyDeleted, NotDeleted, AlreadyBlocked, NotBlocked, CantFollowYourself,
+    UserBlocked, CantBlockYourself
+)
+
+if TYPE_CHECKING:
+    from itd.client import Client
 
 
-def get_user(token: str, username: str):
-    return fetch(token, 'get', f'users/{username}')
+# TODO: add get profile
 
-def update_profile(token: str, bio: str | None = None, display_name: str | None = None, username: str | None = None, banner_id: UUID | Unset | None = None):
+@catch_errors(NotFound('User'), TooLarge('User'))
+def get_user(client: Client, username_or_id: str | UUID):
+    return client.request('get', f'users/{username_or_id}')
+
+@catch_errors(ValidationError(), RequiresVerification('GIF banner uploading'), UsernameTaken())
+def update_profile(client: Client, bio: str | None = None, display_name: str | None = None, username: str | None = None, banner_id: UUID | Unset | None = None):
     data = {}
     if bio is not None:
         data['bio'] = bio
@@ -18,37 +30,65 @@ def update_profile(token: str, bio: str | None = None, display_name: str | None 
         data['username'] = username
     if banner_id is not None:
         data['bannerId'] = str(banner_id) if banner_id != UNSET else None
-    return fetch(token, 'put', 'users/me', data)
+    return client.request('put', 'users/me', data)
 
-def update_privacy(token: str, privacy: UserPrivacyData):
-    return fetch(token, 'put', 'users/me/privacy', privacy.to_dict())
+@catch_errors()
+def get_profile(client: Client):
+    return client.request('get', 'profile')
 
-def follow(token: str, username: str):
-    return fetch(token, 'post', f'users/{username}/follow')
+@catch_errors()
+def get_privacy(client: Client):
+    return client.request('get', 'users/me/privacy')
 
-def unfollow(token: str, username: str):
-    return fetch(token, 'delete', f'users/{username}/follow')
+@catch_errors(ValidationError())
+def update_privacy(client: Client, is_private: bool | None = None, wall_access: AccessType | None = None, likes_visibility: AccessType | None = None, show_last_seen: bool | None = None):
+    data = {}
+    if is_private is not None:
+        data['isPrivate'] = is_private
+    if wall_access:
+        data['wallAccess'] = wall_access
+    if likes_visibility:
+        data['likesVisibility'] = likes_visibility
+    if show_last_seen is not None:
+        data['showLastSeen'] = show_last_seen
+    return client.request('put', 'users/me/privacy', data)
 
-def get_followers(token: str, username: str, limit: int = 30, page: int = 1):
-    return fetch(token, 'get', f'users/{username}/followers', {'limit': limit, 'page': page})
+@catch_errors(NotFound('User'), AlreadyFollowing(), TooLarge('Username'), CantFollowYourself(), UserBlocked())
+def follow(client: Client, username_or_id: str | UUID):
+    return client.request('post', f'users/{username_or_id}/follow')
 
-def get_following(token: str, username: str, limit: int = 30, page: int = 1):
-    return fetch(token, 'get', f'users/{username}/following', {'limit': limit, 'page': page})
+@catch_errors(NotFound('User'), TooLarge('Username'))
+def unfollow(client: Client, username_or_id: str | UUID):
+    return client.request('delete', f'users/{username_or_id}/follow')
 
-def delete_account(token: str):
-    return fetch(token, 'delete', 'users/me')
+@catch_errors(NotFound('User'), ValidationError(), TooLarge('Username'))
+def get_followers(client: Client, username_or_id: str | UUID, page: int = 1): # !! page not works if not me
+    return client.request('get', f'users/{username_or_id}/followers', {'page': page})
 
-def restore_account(token: str):
-    return fetch(token, 'post', 'users/me/restore')
+@catch_errors(NotFound('User'), ValidationError(), TooLarge('Username'))
+def get_following(client: Client, username_or_id: str | UUID, page: int = 1): # !! page not works if not me
+    return client.request('get', f'users/{username_or_id}/following', {'page': page})
 
-def block(token: str, username_or_id: str | UUID):
-    return fetch(token, 'post', f'users/{username_or_id}/block')
+@catch_errors(AlreadyDeleted('Account'))
+def delete_account(client: Client):
+    return client.request('delete', 'users/me')
 
-def unblock(token: str, username_or_id: str | UUID):
-    return fetch(token, 'delete', f'users/{username_or_id}/block')
+@catch_errors(NotDeleted('Account'))
+def restore_account(client: Client):
+    return client.request('post', 'users/me/restore')
 
-def get_blocked(token: str, limit: int = 20, page: int = 1):
-    return fetch(token, 'get', 'users/me/blocked', {'limit': limit, 'page': page})
+@catch_errors(NotFound('User'), TooLarge('Username'), AlreadyBlocked(), CantBlockYourself())
+def block(client: Client, username_or_id: str | UUID):
+    return client.request('post', f'users/{username_or_id}/block')
 
-def get_follow_status(token: str, user_ids: list[UUID]):
-    return fetch(token, 'post', 'users/follow-status', {'userIds': list(map(str, user_ids))})
+@catch_errors(NotFound('User'), TooLarge('Username'), NotBlocked())
+def unblock(client: Client, username_or_id: str | UUID):
+    return client.request('delete', f'users/{username_or_id}/block')
+
+@catch_errors()
+def get_blocked(client: Client, page: int = 1, limit: int = 20):
+    return client.request('get', 'users/me/blocked', {'limit': limit, 'page': page})
+
+@catch_errors()
+def get_follow_status(client: Client, user_ids: list[UUID]):
+    return client.request('post', 'users/follow-status', {'userIds': list(map(str, user_ids))})

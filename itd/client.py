@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from _io import BufferedReader
 from typing import cast, Iterator
 from datetime import datetime
@@ -7,8 +7,10 @@ from time import sleep
 from functools import wraps
 
 from sseclient import SSEClient
-from msgpack import Unpacker
 
+from requests import Session
+
+from itd.request import fetch
 from itd.routes.users import (
     get_user, update_profile, follow, unfollow, get_followers, get_following, update_privacy,
     delete_account, restore_account, block, unblock, get_blocked,
@@ -24,10 +26,11 @@ from itd.routes.notifications import (
     get_notifications, mark_as_read, mark_all_as_read, get_unread_notifications_count,
     stream_notifications
 )
-from itd.routes.posts import (
-    create_post, get_posts, get_post, edit_post, delete_post, pin_post, repost, view_post,
-    get_liked_posts, restore_post, like_post, unlike_post, get_user_posts, vote
-)
+# remvoe due to circular import
+# from itd.routes.posts import (
+#     create_post, get_posts, get_post, edit_post, delete_post, pin_post, repost, view_post,
+#     get_liked_posts, restore_post, like_post, unlike_post, get_user_posts, vote
+# )
 from itd.routes.reports import report
 from itd.routes.search import search
 from itd.routes.files import upload_file, get_file, delete_file
@@ -51,14 +54,14 @@ from itd.models.pin import Pin
 from itd.models.event import StreamConnect, StreamNotification
 
 from itd.enums import PostsTab, ReportTargetType, ReportTargetReason, UserPostSorting, Unset
-from itd.request import set_cookies, decode_jwt_payload, fetch_ws, fetch_board
+from itd.request import decode_jwt_payload
 from itd.exceptions import (
     NoCookie, NoAuthData, SamePassword, InvalidOldPassword, NotFound, ValidationError,
     PendingRequestExists, Forbidden, UsernameTaken, CantFollowYourself, Unauthorized,
-    CantRepostYourPost, AlreadyReposted, AlreadyReported, TooLarge, PinNotOwned, NoContent,
+    CantRepostYourPost, AlreadyReposted, AlreadyReported, TooLarge, PinNotOwned,
     AlreadyFollowing, NotFoundOrForbidden, OptionsNotBelong, NotMultipleChoice, EmptyOptions,
-    RequiresVerification, InvalidFileType, EditExpired, UploadError, AccountNotDeleted,
-    AccountAlreadyDeleted, AlreadyBlocked, NotBlocked, CantBlockYourself, TargetUserBanned,
+    RequiresVerification, InvalidFileType, EditExpired, UploadError,
+    AlreadyBlocked, NotBlocked, CantBlockYourself, TargetUserBanned,
     UserBlocked, NotFoundOrBlocked
 )
 
@@ -66,10 +69,11 @@ from itd.exceptions import (
 def refresh_on_error(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        if self.cookies:
+        if self.refresh_token:
             try:
                 return func(self, *args, **kwargs)
             except Unauthorized:
+                self.access_token = None # token is expired!
                 self.refresh_auth()
                 return func(self, *args, **kwargs)
         else:
@@ -78,17 +82,48 @@ def refresh_on_error(func):
 
 
 class Client:
-    def __init__(self, token: str | None = None, cookies: str | None = None):
-        self.cookies = cookies
-        self._stream_active = False  # Флаг для остановки stream_notifications
+    access_token: str | None = None
+    refresh_token: str | None = None
+    _user = None
 
-        if token:
-            self.token = token.replace('Bearer ', '')
-        elif self.cookies:
-            set_cookies(self.cookies)
+    def __init__(self, refresh_token: str | None = None, access_token: str | None = None):
+        self._stream_active = False  # Флаг для остановки stream_notifications
+        self.session = Session()
+
+        if access_token:
+            self.access_token = access_token.replace('Bearer ', '')
+
+        elif refresh_token:
+            self.refresh_token = refresh_token
+            self.session.cookies.set('refresh_token', refresh_token, path='/', domain='xn--d1ah4a.com')
             self.refresh_auth()
+
         else:
             raise NoAuthData()
+
+        if _default_client is None:
+            set_default_client(self)
+
+    def request(self, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}):
+        """Сделать запрос
+
+        Args:
+            method (str): Метод
+            url (str): URL
+            params (dict, optional): Параметры. Defaults to {}.
+            files (dict[str, tuple[str, BufferedReader | bytes]], optional): Файлы. Defaults to {}.
+        """
+        def _fetch():
+            return fetch(self.token, method, url, params, files, session=self.session)
+
+        if not self.refresh_token:
+            return _fetch()
+
+        try:
+            return _fetch()
+        except Unauthorized:
+            self.refresh_auth()
+            return _fetch()
 
     def refresh_auth(self) -> str:
         """Обновить access token
@@ -100,14 +135,17 @@ class Client:
             str: Токен
         """
         print('refresh token')
-        if not self.cookies:
+        if not self.refresh_token:
             raise NoCookie()
 
-        res = refresh_token(self.cookies)
+        res = refresh_token(self.session)
         res.raise_for_status()
 
-        self.token = res.json()['accessToken']
-        return self.token
+        self.access_token = res.json()['accessToken']
+
+        assert self.access_token
+        return self.access_token
+
 
     @refresh_on_error
     def change_password(self, old: str, new: str) -> dict:
@@ -125,10 +163,10 @@ class Client:
         Returns:
             dict: Ответ API `{'message': 'Password changed successfully'}`
         """
-        if not self.cookies:
+        if not self.refresh_token:
             raise NoCookie()
 
-        res = change_password(self.cookies, self.token, old, new)
+        res = change_password(self, old, new)
         if res.json().get('error', {}).get('code') == 'SAME_PASSWORD':
             raise SamePassword()
         if res.json().get('error', {}).get('code') == 'INVALID_OLD_PASSWORD':
@@ -136,6 +174,22 @@ class Client:
         res.raise_for_status()
 
         return res.json()
+
+    @property
+    def token(self) -> str:
+        assert self.access_token, 'Access token not refreshed yet'
+        return self.access_token
+
+    @property
+    def user_id(self) -> UUID:
+        return UUID(decode_jwt_payload(self.token)['sub'])
+
+    @property
+    def user(self):
+        if not self._user:
+            self._user = self.get_me()
+        return self._user
+
 
     @refresh_on_error
     def logout(self) -> dict:
@@ -147,10 +201,10 @@ class Client:
         Returns:
             dict: Ответ API
         """
-        if not self.cookies:
-            raise NoCookie()
+        # if not self.cookies:
+            # raise NoCookie()
 
-        res = logout(self.cookies)
+        res = logout(self)
         res.raise_for_status()
 
         return res.json()
@@ -169,7 +223,7 @@ class Client:
         Returns:
             User: Пользователь
         """
-        res = get_user(self.token, username)
+        res = get_user(self, username)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         if res.json().get('error', {}).get('message') == 'Этот аккаунт заблокирован':
@@ -206,7 +260,7 @@ class Client:
         Returns:
             UserProfileUpdate: Обновленный профиль
         """
-        res = update_profile(self.token, bio, display_name, username, banner_id)
+        res = update_profile(self, bio, display_name, username, banner_id)
         if res.status_code == 422 and 'found' in res.json():
             raise ValidationError(*list(res.json()['found'].items())[0])
         if res.json().get('error', {}).get('message') == 'Баннер может быть только изображением':
@@ -219,21 +273,6 @@ class Client:
 
         return UserProfileUpdate.model_validate(res.json())
 
-
-    @refresh_on_error
-    def update_privacy(self, privacy: UserPrivacyData) -> UserPrivacy:
-        """Обновить настройки приватности
-
-        Args:
-            privacy (UserPrivacyData): Данные приватности
-
-        Returns:
-            UserPrivacy: Обновленные данные приватности
-        """
-        res = update_privacy(self.token, privacy)
-        res.raise_for_status()
-
-        return UserPrivacy.model_validate(res.json())
 
     @refresh_on_error
     def follow(self, username: str) -> int:
@@ -249,7 +288,7 @@ class Client:
         Returns:
             int: Число подписчиков после подписки
         """
-        res = follow(self.token, username)
+        res = follow(self, username)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         if res.json().get('error', {}).get('code') == 'CONFLICT':
@@ -277,7 +316,7 @@ class Client:
         Returns:
             int: Число подписчиков после отписки
         """
-        res = unfollow(self.token, username)
+        res = unfollow(self, username)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         if res.json().get('error', {}).get('message') == 'Этот аккаунт заблокирован':
@@ -287,7 +326,7 @@ class Client:
         return res.json()['followersCount']
 
     @refresh_on_error
-    def get_followers(self, username: str, limit: int = 30, page: int = 1) -> tuple[list[UserFollower], Pagination]:
+    def get_followers(self, username: str, page: int = 1) -> tuple[list[UserFollower], Pagination]:
         """Получить подписчиков пользователя
 
         Args:
@@ -303,7 +342,7 @@ class Client:
             list[UserFollower]: Список подписчиков
             Pagination: Данные пагинации (лимит, страница, сколько всего, есть ли еще)
         """
-        res = get_followers(self.token, username, limit, page)
+        res = get_followers(self, username, page)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFoundOrBlocked('User')
         if res.json().get('error', {}).get('message') == 'Этот аккаунт заблокирован':
@@ -313,7 +352,7 @@ class Client:
         return [UserFollower.model_validate(user) for user in res.json()['data']['users']], Pagination.model_validate(res.json()['data']['pagination'])
 
     @refresh_on_error
-    def get_following(self, username: str, limit: int = 30, page: int = 1) -> tuple[list[UserFollower], Pagination]:
+    def get_following(self, username: str, page: int = 1) -> tuple[list[UserFollower], Pagination]:
         """Получить подписки пользователя
 
         Args:
@@ -328,7 +367,7 @@ class Client:
             list[UserFollower]: Список подписок
             Pagination: Данные пагинации (лимит, страница, сколько всего, есть ли еще)
         """
-        res = get_following(self.token, username, limit, page)
+        res = get_following(self, username, page)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFoundOrBlocked('User')
         if res.json().get('error', {}).get('message') == 'Этот аккаунт заблокирован':
@@ -336,35 +375,6 @@ class Client:
         res.raise_for_status()
 
         return [UserFollower.model_validate(user) for user in res.json()['data']['users']], Pagination.model_validate(res.json()['data']['pagination'])
-
-    @refresh_on_error
-    def delete_account(self) -> datetime:
-        """Удалить аккаунт
-
-        Raises:
-            AccountAlreadyDeleted: Аккаунт уже удален
-
-        Returns:
-            datetime: Время удаления (сегодня + 30 дней)
-        """
-        res = delete_account(self.token)
-        if res.json().get('error', {}).get('code') == 'ALREADY_DELETED':
-            raise AccountAlreadyDeleted()
-        res.raise_for_status()
-
-        return datetime.fromisoformat(res.json()['restoreDeadline'])
-
-    @refresh_on_error
-    def restore_account(self):
-        """Восстановить аккаунт
-
-        Raises:
-            AccountNotDeleted: Аккаунт итак не удален
-        """
-        res = restore_account(self.token)
-        if res.json().get('error', {}).get('code') == 'NOT_DELETED':
-            raise AccountNotDeleted()
-        res.raise_for_status()
 
     @refresh_on_error
     def block(self, username_or_id: str | UUID):
@@ -378,7 +388,7 @@ class Client:
             NotFound: Пользователь не найден
             CantBlockYourself: Невозможно заблокировать самого себя
         """
-        res = block(self.token, username_or_id)
+        res = block(self, username_or_id)
         if res.json().get('error', {}).get('code') == 'CONFLICT':
             raise AlreadyBlocked()
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
@@ -400,7 +410,7 @@ class Client:
             NotBlocked: Пользователь итак не заблокирован
             NotFound: Пользователь не найден.
         """
-        res = unblock(self.token, username_or_id)
+        res = unblock(self, username_or_id)
         if res.json().get('error', {}).get('code') == 'CONFLICT':
             raise NotBlocked()
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
@@ -421,7 +431,7 @@ class Client:
             list[UserBlock]: Список пользователей
             PagePagination: Пагинация
         """
-        res = get_blocked(self.token, limit, page)
+        res = get_blocked(self, limit, page)
         res.raise_for_status()
 
         data = res.json()['data']
@@ -437,7 +447,7 @@ class Client:
         Returns:
             dict[UUID, bool]: Словарь пользователей, где значение - полписаны вы или нет
         """
-        res = get_follow_status(self.token, user_ids)
+        res = get_follow_status(self, user_ids)
         res.raise_for_status()
 
         return {UUID(k): v for k, v in res.json()['data'].items()}
@@ -455,7 +465,7 @@ class Client:
         Returns:
             Verification: Верификация
         """
-        res = verify(self.token, file_url)
+        res = verify(self, file_url)
         if res.json().get('error', {}).get('code') == 'PENDING_REQUEST_EXISTS':
             raise PendingRequestExists()
         res.raise_for_status()
@@ -469,7 +479,7 @@ class Client:
         Returns:
             VerificationStatus: Верификация
         """
-        res = get_verification_status(self.token)
+        res = get_verification_status(self)
         res.raise_for_status()
 
         return VerificationStatus.model_validate(res.json())
@@ -481,7 +491,7 @@ class Client:
         Returns:
             list[UserWhoToFollow]: Список пользователей
         """
-        res = get_who_to_follow(self.token)
+        res = get_who_to_follow(self)
         res.raise_for_status()
 
         return [UserWhoToFollow.model_validate(user) for user in res.json()['users']]
@@ -493,180 +503,10 @@ class Client:
         Returns:
             list[Clan]: Топ кланов
         """
-        res = get_top_clans(self.token)
+        res = get_top_clans(self)
         res.raise_for_status()
 
         return [Clan.model_validate(clan) for clan in res.json()['clans']]
-
-
-    @refresh_on_error
-    def add_comment(self, post_id: UUID, content: str | None = None, attachment_ids: list[UUID] = []) -> Comment:
-        """Добавить комментарий
-
-        Args:
-            post_id (str): UUID поста
-            content (str): Содержание
-            attachment_ids (list[UUID]): Список UUID прикреплённых файлов
-            reply_comment_id (UUID | None, optional): ID коммента для ответа. Defaults to None.
-
-        Raises:
-            ValidationError: Ошибка валидации
-            NotFound: Пост не найден
-
-        Returns:
-            Comment: Комментарий
-        """
-        res = add_comment(self.token, post_id, content, attachment_ids)
-        if res.status_code == 422 and 'found' in res.json():
-            raise ValidationError(*list(res.json()['found'].items())[0])
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        res.raise_for_status()
-
-        return Comment.model_validate(res.json())
-
-
-    @refresh_on_error
-    def add_reply_comment(self, comment_id: UUID, content: str, author_id: UUID, attachment_ids: list[UUID] = []) -> Comment:
-        """Добавить ответный комментарий
-
-        Args:
-            comment_id (str): UUID комментария
-            content (str): Содержание
-            author_id (UUID | None, optional): ID пользователя, отправившего комментарий. Defaults to None.
-            attachment_ids (list[UUID]): Список UUID прикреплённых файлов
-
-        Raises:
-            ValidationError: Ошибка валидации
-            NotFound: Пользователь или комментарий не найден
-
-        Returns:
-            Comment: Комментарий
-        """
-        res = add_reply_comment(self.token, comment_id, content, author_id, attachment_ids)
-        if res.status_code == 500 and 'Failed query' in res.text:
-            raise NotFound('User')
-        if res.status_code == 422 and 'found' in res.json():
-            raise ValidationError(*list(res.json()['found'].items())[0])
-        if res.json().get('error', {}).get('code') == 'VALIDATION_ERROR':
-            raise NoContent()
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Comment')
-        res.raise_for_status()
-
-        return Comment.model_validate(res.json())
-
-
-    @refresh_on_error
-    def get_comments(self, post_id: UUID, limit: int = 20, cursor: int = 0, sort: str = 'popular') -> tuple[list[Comment], Pagination]:
-        """Получить список комментариев
-
-        Args:
-            post_id (UUID): UUID поста
-            limit (int, optional): Лимит. Defaults to 20.
-            cursor (int, optional): Курсор (сколько пропустить). Defaults to 0.
-            sort (str, optional): Сортировка. Defaults to 'popular'.
-
-        Raises:
-            NotFound: Пост не найден
-
-        Returns:
-            list[Comment]: Список комментариев
-            Pagination: Пагинация
-        """
-        res = get_comments(self.token, post_id, limit, cursor, sort)
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        res.raise_for_status()
-        data = res.json()['data']
-
-        return [Comment.model_validate(comment) for comment in data['comments']], Pagination(page=(cursor // limit) or 1, limit=limit, total=data['total'], hasMore=data['hasMore'], nextCursor=None)
-
-    @refresh_on_error
-    def get_replies(self, comment_id: UUID, limit: int = 50, page: int = 1, sort: str = 'oldest') -> tuple[list[Comment], Pagination]:
-        """Получить список ответов на комментарий
-
-        Args:
-            comment_id (UUID): UUID поста
-            limit (int, optional): Лимит. Defaults to 50.
-            page (int, optional): Курсор (сколько пропустить). Defaults to 1.
-            sort (str, optional): Сортировка. Defaults to 'oldest'.
-
-        Raises:
-            NotFound: Пост не найден
-
-        Returns:
-            list[Comment]: Список комментариев
-            Pagination: Пагинация
-        """
-        res = get_replies(self.token, comment_id, page, limit, sort)
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Comment')
-        res.raise_for_status()
-        data = res.json()['data']
-
-        return [Comment.model_validate(comment) for comment in data['replies']], Pagination.model_validate(data['pagination'])
-
-
-    @refresh_on_error
-    def like_comment(self, id: UUID) -> int:
-        """Лайкнуть комментарий
-
-        Args:
-            id (UUID): UUID комментария
-
-        Raises:
-            NotFound: Комментарий не найден
-
-        Returns:
-            int: Количество лайков
-        """
-        res = like_comment(self.token, id)
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Comment')
-        res.raise_for_status()
-
-        return res.json()['likesCount']
-
-    @refresh_on_error
-    def unlike_comment(self, id: UUID) -> int:
-        """Убрать лайк с комментария
-
-        Args:
-            id (UUID): UUID комментария
-
-        Raises:
-            NotFound: Комментарий не найден
-
-        Returns:
-            int: Количество лайков
-        """
-        res = unlike_comment(self.token, id)
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Comment')
-        res.raise_for_status()
-
-        return res.json()['likesCount']
-
-    @refresh_on_error
-    def delete_comment(self, id: UUID) -> None:
-        """Удалить комментарий
-
-        Args:
-            id (UUID): UUID комментария
-
-        Raises:
-            NotFound: Комментарий не найден
-            Forbidden: Нет прав на удаление
-        """
-        res = delete_comment(self.token, id)
-        if res.status_code == 204:
-            return
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Comment')
-        if res.json().get('error', {}).get('code') == 'FORBIDDEN':
-            raise Forbidden('delete comment')
-        res.raise_for_status()
 
     @refresh_on_error
     def get_hashtags(self, limit: int = 10) -> list[Hashtag]:
@@ -678,7 +518,7 @@ class Client:
         Returns:
             list[Hashtag]: Список хэштэгов
         """
-        res = get_hashtags(self.token, limit)
+        res = get_hashtags(self, limit)
         res.raise_for_status()
 
         return [Hashtag.model_validate(hashtag) for hashtag in res.json()['data']['hashtags']]
@@ -697,7 +537,7 @@ class Client:
             list[Post]: Посты
             Pagination: Пагинация
         """
-        res = get_posts_by_hashtag(self.token, hashtag, limit, cursor)
+        res = get_posts_by_hashtag(self, hashtag, limit, cursor)
         res.raise_for_status()
         data = res.json()['data']
 
@@ -716,7 +556,7 @@ class Client:
             list[Notification]: Уведомления
             Pagination: Пагинация
         """
-        res = get_notifications(self.token, limit, offset)
+        res = get_notifications(self, limit, offset)
         res.raise_for_status()
 
         return (
@@ -734,7 +574,7 @@ class Client:
         Returns:
             bool: Успешно (False - уже прочитано)
         """
-        res = mark_as_read(self.token, id)
+        res = mark_as_read(self, id)
         res.raise_for_status()
 
         return res.json()['success']
@@ -742,7 +582,7 @@ class Client:
     @refresh_on_error
     def mark_all_as_read(self) -> None:
         """Прочитать все уведомления"""
-        res = mark_all_as_read(self.token)
+        res = mark_all_as_read(self)
         res.raise_for_status()
 
     @refresh_on_error
@@ -752,244 +592,10 @@ class Client:
         Returns:
             int: Количество
         """
-        res = get_unread_notifications_count(self.token)
+        res = get_unread_notifications_count(self)
         res.raise_for_status()
 
         return res.json()['count']
-
-
-    @refresh_on_error
-    def create_post(self, content: str | None = None, spans: list[Span] = [], wall_recipient_id: UUID | None = None, attachment_ids: list[UUID] = [], poll: PollData | None = None) -> Post:
-        """Создать пост
-
-        Args:
-            content (str | None, optional): Содержимое. Defaults to None.
-            spans (list[Span], optional): Стилизация содержимого. Defaults to [].
-            wall_recipient_id (UUID | None, optional): UUID пользователя (чтобы создать пост ему на стене). Defaults to None.
-            attachment_ids (list[UUID], optional): UUID вложений. Defaults to [].
-            poll (PollData | None, optional): Опрос. Defaults to None.
-
-        Raises:
-            NotFound: Пользователь не найден
-            Forbidden: Некоторые файлы не принадлежат вам
-            ValidationError: Ошибка валидации
-            RequiresVerification: Для загрузки видео нужна верификация
-
-        Returns:
-            Post: Новый пост
-        """
-        res = create_post(self.token, content, [span.model_dump(mode="json") for span in spans], wall_recipient_id, attachment_ids, poll.poll if poll else None)
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Wall recipient')
-        if res.json().get('error', {}).get('message') == 'Некоторые файлы не принадлежат вам':
-            raise Forbidden('post - some files not owned')
-        if res.json().get('error', {}).get('code') == 'VIDEO_REQUIRES_VERIFICATION':
-            raise RequiresVerification('Video')
-        if res.status_code == 422 and 'found' in res.json():
-            raise ValidationError(*list(res.json()['found'].items())[0])
-        res.raise_for_status()
-        data = res.json()
-        data['author']['id'] = decode_jwt_payload(self.token)['sub']
-        data['dominant'] = None # как только пост создан никто не поставил лайк поэтомут точно Nonne
-        data['editedAt'] = None # как только пост создан он не отредактирован
-        return Post.model_validate(data)
-
-    @refresh_on_error
-    def vote(self, id: UUID, option_ids: list[UUID]) -> Poll:
-        """Проголосовать в опросе
-
-        Args:
-            id (UUID): UUID поста
-            option_ids (list[UUID]): Список UUID вариантов
-
-        Raises:
-            EmptyOptions: Пустые варианты
-            NotFound: Пост не найден или в посте нет опроса
-            OptionsNotBelong: Неверные варианты (варинты не пренадлежат опросу)
-            NotMultipleChoice: Можно выбрать только 1 вариант (для опросов, где не разрешены несколько ответов)
-
-        Returns:
-            Poll: Опрос
-        """
-        if not option_ids:
-            raise EmptyOptions()
-
-        res = vote(self.token, id, option_ids)
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND' and res.json().get('error', {}).get('message') == 'Опрос не найден':
-            raise NotFound('Poll')
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        if res.json().get('error', {}).get('code') == 'VALIDATION_ERROR' and res.json().get('error', {}).get('message') == 'Один или несколько вариантов не принадлежат этому опросу':
-            raise OptionsNotBelong()
-        if res.json().get('error', {}).get('code') == 'VALIDATION_ERROR' and res.json().get('error', {}).get('message') == 'В этом опросе можно выбрать только один вариант':
-            raise NotMultipleChoice()
-        res.raise_for_status()
-
-        return Poll.model_validate(res.json()['data'])
-
-    @refresh_on_error
-    def get_posts(self, cursor: int | datetime = 0, limit: int = 20, tab: PostsTab = PostsTab.POPULAR) -> tuple[list[Post], PostsPagintaion]:
-        """Получить список постов
-
-        Args:
-            cursor (int, optional): Страница. Defaults to 0.
-            limit (int, optional): Лимит. Defaults to 20.
-            tab (PostsTab, optional): Вкладка (популярное или подписки). Defaults to PostsTab.POPULAR.
-
-        Returns:
-            list[Post]: Список постов
-            Pagination: Пагинация
-        """
-        res = get_posts(self.token, cursor, limit, tab)
-        res.raise_for_status()
-        data = res.json()['data']
-
-        return [Post.model_validate(post) for post in data['posts']], PostsPagintaion.model_validate(data['pagination'])
-
-    @refresh_on_error
-    def get_post(self, id: UUID) -> Post:
-        """Получить пост
-
-        Args:
-            id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-
-        Returns:
-            Post: Пост
-        """
-        res = get_post(self.token, id)
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        res.raise_for_status()
-
-        return Post.model_validate(res.json()['data'])
-
-    @refresh_on_error
-    def edit_post(self, id: UUID, content: str, spans: list[Span] = []) -> str:
-        """Редактировать пост
-
-        Args:
-            id (UUID): UUID поста
-            content (str): Содержимое
-            spans (list[Span], optional): Стилизация содержимого. Defaults to [].
-
-        Raises:
-            NotFound: Пост не найден
-            Forbidden: Нет доступа
-            ValidationError: Ошибка валидации
-            EditExpired: Редактирование доступно только в течение 48 часов после публикации
-
-        Returns:
-            str: Новое содержимое
-        """
-        res = edit_post(self.token, id, content, [span.model_dump(mode="json") for span in spans])
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        if res.json().get('error', {}).get('code') == 'FORBIDDEN':
-            raise Forbidden('edit post')
-        if res.json().get('error', {}).get('code') == 'EDIT_WINDOW_EXPIRED':
-            raise EditExpired()
-        if res.status_code == 422 and 'found' in res.json():
-            raise ValidationError(*list(res.json()['found'].items())[0])
-        res.raise_for_status()
-
-        return res.json()['content']
-
-    @refresh_on_error
-    def delete_post(self, id: UUID) -> None:
-        """Удалить пост
-
-        Args:
-            id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-            Forbidden: Нет доступа
-        """
-        res = delete_post(self.token, id)
-        if res.status_code == 204:
-            return
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        if res.json().get('error', {}).get('code') == 'FORBIDDEN':
-            raise Forbidden('delete post')
-        res.raise_for_status()
-
-    @refresh_on_error
-    def pin_post(self, id: UUID):
-        """Закрепить пост
-
-        Args:
-            id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-            Forbidden: Нет доступа
-        """
-        res = pin_post(self.token, id)
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        if res.json().get('error', {}).get('code') == 'FORBIDDEN':
-            raise Forbidden('pin post')
-        res.raise_for_status()
-
-    @refresh_on_error
-    def repost(self, id: UUID, content: str | None = None) -> Post:
-        """Репостнуть пост
-
-        Args:
-            id (UUID): UUID поста
-            content (str | None, optional): Содержимое (доп. комментарий). Defaults to None.
-
-        Raises:
-            NotFound: Пост не найден
-            AlreadyReposted: Пост уже репостнут
-            CantRepostYourPost: Нельзя репостить самого себя
-            ValidationError: Ошибка валидации
-
-        Returns:
-            Post: Новый пост
-        """
-        res = repost(self.token, id, content)
-
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        if res.json().get('error', {}).get('code') == 'CONFLICT':
-            raise AlreadyReposted()
-        if res.status_code == 422 and res.json().get('message') == 'Cannot repost your own post':
-            raise CantRepostYourPost()
-        if res.status_code == 422 and 'found' in res.json():
-            raise ValidationError(*list(res.json()['found'].items())[0])
-        res.raise_for_status()
-        data = res.json()
-        data['author']['id'] = decode_jwt_payload(self.token)['sub']
-        data['dominant'] = None  # как только пост создан никто не поставил лайк поэтомут точно Nonne
-        data['editedAt'] = None  # как только пост создан он не отредактирован
-        return Post.model_validate(data)
-
-    @refresh_on_error
-    def view_post(self, id: UUID) -> None:
-        """Просмотреть пост
-
-        Args:
-            id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-        """
-        res = view_post(self.token, id)
-        if res.status_code == 204:
-            return
-        if res.json().get('error', {}).get('code') == 'NOT_FOUND':
-            raise NotFound('Post')
-        res.raise_for_status()
 
     @refresh_on_error
     def get_user_posts(self, username_or_id: str | UUID, limit: int = 20, cursor: datetime | None = None, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW) -> tuple[list[Post], LikedPostsPagintaion]:
@@ -1009,7 +615,7 @@ class Client:
             list[Post]: Список постов
             LikedPostsPagintaion: Пагинация
         """
-        res = get_user_posts(self.token, username_or_id, limit, cursor, pinned_post_id, sort)
+        res = get_user_posts(self, username_or_id, limit, cursor, pinned_post_id, sort)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         res.raise_for_status()
@@ -1033,7 +639,7 @@ class Client:
             list[Post]: Список постов
             LikedPostsPagintaion: Пагинация
         """
-        res = get_liked_posts(self.token, username_or_id, limit, cursor)
+        res = get_liked_posts(self, username_or_id, limit, cursor)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('User')
         res.raise_for_status()
@@ -1060,7 +666,7 @@ class Client:
         Returns:
             NewReport: Новая жалоба
         """
-        res = report(self.token, id, type, reason, description)
+        res = report(self, id, type, reason, description)
 
         if res.json().get('error', {}).get('code') == 'VALIDATION_ERROR' and 'не найден' in res.json()['error'].get('message', ''):
             raise NotFound(type.value.title())
@@ -1089,10 +695,10 @@ class Client:
             list[UserWhoToFollow]: Список пользователей
             list[Hashtag]: Список хэштэгов
         """
-        res = search(self.token, query, user_limit, hashtag_limit)
+        res = search(self, query, user_limit, hashtag_limit)
 
         if res.status_code == 414:
-            raise TooLarge()
+            raise TooLarge('Query')
         res.raise_for_status()
         data = res.json()['data']
 
@@ -1141,9 +747,9 @@ class Client:
         Returns:
             File: Файл
         """
-        res = upload_file(self.token, name, data)
+        res = upload_file(self, name, data)
         if res.status_code == 413:
-            raise TooLarge()
+            raise TooLarge('File')
         if res.json().get('error', {}).get('message') == 'Недопустимый тип файла':
             raise InvalidFileType()
         if res.json().get('error', {}).get('code') == 'UPLOAD_ERROR':
@@ -1165,7 +771,7 @@ class Client:
         Returns:
             File: Файл
         """
-        res = get_file(self.token, id)
+        res = get_file(self, id)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFoundOrForbidden('File')
         res.raise_for_status()
@@ -1182,7 +788,7 @@ class Client:
         Raises:
             NotFound: Файл не найден
         """
-        res = delete_file(self.token, id)
+        res = delete_file(self, id)
         if res.json().get('error', {}).get('code') == 'NOT_FOUND':
             raise NotFound('File')
         res.raise_for_status()
@@ -1215,56 +821,6 @@ class Client:
         file = self.upload_file(name, cast(BufferedReader, open(name, 'rb')))
         return file, self.update_profile(banner_id=file.id)
 
-    @refresh_on_error
-    def restore_post(self, post_id: UUID) -> None:
-        """Восстановить удалённый пост
-
-        Args:
-            post_id: UUID поста
-        """
-        res = restore_post(self.token, post_id)
-        res.raise_for_status()
-
-    @refresh_on_error
-    def like_post(self, post_id: UUID) -> int:
-        """Лайкнуть пост
-
-        Args:
-            post_id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-
-        Returns:
-            int: Количество лайков
-        """
-        res = like_post(self.token, post_id)
-
-        if res.status_code == 404:
-            raise NotFound("Post")
-
-        return res.json()['likesCount']
-
-    @refresh_on_error
-    def unlike_post(self, post_id: UUID) -> int:
-        """Убрать лайк с поста
-
-        Args:
-            post_id (UUID): UUID поста
-
-        Raises:
-            NotFound: Пост не найден
-
-        Returns:
-            int: Количество лайков
-        """
-        res = unlike_post(self.token, post_id)
-
-        if res.status_code == 404:
-            raise NotFound("Post not found")
-
-        return res.json()['likesCount']
-
 
     @refresh_on_error
     def get_pins(self) -> tuple[list[Pin], str]:
@@ -1274,7 +830,7 @@ class Client:
             list[Pin]: Список пинов
             str: Активный пин
         """
-        res = get_pins(self.token)
+        res = get_pins(self)
         res.raise_for_status()
         data = res.json()['data']
 
@@ -1283,12 +839,12 @@ class Client:
     @refresh_on_error
     def remove_pin(self):
         """Снять пин"""
-        res = remove_pin(self.token)
+        res = remove_pin(self)
         res.raise_for_status()
 
     @refresh_on_error
     def set_pin(self, slug: str):
-        res = set_pin(self.token, slug)
+        res = set_pin(self, slug)
         if res.status_code == 422 and 'found' in res.json():
             raise ValidationError(*list(res.json()['found'].items())[0])
         if res.json().get('error', {}).get('code') == 'PIN_NOT_OWNED':
@@ -1296,21 +852,6 @@ class Client:
         res.raise_for_status()
 
         return res.json()['pin']
-
-    def get_board(self) -> bytes:
-        """Получить текущее состояние холста.
-
-        Returns:
-            bytes: 1024×1024 байт, каждый байт — индекс цвета (0–31)
-        """
-        return fetch_board(self.token)
-
-    def stream_pixels(self) -> Iterator:
-        ws = fetch_ws(self.token, 'ws?platform=web&app_version=1.0.0&device_id=29052d8d-685c-4ade-b4e5-0fb9c99a0050')
-
-        while ws.connected:
-            msg = ws.recv()
-            yield decode_pixels(list(msg))
 
     @refresh_on_error
     def stream_notifications(self) -> Iterator[StreamConnect | StreamNotification]:
@@ -1340,7 +881,7 @@ class Client:
 
         while self._stream_active:
             try:
-                response = stream_notifications(self.token)
+                response = stream_notifications(self)
                 response.raise_for_status()
 
                 client = SSEClient(response)
@@ -1411,32 +952,14 @@ class Client:
         self._stream_active = False
 
 
-PIXEL_COLORS = [
-    '#FFFFFF', '#C8C8C8', '#888888', '#4A4A4A', '#000000',
-    '#5C2E1A', '#9B6340', '#EBB89B', '#7A1535', '#B80040',
-    '#E80000', '#F00078', '#F5B5C5', '#DC6BA0', '#E88000',
-    '#D07000', '#F0D000', '#F5F0A0', '#1A5E00', '#00C800',
-    '#88D000', '#006060', '#0000E0', '#000080', '#80C0F0',
-    '#00B0B0', '#A0D8F0', '#2E0080', '#8000B0', '#C080F0',
-    '#C00080', '#404050'
-]
+_default_client: Client | None = None
 
+def get_default_client() -> Client:
+    global _default_client
+    if _default_client is None:
+        raise
+    return _default_client
 
-def decode_pixels(data: list[int]) -> list[tuple[int, int, int, str]]:
-    """Декодировать бинарные данные пикселей из WebSocket.
-
-    Формат: uint32 LE, bits 0-9 = X, bits 10-19 = Y, bits 20-24 = color (0-31)
-
-    Returns:
-        list of (x, y, color_index, color_hex)
-    """
-    import struct
-    pixels = []
-    for i in range(0, len(data) - len(data) % 4, 4):
-        val = struct.unpack_from('<I', bytes(data[i:i+4]))[0]
-        x = val & 0x3FF
-        y = (val >> 10) & 0x3FF
-        color = (val >> 20) & 0x1F
-        hex_color = PIXEL_COLORS[color] if color < len(PIXEL_COLORS) else f'?({color})'
-        pixels.append((x, y, color, hex_color))
-    return pixels
+def set_default_client(client: Client):
+    global _default_client
+    _default_client = client

@@ -1,0 +1,307 @@
+from uuid import UUID
+from datetime import datetime
+from math import ceil
+
+from pydantic import Field, BaseModel, field_validator
+
+from itd.base import ITDBaseModel
+from itd.client import Client
+from itd.enums import CommentSorting
+from itd.utils import parse_datetime, to_uuid, to_nullable_uuid
+from itd.routes.comments import get_comments, add_comment, add_reply_comment, get_replies, like_comment, unlike_comment, delete_comment
+from itd.models.user import UserPost
+from itd.models.file import Attach
+
+
+class Comment(ITDBaseModel):
+    _refreshable = False
+
+    id: UUID
+    content: str
+
+    created_at: datetime = Field(alias='createdAt')
+    author: UserPost
+
+    likes_count: int = Field(0, alias='likesCount')
+    replies_count: int = Field(0, alias='repliesCount')
+    is_liked: bool = Field(False, alias='isLiked')
+
+    attachments: list[Attach] = []
+    replies: 'Replies' = Field(default_factory=lambda: Replies(_empty=True))
+    reply_to: UserPost | None = None # author of replied comment, if this comment is reply
+
+    _post_id: UUID | None = None
+    _comment_id: UUID | None = None # base comment id, if this comment is reply
+
+    def __init__(self, comment: dict, post_id: UUID | None = None, comment_id: UUID | None = None, client: Client | None = None, _skip_init: bool = False) -> None:
+        if not _skip_init:
+            super().__init__(client)
+
+        for name, value in _CommentValidate.model_validate(comment).__dict__.items():
+            setattr(self, name, value)
+        self._post_id = post_id
+        if comment_id:
+            self._comment_id = comment_id
+        # print(self.id, self.reply_to)
+        self.replies._comment = self
+
+    def __str__(self) -> str:
+        return self.content
+
+    def reply(self, content: str | None = None, attachment_ids: list[UUID | str] = [], user_id: UUID | None = None, client: Client | None = None) -> 'Comment':
+        """Ответить на комментарий
+
+        Args:
+            content (str | None, optional): Содержимое. Defaults to None.
+            attachment_ids (list[UUID | str], optional): Вложения. Defaults to [].
+            user_id (UUID | None, optional): Пользователь (создатель комментария, на который отвечать), если None то берется автор текущего комментария. Defaults to None.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            Comment: Комментарий
+        """
+        return Comment(
+            add_reply_comment(
+                client or self._client,
+                self.id,
+                user_id or self.author.id,
+                content,
+                [to_uuid(attachment) for attachment in attachment_ids]
+            ).json(),
+            self._post_id,
+            client=client or self.client,
+            _skip_init=True
+        )
+
+    def like(self, client: Client | None = None) -> int:
+        """Лайкнуть комментарий
+
+        Args:
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            int: Количество лайков после лайка
+        """
+        likes = like_comment(client or self._client, self.id).json()['likesCount']
+        self.likes_count = likes
+        return likes
+
+    def unlike(self, client: Client | None = None) -> int:
+        """Убрать лайк с комментария
+
+        Args:
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            int: Количество лайков после убирания лайка
+        """
+        likes = unlike_comment(client or self._client, self.id).json()['likesCount']
+        self.likes_count = likes
+        return likes
+
+    def delete(self, client: Client | None = None) -> None:
+        """Удалить комментарий
+
+        Args:
+            client (Client | None, optional): Клиент. Defaults to None.
+        """
+        delete_comment(client or self._client, self.id)
+
+
+    @classmethod
+    def new(cls, post_id: UUID, content: str | None = None, attachment_ids: list[UUID | str] = [], client: Client | None = None):
+        instance = cls.__new__(cls)
+        super(Comment, instance).__init__(client)
+        instance.__init__(
+            add_comment(
+                client or instance.client,
+                post_id,
+                content,
+                [to_uuid(attachment) for attachment in attachment_ids]
+            ).json(),
+            post_id,
+            client=client or instance.client
+        )
+        return instance
+
+
+
+class _CommentValidate(BaseModel, Comment):
+    @field_validator('replies', mode='plain')
+    @classmethod
+    def validate_replies(cls, replies: list[dict]):
+        return Replies(replies)
+
+    @field_validator('created_at', mode='plain')
+    @classmethod
+    def validate_created_at(cls, v: str):
+        return parse_datetime(v)
+
+
+
+class Comments(ITDBaseModel, list[Comment]):
+    """Список комментариев с функцией дозагрузки"""
+    _refreshable = False
+
+    _post_id: UUID
+    has_more: bool = True
+    total: int
+    _sorting: CommentSorting = CommentSorting.POPULAR
+
+    def __init__(self, data: list[dict] = [], _empty: bool = False):
+        if _empty: # only for default value
+            return
+
+        super().__init__()
+        self.extend([Comment(comment) for comment in data])
+
+
+    def load(self, count: int | None = 100, limit: int = 500, client: Client | None = None) -> 'Comments': # "None" count means load all
+        """Загрузить комментарии
+
+        Args:
+            count (int | None, optional): Количество (None - все). Defaults to 100.
+            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
+            client (Client | None, optional): Клиент. Defaults to None.
+        """
+        if not self.has_more:
+            return self
+
+        left = count or limit # if None get [LIMIT] firstly
+        total_loaded = False
+
+        while left > 0: # can be !=, but what if something went wrong
+            data = get_comments(
+                client or self._client,
+                self._post_id,
+                len(self), # cursor equals already loaded
+                min(limit, left) # not always [LIMIT] to not overflow (if left < [LIMIT], use left, [LIMIT] otherwise)
+            ).json()['data']
+
+            self.has_more = data['hasMore']
+
+            if count is None and not total_loaded:
+                total_loaded = True
+                self.total = data['total']
+                left = self.total - len(self)
+
+            left -= len(data['comments'])
+            if not data['comments']:
+                break
+
+            self.extend([Comment(comment, self._post_id, client=client or self.client) for comment in data['comments']])
+        return self
+
+
+    def load_all(self, limit: int = 500, client: Client | None = None) -> 'Comments': # dont know why you should change client to load comments but
+        """Загрузить все комментарии
+
+        Args:
+            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
+            client (Client | None, optional): Клиент. Defaults to None.
+        """
+        return self.load(None, limit, client)
+
+    def refresh(self, count: int | None = None, client: Client | None = None, limit: int = 500) -> 'Comments': # "None" count means already loaded count
+        count = count or len(self)
+        self.clear()
+        return self.load(count, limit, client)
+
+
+    def new(self, content: str | None = None, attachment_ids: list[UUID | str] = [], client: Client | None = None) -> Comment:
+        comment = Comment.new(self._post_id, content, attachment_ids, client=client or self.client)
+        self.insert(0, comment)
+        return comment
+
+
+    @property
+    def sorting(self) -> CommentSorting:
+        return self._sorting
+
+    @sorting.setter
+    def sorting(self, value: CommentSorting):
+        self._sorting = value
+        self.refresh()
+
+
+    def __setattr__(self, name: str, value) -> None:
+        if name == '_client':
+            for comment in self:
+                comment._client = value
+        elif name == '_post_id':
+            for comment in self:
+                comment._post_id = value
+        super().__setattr__(name, value)
+
+
+
+class Replies(Comments):
+    _comment: 'Comment'
+
+    def __init__(self, data: list[dict] = [], _empty: bool = False):
+        super().__init__(data, _empty)
+
+    def load(self, count: int | None = 100, limit: int = 100, client: Client | None = None) -> 'Replies': # "None" count means load all
+        """Загрузить ответы
+
+        Args:
+            count (int | None, optional): Количество (None - все). Defaults to 100.
+            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
+            client (Client | None, optional): Клиент. Defaults to None.
+        """
+        if not self.has_more:
+            return self
+
+        left = count or limit # if None get [LIMIT] firstly
+        total_loaded = False
+
+        while left > 0: # can be !=, but what if something went wrong
+            data = get_replies(
+                client or self._client,
+                self._comment.id,
+                ceil(len(self) / min(limit, left)), # page equals already loaded divide by [LIMIT]
+                min(limit, left), # not always [LIMIT] to not overflow (if left < [LIMIT], use left, [LIMIT] otherwise)
+            ).json()['data']
+            self.has_more = data['pagination']['hasMore']
+
+            if count is None and not total_loaded:
+                total_loaded = True
+                self.total = data['pagination']['total']
+                left = self.total - len(self)
+
+            replies = data['replies']
+            left -= len(replies)
+
+            if not replies:
+                break
+
+            if left < 0: # um what
+                replies = replies[:len(replies) + left] # cut extra (stupid api)
+
+            print(f'loaded {len(replies)} left={left} was={len(self)}')
+            self.extend([Comment(comment, comment_id=self._comment.id, client=client or self.client) for comment in replies])
+        return self
+
+    def load_all(self, limit: int = 100, client: Client | None = None) -> 'Replies':
+        """Загрузить все ответы
+
+        Args:
+            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
+            client (Client | None, optional): Клиент. Defaults to None.
+        """
+        return self.load(None, limit, client)
+
+
+    def __setattr__(self, name: str, value) -> None:
+        if name == '_comment':
+            for comment in self:
+                comment._comment_id = value.id
+
+        super().__setattr__(name, value)
+
+
+    def new(self, content: str | None =None, attachment_ids: list[str | UUID] = [], client: Client | None = None, *, author_id: str | UUID | None = None) -> 'Comment':
+        assert self._comment is not None
+        reply = self._comment.reply(content, attachment_ids, to_nullable_uuid(author_id), client)
+        self.insert(0, reply)
+        return reply

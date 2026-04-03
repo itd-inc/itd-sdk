@@ -1,12 +1,18 @@
-from requests import Response
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from itd.request import auth_fetch
+from requests import Response, Session
 
-def refresh_token(cookies: str) -> Response:
-    return auth_fetch(cookies, 'post', 'v1/auth/refresh')
+from itd.request import fetch
 
-def change_password(cookies: str, token: str, old: str, new: str) -> Response:
-    return auth_fetch(cookies, 'post', 'v1/auth/change-password', {'newPassword': new, 'oldPassword': old}, token)
+if TYPE_CHECKING:
+    from itd.client import Client
 
-def logout(cookies: str) -> Response:
-    return auth_fetch(cookies, 'post', 'v1/auth/logout')
+def refresh_token(session: Session) -> Response:
+    return fetch(None, 'post', 'v1/auth/refresh', session=session)
+
+def change_password(client: Client, old: str, new: str) -> Response:
+    return client.request('post', 'v1/auth/change-password', {'newPassword': new, 'oldPassword': old})
+
+def logout(client: Client) -> Response:
+    return client.request('post', 'v1/auth/logout')

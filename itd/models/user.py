@@ -94,7 +94,7 @@ class User(UserSearch, _UserPrivacy):
     following_count: int = Field(0, alias='followingCount')
     posts_count: int = Field(0, alias='postsCount')
 
-    is_followed: bool | None = Field(None, alias='isFollowedBy') # none for me
+    is_followed_by: bool | None = Field(None, alias='isFollowedBy') # none for me
     is_blocked: bool = Field(False, alias='isBlockedByMe')
     is_blocking: bool = Field(False, alias='isBlockedByThem')
 

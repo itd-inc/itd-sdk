@@ -1,14 +1,17 @@
+from __future__ import annotations
 from _io import BufferedReader
 from uuid import UUID
+from typing import TYPE_CHECKING
 
-from itd.request import fetch
+if TYPE_CHECKING:
+    from itd.client import Client
 
 
-def upload_file(token: str, name: str, data: BufferedReader | bytes):
-    return fetch(token, 'post', 'files/upload', files={'file': (name, data)})
+def upload_file(client: Client, name: str, data: BufferedReader | bytes):
+    return client.request('post', 'files/upload', files={'file': (name, data)})
 
-def get_file(token: str, id: UUID):
-    return fetch(token, 'get', f'files/{id}')
+def get_file(client: Client, id: UUID):
+    return client.request('get', f'files/{id}')
 
-def delete_file(token: str, id: UUID):
-    return fetch(token, 'delete', f'files/{id}')
+def delete_file(client: Client, id: UUID):
+    return client.request('delete', f'files/{id}')
