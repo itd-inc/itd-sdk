@@ -8,7 +8,7 @@ from itd.client import Client
 from itd.comment import Comment, Comments
 from itd.enums import PostsTab, UserPostSorting
 from itd.models.post import Span, PostAttach
-from itd.user import User
+from itd.user import User, _UserBase
 from itd.poll import Poll, NewPoll
 from itd.routes.posts import (
     get_post, create_post, like_post, unlike_post, repost, view_post, pin_post, unpin_post,
@@ -358,8 +358,8 @@ class _PostValidate(BaseModel, Post): # BaseModel MUST be first or you ll have s
 
     @field_validator('author', mode='plain')
     @classmethod
-    def validate_author(cls, author: dict | User):
-        if isinstance(author, User):
+    def validate_author(cls, author: dict | _UserBase):
+        if isinstance(author, _UserBase):
             return author
         return User._from_dict(author, False)
 
