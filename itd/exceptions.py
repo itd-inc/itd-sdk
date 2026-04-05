@@ -184,7 +184,7 @@ class ProfileRequired(Exception):
 class RequiresVerification(ITDException):
     code = 'VIDEO_REQUIRES_VERIFICATION'
     def __init__(self, obj: str):
-        self.text = f'{obj.title()} allowed only for verificated users'
+        self.text = f'{obj} allowed only for verificated users'
 
 class InvalidFileType(Exception):
     def __str__(self) -> str:
