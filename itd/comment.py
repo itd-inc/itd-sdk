@@ -6,7 +6,7 @@ from pydantic import Field, BaseModel, field_validator
 
 from itd.base import ITDBaseModel
 from itd.client import Client
-from itd.enums import CommentSorting
+from itd.enums import CommentSorting, All, ALL
 from itd.utils import parse_datetime, to_uuid, to_nullable_uuid
 from itd.routes.comments import get_comments, add_comment, add_reply_comment, get_replies, like_comment, unlike_comment, delete_comment
 from itd.models.user import UserPost
@@ -156,7 +156,7 @@ class Comments(ITDBaseModel, list[Comment]):
         self.extend([Comment(comment) for comment in data])
 
 
-    def load(self, count: int | None = 100, limit: int = 500, client: Client | None = None) -> 'Comments': # "None" count means load all
+    def load(self, count: int | All = 100, limit: int = 500, client: Client | None = None) -> 'Comments':
         """Загрузить комментарии
 
         Args:
@@ -164,10 +164,12 @@ class Comments(ITDBaseModel, list[Comment]):
             limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
             client (Client | None, optional): Клиент. Defaults to None.
         """
-        if not self.has_more:
-            return self
+        if isinstance(count, All):
+            ncount = None
+        else:
+            ncount = count
 
-        left = count or limit # if None get [LIMIT] firstly
+        left = ncount or limit # if None get [LIMIT] firstly
 
         while left > 0: # can be !=, but what if something went wrong
             data = get_comments(
@@ -180,14 +182,18 @@ class Comments(ITDBaseModel, list[Comment]):
             self.has_more = data['hasMore']
             self.total = data['total']
 
-            if count is None:
+            if ncount is None:
                 left = self.total - len(self)
+            elif self.total < ncount:
+                left = 0
 
-            left -= len(data['comments'])
-            if not data['comments']:
+            comments = data['comments']
+            left -= len(comments)
+            if not comments:
                 break
 
-            self.extend([Comment(comment, self._post_id, client=client or self.client) for comment in data['comments']])
+            print(f'fetched {len(comments)} left={left} (was {len(self)})')
+            self.extend([Comment(comment, self._post_id, client=client or self.client) for comment in comments])
         return self
 
 
@@ -198,7 +204,7 @@ class Comments(ITDBaseModel, list[Comment]):
             limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
             client (Client | None, optional): Клиент. Defaults to None.
         """
-        return self.load(None, limit, client)
+        return self.load(ALL, limit, client)
 
     def refresh(self, count: int | None = None, client: Client | None = None, limit: int = 500) -> 'Comments': # "None" count means already loaded count
         count = count or len(self)
@@ -240,10 +246,7 @@ class Comments(ITDBaseModel, list[Comment]):
 class Replies(Comments):
     _comment: 'Comment'
 
-    def __init__(self, data: list[dict] = [], _empty: bool = False):
-        super().__init__(data, _empty)
-
-    def load(self, count: int | None = 100, limit: int = 100, client: Client | None = None) -> 'Replies': # "None" count means load all
+    def load(self, count: int | All = 100, limit: int = 100, client: Client | None = None) -> 'Replies':
         """Загрузить ответы
 
         Args:
@@ -251,10 +254,12 @@ class Replies(Comments):
             limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
             client (Client | None, optional): Клиент. Defaults to None.
         """
-        if not self.has_more:
-            return self
+        if isinstance(count, All):
+            ncount = None
+        else:
+            ncount = count
 
-        left = count or limit # if None get [LIMIT] firstly
+        left = ncount or limit # if None get [LIMIT] firstly
 
         while left > 0: # can be !=, but what if something went wrong
             data = get_replies(
@@ -266,7 +271,7 @@ class Replies(Comments):
             self.has_more = data['pagination']['hasMore']
             self.total = data['pagination']['total']
 
-            if count is None:
+            if ncount is None:
                 left = self.total - len(self)
 
             replies = data['replies']
@@ -289,7 +294,7 @@ class Replies(Comments):
             limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
             client (Client | None, optional): Клиент. Defaults to None.
         """
-        return self.load(None, limit, client)
+        return self.load(ALL, limit, client)
 
 
     def __setattr__(self, name: str, value) -> None:
@@ -300,7 +305,7 @@ class Replies(Comments):
         super().__setattr__(name, value)
 
 
-    def new(self, content: str | None =None, attachment_ids: list[str | UUID] = [], client: Client | None = None, *, author_id: str | UUID | None = None) -> 'Comment':
+    def new(self, content: str | None = None, attachment_ids: list[str | UUID] = [], client: Client | None = None, *, author_id: str | UUID | None = None) -> 'Comment':
         assert self._comment is not None
         reply = self._comment.reply(content, attachment_ids, to_nullable_uuid(author_id), client)
         self.insert(0, reply)

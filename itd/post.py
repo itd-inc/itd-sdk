@@ -316,6 +316,13 @@ class Post(_BasePost):
         self.poll.vote(options, client or self.client)
 
 
+    def __getattribute__(self, name: str):
+        value = super().__getattribute__(name)
+        if name == 'comments' and getattr(value, '_post_id', None) is None:
+            value._post_id = self.id
+        return value
+
+
 
 class _PostValidate(BaseModel, Post): # BaseModel MUST be first or you ll have some problems with init
     @field_validator('edited_at', mode='plain')
