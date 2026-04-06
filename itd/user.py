@@ -37,6 +37,7 @@ class ProfileUser(BaseModel):
 
 class Profile(ITDBaseModel):
     _validator = lambda _: _ProfileValidate
+    _load_with_parent = False
 
     authenticated: bool = True
     user: ProfileUser | None
@@ -57,6 +58,7 @@ class _ProfileValidate(BaseModel, Profile):
 class Privacy(ITDBaseModel):
     _validator = lambda _: _PrivacyValidate
     _user: 'Me | None' = None
+    _load_with_parent = False
 
     is_private: bool = Field(False, alias='isPrivate')
     wall_access: AccessType = Field(alias='wallAccess')

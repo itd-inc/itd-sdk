@@ -32,6 +32,7 @@ class ITDBaseModel:
     _refreshable: bool = True
     _loaded: bool = False
     _loading: bool = False
+    _load_with_parent: bool = True
     _fields_from_data: set[str] = set()
     _validator: Callable[[Any], type[BaseModel]] | None = None # callable (pls use lambda), becuase we havent validator at that moment (it depends on this class)
 
@@ -70,7 +71,8 @@ class ITDBaseModel:
             if not _getattr(self, '_loaded') and (
                 (name not in fields_from_data and _field_has_default(type(self), name)) or
                 (attr is None and not _field_has_default(type(self), name)) or
-                isinstance(attr, FieldInfo)
+                isinstance(attr, FieldInfo) or
+                isinstance(attr, ITDBaseModel) and attr._load_with_parent
             ):
                 self.refresh()
 
