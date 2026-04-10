@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import Field, BaseModel, field_validator
 
 from itd.base import ITDBaseModel, refresh_wrapper
-from itd.client import Client
+from itd.client import Client, Client as ITDClient
 from itd.comment import Comment, Comments
 from itd.enums import PostsTab, UserPostSorting
 from itd.models.post import Span
@@ -15,6 +15,8 @@ from itd.routes.posts import (
     get_post, create_post, like_post, unlike_post, repost, view_post, pin_post, unpin_post,
     delete_post, restore_post, edit_post, get_posts, get_user_posts, get_liked_posts
 )
+from itd.hashtag import Hashtag
+from itd.routes.hashtags import get_posts_by_hashtag
 from itd.utils import to_uuid, parse_datetime
 
 
@@ -532,3 +534,18 @@ class LikedPosts(_BasePosts): # [] if forbidden
 
     def _fetch(self, client: Client, limit: int = 50) -> dict:
         return get_liked_posts(client, self.username_or_id, self.cursor, limit).json()['data']
+
+
+class HashtagPosts(_BasePosts):
+    hashtag: Hashtag
+    cursor: UUID | None = None
+
+    def __init__(self, hashtag: Hashtag | str, client: Client | None = None) -> None:
+        super().__init__(client)
+
+        if isinstance(hashtag, str):
+            hashtag = Hashtag(hashtag, self.client)
+        self.hashtag = hashtag
+
+    def _fetch(self, client: Client, limit: int = 50) -> dict:
+        return get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']

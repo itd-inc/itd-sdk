@@ -27,7 +27,9 @@ def catch_errors(*exceptions: ITDException):
                 if (
                     getattr(exception, '_reply_comment_user_not_found', False) and res.status_code == 500 and 'Failed query' in res.text or
                     getattr(exception, '_delete_comment_not_found', False) and res.status_code == 500 and res.text == 'Комментарий не найден' or
+                    getattr(exception, '_liked_posts_user_not_found', False) and res.status_code == 404 and res.text == 'NOT_FOUND' or
                     getattr(exception, '_subscription_not_found', False) and res.json().get('error') == 'Активная подписка не найдена' or
+                    getattr(exception, '_hashtag_not_found', False) and res.json().get('data', {}).get('hashtag', '') == None or
                     getattr(exception, '_notification_read_error', False) and res.json().get('success') is False or
                     isinstance(exception, ValidationError) and res.status_code == 422 and 'found' in res.json() or
 
@@ -81,12 +83,22 @@ class InvalidOldPassword(Exception):
 
 class NotFound(ITDException):
     code = 'NOT_FOUND'
-    def __init__(self, obj: str, message: str | None = None, _reply_comment_user_not_found: bool = False, _subscription_not_found: bool = False):
+    def __init__(
+        self,
+        obj: str,
+        message: str | None = None,
+        _reply_comment_user_not_found: bool = False,
+        _subscription_not_found: bool = False,
+        _hashtag_not_found: bool = False,
+        _liked_posts_user_not_found: bool = False
+    ):
         self.text = f'{obj} not found'
         if message:
-            self.message = 'message'
+            self.message = message
         self._reply_comment_user_not_found = _reply_comment_user_not_found
         self._subscription_not_found = _subscription_not_found
+        self._hashtag_not_found = _hashtag_not_found
+        self._liked_posts_user_not_found = _liked_posts_user_not_found
 
 class NotFoundOrForbidden(Exception):
     def __init__(self, obj: str):
