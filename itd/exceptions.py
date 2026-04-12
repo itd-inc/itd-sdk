@@ -74,13 +74,17 @@ class InvalidToken(Exception):
     def __str__(self):
         return 'Invalid access token'
 
-class SamePassword(Exception):
-    def __str__(self):
-        return 'Old and new password must not equals'
+class SamePassword(ITDException):
+    code = 'SAME_PASSWORD'
+    text = 'Old and new password must not equals'
 
-class InvalidOldPassword(Exception):
-    def __str__(self):
-        return 'Old password is incorrect'
+class InvalidOldPassword(ITDException):
+    code = 'INVALID_OLD_PASSWORD'
+    text = 'Old password is incorrect'
+
+class InvalidPassword(ITDException):
+    code = 'INVALID_PASSWORD'
+    text = 'Password requirement not met'
 
 class NotFound(ITDException):
     code = 'NOT_FOUND'
@@ -161,11 +165,9 @@ class TooLarge(ITDException):
     def __init__(self, obj: str):
         self.text = f'{obj} is too large'
 
-class PinNotOwned(Exception):
-    def __init__(self, pin: str) -> None:
-        self.pin = pin
-    def __str__(self):
-        return f'You do not own "{self.pin}" pin'
+class PinNotOwned(ITDException):
+    code = "PIN_NOT_OWNED"
+    text = 'You do not own this pin'
 
 class AlreadyFollowing(ITDException):
     code = 'CONFLICT'

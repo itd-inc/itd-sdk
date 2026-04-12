@@ -128,20 +128,11 @@ class Client:
             SamePassword: Одинаковые пароли
             InvalidOldPassword: Старый пароль неверный
 
-        Returns:
-            dict: Ответ API `{'message': 'Password changed successfully'}`
         """
         if not self.refresh_token:
             raise NoCookie()
 
-        res = change_password(self, old, new)
-        if res.json().get('error', {}).get('code') == 'SAME_PASSWORD':
-            raise SamePassword()
-        if res.json().get('error', {}).get('code') == 'INVALID_OLD_PASSWORD':
-            raise InvalidOldPassword()
-        res.raise_for_status()
-
-        return res.json()
+        change_password(self, old, new)
 
 
     def search(self, query: str, hashtags_limit: int = 20, users_limit: int = 20) -> tuple[list[User], list[Hashtag]]:
