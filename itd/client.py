@@ -142,3 +142,8 @@ class Client:
         res.raise_for_status()
 
         return res.json()
+
+
+    def search(self, query: str, hashtags_limit: int = 20, users_limit: int = 20) -> tuple[list[User], list[Hashtag]]:
+        res = search(self, query, users_limit, hashtags_limit).json()['data']
+        return [User._from_dict(user, False, self) for user in res['users']], [Hashtag._from_dict(hashtag, self) for hashtag in res['hashtags']]
