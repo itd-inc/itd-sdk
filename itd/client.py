@@ -116,7 +116,7 @@ class Client:
         return res.json()
 
 
-    def change_password(self, old: str, new: str) -> dict:
+    def change_password(self, old: str, new: str) -> None:
         """Смена пароля
 
         Args:

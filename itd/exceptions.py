@@ -1,6 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from functools import wraps
+from time import sleep
+from datetime import datetime, timedelta
+
 from requests import Response
 
-from functools import wraps
+if TYPE_CHECKING:
+    from itd.client import Client
 
 class ITDException(Exception):
     code: str | None = None # ['error']['code']
@@ -17,7 +24,7 @@ def catch_errors(*exceptions: ITDException):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs) -> Response | None:
-            print(f'exec {func.__name__} {args} {kwargs}')
+            print(f'exec {func.__name__} {str(args)[:1000]} {str(kwargs)[:1000]}')
             res: Response = func(*args, **kwargs)
             assert isinstance(res, Response)
             if res.status_code == 204:
@@ -47,6 +54,26 @@ def catch_errors(*exceptions: ITDException):
         return wrapper
     return decorator
 
+
+def rate_limit(default_delay: float | None = None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(client: Client, *args, **kwargs) -> Response | None:
+            default = default_delay or client.default_delay
+
+            if datetime.now() - timedelta(seconds=default) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
+                sleep(default - (datetime.now() - client.last_actions[func.__name__]).seconds)
+            client.last_actions[func.__name__] = datetime.now()
+
+            while True:
+                try:
+                    return func(client, *args, **kwargs)
+                except RateLimitExceeded as e:
+                    print(f'rate limit, wait {e.retry_after or 10}s')
+                    sleep(e.retry_after or 10)
+
+        return wrapper
+    return decorator
 
 
 class NoCookie(Exception):

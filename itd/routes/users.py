@@ -4,21 +4,20 @@ from typing import TYPE_CHECKING
 
 from itd.enums import Unset, UNSET, AccessType
 from itd.exceptions import (
-    catch_errors, NotFound, TooLarge, ValidationError, RequiresVerification, UsernameTaken,
-    AlreadyFollowing, AlreadyDeleted, NotDeleted, AlreadyBlocked, NotBlocked, CantFollowYourself,
-    UserBlocked, CantBlockYourself
+    rate_limit, catch_errors, NotFound, TooLarge, ValidationError, RequiresVerification,
+    UsernameTaken, AlreadyFollowing, AlreadyDeleted, NotDeleted, AlreadyBlocked, NotBlocked,
+    CantFollowYourself, UserBlocked, CantBlockYourself
 )
 
 if TYPE_CHECKING:
     from itd.client import Client
 
-
-# TODO: add get profile
-
+@rate_limit()
 @catch_errors(NotFound('User'), TooLarge('User'))
 def get_user(client: Client, username_or_id: str | UUID):
     return client.request('get', f'users/{username_or_id}')
 
+@rate_limit(20)
 @catch_errors(ValidationError(), RequiresVerification('GIF banner uploading'), UsernameTaken())
 def update_profile(client: Client, bio: str | None = None, display_name: str | None = None, username: str | None = None, banner_id: UUID | Unset | None = None):
     data = {}

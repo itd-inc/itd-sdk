@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 from itd.enums import PostsTab, UserPostSorting
 from itd.poll import NewPoll
 from itd.exceptions import (
-    catch_errors, NotFound, Forbidden, RequiresVerification, ValidationError, AlreadyReposted,
-    CantRepostYourPost, NotPinned, EditExpired
+    catch_errors, rate_limit, NotFound, Forbidden, RequiresVerification, ValidationError,
+    AlreadyReposted, CantRepostYourPost, NotPinned, EditExpired
 )
-
 if TYPE_CHECKING:
     from itd.client import Client
 
+@rate_limit(20)
 @catch_errors(NotFound('Wall recipient'), Forbidden('post - some files not owned'), RequiresVerification('Video uploading'), ValidationError())
 def create_post(
     client: Client,
@@ -34,6 +34,7 @@ def create_post(
 
     return client.request('post', 'posts', data)
 
+@rate_limit()
 @catch_errors(ValidationError())
 def get_posts(client: Client, cursor: str | datetime | None = None, limit: int = 20, tab: PostsTab = PostsTab.POPULAR):
     data = {'limit': limit, 'tab': tab.value}
@@ -41,14 +42,17 @@ def get_posts(client: Client, cursor: str | datetime | None = None, limit: int =
         data['cursor'] = cursor
     return client.request('get', 'posts', data)
 
+@rate_limit()
 @catch_errors(NotFound('Post'))
 def get_post(client: Client, id: UUID):
     return client.request('get', f'posts/{id}')
 
+@rate_limit()
 @catch_errors(NotFound('Post'), Forbidden('edit post'), EditExpired())
 def edit_post(client: Client, id: UUID, content: str, spans: list[dict] = []):
     return client.request('put', f'posts/{id}', {'content': content, 'spans': spans})
 
+@rate_limit()
 @catch_errors(NotFound('Post'), Forbidden('delete post'))
 def delete_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}')
