@@ -94,7 +94,7 @@ class Client:
     @property
     def user(self):
         if not self._user:
-            self._user = Me()
+            self._user = Me(self)
         return self._user
 
 
