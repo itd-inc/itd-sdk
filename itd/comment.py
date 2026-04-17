@@ -10,7 +10,7 @@ from itd.enums import CommentSorting, All, ALL, ReportTargetType, ReportReason
 from itd.report import Report
 from itd.utils import parse_datetime, to_nullable_uuid, format_attachments, ATTACHMENTS
 from itd.routes.comments import get_comments, add_comment, add_reply_comment, get_replies, like_comment, unlike_comment, delete_comment
-from itd.models.user import UserPost
+from itd.user import User
 from itd.file import CommentAttach
 
 class Comment(ITDBaseModel):
@@ -20,7 +20,7 @@ class Comment(ITDBaseModel):
     content: str
 
     created_at: datetime = Field(alias='createdAt')
-    author: UserPost
+    author: User
 
     likes_count: int = Field(0, alias='likesCount')
     replies_count: int = Field(0, alias='repliesCount')
@@ -28,7 +28,7 @@ class Comment(ITDBaseModel):
 
     attachments: list[CommentAttach]
     replies: 'Replies' = Field(default_factory=lambda: Replies(_empty=True))
-    reply_to: UserPost | None = None # author of replied comment, if this comment is reply
+    reply_to: User | None = None # author of replied comment, if this comment is reply
 
     _post_id: UUID | None = None
     _comment_id: UUID | None = None # base comment id, if this comment is reply
@@ -139,6 +139,19 @@ class _CommentValidate(BaseModel, Comment):
     @classmethod
     def validate_created_at(cls, v: str):
         return parse_datetime(v)
+
+    @field_validator('reply_to', mode='plain')
+    @classmethod
+    def validate_reply_to(cls, reply_to: dict | None):
+        if reply_to is not None:
+            return User._from_dict(reply_to, False)
+
+    @field_validator('author', mode='plain')
+    @classmethod
+    def validate_author(cls, author: dict):
+        return User._from_dict(author, False)
+
+
 
 
 
