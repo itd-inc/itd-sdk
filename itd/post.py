@@ -6,7 +6,7 @@ from pydantic import Field, BaseModel, field_validator
 from itd.base import ITDBaseModel, refresh_wrapper
 from itd.client import Client
 from itd.comment import Comment, Comments
-from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, SpanType
+from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, All, ALL
 from itd.file import PostAttach
 from itd.hashtag import Hashtag
 from itd.poll import Poll, NewPoll, PollOption
@@ -450,8 +450,8 @@ class _BasePosts(ITDBaseModel, list[Post]):
     _refreshable = False
     _set_loaded: bool = True
 
-    def load(self, count: int | None = None, limit: int = 50, client: Client | None = None) -> '_BasePosts':
-        left = count or limit # if None get [LIMIT] firstly
+    def load(self, count: int = 50, limit: int = 50, client: Client | None = None) -> '_BasePosts':
+        left = count
 
         while left > 0: # can be !=, but what if something went wrong
             data = self._fetch(
@@ -461,9 +461,10 @@ class _BasePosts(ITDBaseModel, list[Post]):
             self.cursor = data['pagination']['nextCursor']
 
             posts = data['posts']
-            left -= len(posts)
-            if not posts:
-                break
+            if len(posts) < min(limit, left):
+                left = 0
+            else:
+                left -= len(posts)
 
             print(f'fetched {len(posts)} left={left} (was {len(self)})')
             self.extend([Post._from_dict(post, self._set_loaded, self.client) for post in posts])
@@ -504,7 +505,41 @@ class Posts(_BasePosts):
         return cls(PostsTab.CLAN, client)
 
 
-class UserPosts(_BasePosts):
+class _FinitePosts(_BasePosts):
+    _refreshable = True
+
+    def load(self, count: int | All = 50, limit: int = 50, client: Client | None = None):
+        left = count or limit # if None get [LIMIT] firstly
+
+        while left > 0: # can be !=, but what if something went wrong
+            data = self._fetch(client or self.client, min(limit, left))
+            self.has_more = data['pagination']['hasMore']
+            self.cursor = data['pagination']['nextCursor']
+
+            posts = data['posts']
+            if len(posts) < min(limit, left):
+                left = 0
+            else:
+                left -= len(posts)
+
+            print(f'fetched {len(posts)} left={left} (was {len(self)})')
+            self.extend([Post._from_dict(post, self._set_loaded, self.client) for post in posts])
+        return self
+
+    def refresh(self, count: int | None = None, client: Client | None = None, limit: int = 500):
+        count = count or len(self)
+        self.clear()
+        return self.load(count, limit, client)
+
+    def load_all(self, limit: int = 500, client: Client | None = None):
+        return self.load(ALL, limit, client)
+
+    @property
+    def all(self):
+        return self.load_all()
+
+
+class UserPosts(_FinitePosts):
     _load_with_parent = False
     cursor: datetime | None = None
 
@@ -531,7 +566,7 @@ class UserPosts(_BasePosts):
         return cls(username_or_id, UserPostSorting.NEW, client)
 
 
-class LikedPosts(_BasePosts): # [] if forbidden
+class LikedPosts(_FinitePosts): # [] if forbidden
     _load_with_parent = False
     cursor: datetime | None = None
 
@@ -543,7 +578,7 @@ class LikedPosts(_BasePosts): # [] if forbidden
         return get_liked_posts(client, self.username_or_id, self.cursor, limit).json()['data']
 
 
-class HashtagPosts(_BasePosts):
+class HashtagPosts(_FinitePosts):
     hashtag: Hashtag
     cursor: UUID | None = None
     _set_loaded = False

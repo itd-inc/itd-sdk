@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 class NotificationType(Enum):
     LIKE = 'like'
@@ -77,5 +78,8 @@ class Role(Enum):
 class Unset: pass
 UNSET = Unset()
 
-class All: pass
+class All:
+    def __bool__(self) -> Literal[False]:
+        return False
+
 ALL = All()
