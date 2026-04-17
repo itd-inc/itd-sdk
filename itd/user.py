@@ -12,6 +12,8 @@ from itd.exceptions import PinNotOwned
 from itd.pin import Pin
 from itd.poll import NewPoll
 from itd.report import Report
+from itd.span import Span
+from itd.utils import to_uuid, ATTACHMENTS
 from itd.routes.etc import get_who_to_follow
 from itd.routes.users import (
     get_user, follow, unfollow, block, unblock, get_followers, get_following, delete_account,
@@ -19,10 +21,9 @@ from itd.routes.users import (
 )
 from itd.routes.pins import get_pins, remove_pin
 from itd.routes.subscription import get_subscription, pay_subscription, get_payment_methods, toggle_subscription_auto_renewal
-from itd.utils import to_uuid, ATTACHMENTS
 if TYPE_CHECKING:
     from itd.client import Client
-    from itd.post import Post, Span
+    from itd.post import Post
 
 
 class ProfileUser(BaseModel):

@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 from datetime import datetime
 import re
 
-from itd.models.post import Span
+from itd.span import Span
 from itd.file import File
 from itd.enums import SpanType
 
