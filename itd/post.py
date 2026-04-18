@@ -515,8 +515,11 @@ class _FinitePosts(_BasePosts):
             self.cursor = data['pagination']['nextCursor']
 
             posts = data['posts']
+
             if len(posts) < min(limit, left):
                 left = 0
+            elif isinstance(count, All):
+                left = limit
             else:
                 left -= len(posts)
 
@@ -527,6 +530,7 @@ class _FinitePosts(_BasePosts):
     def refresh(self, count: int | All | None = None, client: Client | None = None, limit: int = 50):
         count = count or len(self)
         self.clear()
+        self.cursor = None
         return self.load(count, limit, client)
 
     def load_all(self, limit: int = 50, client: Client | None = None):
@@ -589,4 +593,6 @@ class HashtagPosts(_FinitePosts):
         self.hashtag = hashtag
 
     def _fetch(self, client: Client, limit: int = 50) -> dict:
-        return get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']
+        data = get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']
+        self.total = data['hashtag']['postsCount']
+        return data
