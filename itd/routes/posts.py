@@ -57,18 +57,22 @@ def edit_post(client: Client, id: UUID, content: str, spans: list[dict] = []):
 def delete_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}')
 
+@rate_limit()
 @catch_errors(NotFound('Post'), Forbidden('restore post'))
 def restore_post(client: Client, id: UUID):
     return client.request('post', f'posts/{id}/restore')
 
+@rate_limit()
 @catch_errors(NotFound('Post'), Forbidden('pin post'))
 def pin_post(client: Client, id: UUID):
     return client.request('post', f'posts/{id}/pin')
 
+@rate_limit()
 @catch_errors(NotPinned())
 def unpin_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}/pin')
 
+@rate_limit(20)
 @catch_errors(NotFound('Post'), AlreadyReposted(), CantRepostYourPost(), ValidationError())
 def repost(client: Client, id: UUID, content: str | None = None):
     data = {}
@@ -76,22 +80,27 @@ def repost(client: Client, id: UUID, content: str | None = None):
         data['content'] = content
     return client.request('post', f'posts/{id}/repost', data)
 
+@rate_limit()
 @catch_errors(NotFound('Post'))
 def view_post(client: Client, id: UUID):
     return client.request('post', f'posts/{id}/view')
 
+@rate_limit()
 @catch_errors(ValidationError(), NotFound('User'))
 def get_liked_posts(client: Client, username_or_id: str | UUID, cursor: datetime | None = None, limit: int = 20):
     return client.request('get', f'posts/user/{username_or_id}/liked', {'limit': limit, 'cursor': cursor})
 
+@rate_limit()
 @catch_errors(ValidationError(), NotFound('User', _liked_posts_user_not_found=True))
 def get_user_posts(client: Client, username_or_id: str | UUID, cursor: datetime | None = None, limit: int = 20, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW):
     return client.request('get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor, 'pinnedPostId': pinned_post_id, 'sort': sort.value})
 
+@rate_limit(10)
 @catch_errors(NotFound('Post'))
 def like_post(client: Client, id: UUID):
     return client.request('post', f'posts/{id}/like')
 
+@rate_limit()
 @catch_errors(NotFound('Post'))
 def unlike_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}/like')
