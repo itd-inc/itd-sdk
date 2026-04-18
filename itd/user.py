@@ -253,6 +253,56 @@ class User(_UserBase):
     def me(cls, client: Client | None = None) -> 'Me':
         return Me(client)
 
+
+    def complete_actions_for_wall_access(self, client: Client | None = None) -> bool:
+        if self.wall_access == AccessType.NOBODY:
+            return False
+        if self.wall_access == AccessType.MUTUAL:
+            if self.is_followed_by: # TODO: use is_followed_by/is_following for specified client
+                if not self.is_following:
+                    self.follow(client)
+                return True
+            return False
+        if self.wall_access == AccessType.FOLLOWERS:
+            if not self.is_following:
+                self.follow(client)
+        return True
+
+    def complete_actions_for_likes_visibility(self, client: Client | None = None) -> bool:
+        if self.likes_visibility == AccessType.NOBODY:
+            return False
+        if self.likes_visibility == AccessType.MUTUAL:
+            if self.is_followed_by: # TODO: use is_followed_by/is_following for specified client
+                if not self.is_following:
+                    self.follow(client)
+                return True
+            return False
+        if self.likes_visibility == AccessType.FOLLOWERS:
+            if not self.is_following:
+                self.follow(client)
+        return True
+
+    @property
+    def can_post_on_wall(self) -> bool:
+        if self.wall_access == AccessType.NOBODY:
+            return False
+        if self.wall_access == AccessType.MUTUAL:
+            return self.is_following and self.is_followed_by
+        if self.wall_access == AccessType.FOLLOWERS:
+            return self.is_following
+        return True
+
+    @property
+    def can_see_liked_posts(self) -> bool:
+        if self.likes_visibility == AccessType.NOBODY:
+            return False
+        if self.likes_visibility == AccessType.MUTUAL:
+            return self.is_following and self.is_followed_by
+        if self.likes_visibility == AccessType.FOLLOWERS:
+            return self.is_following
+        return True
+
+
     def report(self, reason: ReportReason, description: str | None = None, client: Client | None = None) -> Report:
         return Report(self.id, ReportTargetType.USER, reason, description, client or self.client)
 
