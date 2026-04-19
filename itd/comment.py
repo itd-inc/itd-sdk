@@ -13,6 +13,7 @@ from itd.routes.comments import get_comments, add_comment, add_reply_comment, ge
 from itd.user import User
 from itd.file import CommentAttach
 
+
 class Comment(ITDBaseModel):
     _refreshable = False
 
@@ -27,7 +28,7 @@ class Comment(ITDBaseModel):
     is_liked: bool = Field(False, alias='isLiked')
 
     attachments: list[CommentAttach]
-    replies: 'Replies' = Field(default_factory=lambda: Replies(_empty=True))
+    replies: 'Replies'
     reply_to: User | None = None # author of replied comment, if this comment is reply
 
     _post_id: UUID | None = None
@@ -164,10 +165,7 @@ class Comments(ITDBaseModel, list[Comment]):
     total: int
     _sorting: CommentSorting = CommentSorting.POPULAR
 
-    def __init__(self, data: list[dict] = [], _empty: bool = False):
-        if _empty: # only for default value
-            return
-
+    def __init__(self, data: list[dict] = []):
         super().__init__()
         self.extend([Comment(comment) for comment in data])
 

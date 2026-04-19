@@ -2,7 +2,8 @@ from __future__ import annotations
 from uuid import UUID
 from typing import TYPE_CHECKING
 
-from itd.exceptions import catch_errors, rate_limit, ValidationError, NotFound, AlreadyDeleted
+from itd.base import catch_errors, rate_limit
+from itd.exceptions import ValidationError, NotFound, AlreadyDeleted
 
 if TYPE_CHECKING:
     from itd.client import Client

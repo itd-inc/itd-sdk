@@ -3,7 +3,8 @@ from uuid import UUID
 from typing import TYPE_CHECKING
 
 from itd.enums import ReportReason, ReportTargetType
-from itd.exceptions import rate_limit, catch_errors, AlreadyReported, NotFound, ValidationError
+from itd.exceptions import AlreadyReported, NotFound, ValidationError
+from itd.base import catch_errors, rate_limit
 
 if TYPE_CHECKING:
     from itd.client import Client

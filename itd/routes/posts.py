@@ -6,9 +6,10 @@ from typing import TYPE_CHECKING
 from itd.enums import PostsTab, UserPostSorting
 from itd.poll import NewPoll
 from itd.exceptions import (
-    catch_errors, rate_limit, NotFound, Forbidden, RequiresVerification, ValidationError,
-    AlreadyReposted, CantRepostYourPost, NotPinned, EditExpired
+    NotFound, Forbidden, RequiresVerification, ValidationError, AlreadyReposted, CantRepostYourPost,
+    NotPinned, EditExpired
 )
+from itd.base import rate_limit, catch_errors
 if TYPE_CHECKING:
     from itd.client import Client
 

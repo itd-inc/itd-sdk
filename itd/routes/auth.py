@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 
 from requests import Response, Session
 
+from itd.base import catch_errors
 from itd.request import fetch
-from itd.exceptions import catch_errors, InvalidPassword, SamePassword, InvalidOldPassword
+from itd.exceptions import InvalidPassword, SamePassword, InvalidOldPassword
 if TYPE_CHECKING:
     from itd.client import Client
 

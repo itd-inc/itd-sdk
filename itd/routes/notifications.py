@@ -3,7 +3,8 @@ from uuid import UUID
 from typing import TYPE_CHECKING
 
 from itd.request import fetch_stream
-from itd.exceptions import catch_errors, rate_limit, NotificationNotFoundOrNotBelongOrAlreadyRead
+from itd.exceptions import NotificationNotFoundOrNotBelongOrAlreadyRead
+from itd.base import catch_errors, rate_limit
 
 if TYPE_CHECKING:
     from itd.client import Client

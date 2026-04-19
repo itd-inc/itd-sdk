@@ -30,7 +30,7 @@ class _BasePost(ITDBaseModel):
     content: str
     spans: list[Span] = []
     attachments: list[PostAttach]
-    comments: Comments = Field(default_factory=lambda: Comments(_empty=True))
+    comments: Comments
 
     likes_count: int = Field(0, alias='likesCount')
     comments_count: int = Field(0, alias='commentsCount')

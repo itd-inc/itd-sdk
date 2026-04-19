@@ -3,7 +3,7 @@ from _io import BufferedReader
 from uuid import UUID
 from typing import TYPE_CHECKING
 
-from itd.exceptions import catch_errors, rate_limit
+from itd.base import catch_errors, rate_limit
 if TYPE_CHECKING:
     from itd.client import Client
 

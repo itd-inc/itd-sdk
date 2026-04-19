@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from itd.exceptions import catch_errors, rate_limit, PinNotOwned
+from itd.exceptions import PinNotOwned
+from itd.base import rate_limit, catch_errors
 if TYPE_CHECKING:
     from itd.client import Client
 

@@ -6,12 +6,16 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 
 from itd._default import _default_client, set_default_client
-from itd.exceptions import NoCookie, SamePassword, InvalidOldPassword, Unauthorized
+from itd.exceptions import NoCookie, Unauthorized
 from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
+from itd.user import Me, User
 from itd.routes.auth import refresh_token, change_password, logout
 from itd.routes.search import search
-from itd.user import Me, User
+from itd.logger import get_logger
+
+
+l = get_logger('client')
 
 
 class Client:
@@ -22,7 +26,8 @@ class Client:
     _user = None
 
     def __init__(self, refresh_token: str | None = None, access_token: str | None = None):
-        self._stream_active = False  # Флаг для остановки stream_notifications
+        l.info('init client refresh=%s access=%s', refresh_token is not None, access_token is not None)
+
         self.session = Session()
         adapter = HTTPAdapter(pool_connections=1, pool_maxsize=10, pool_block=False)
         self.session.mount('https://', adapter)
@@ -30,11 +35,11 @@ class Client:
         if access_token:
             self.access_token = access_token.replace('Bearer ', '')
 
-        elif refresh_token:
+        if refresh_token:
             self.refresh_token = refresh_token
             self.session.cookies.set('refresh_token', refresh_token, path='/', domain='xn--d1ah4a.com')
-            self.refresh_auth()
-
+            if access_token is None:
+                self.refresh_auth()
 
         if _default_client is None:
             set_default_client(self)
@@ -48,6 +53,7 @@ class Client:
             params (dict, optional): Параметры. Defaults to {}.
             files (dict[str, tuple[str, BufferedReader | bytes]], optional): Файлы. Defaults to {}.
         """
+        l.debug('%s %s params=%s', method.upper(), url, params)
         def _fetch():
             return fetch(self.token, method, url, params, files, session=self.session)
 
@@ -69,7 +75,7 @@ class Client:
         Returns:
             str: Токен
         """
-        print('refresh token')
+        l.debug('refresh token')
         if not self.refresh_token:
             raise NoCookie()
 

@@ -26,6 +26,9 @@ requires-python = ">=3.9"
 filetype = [
     "filetype>=1.2.0",
 ]
+logs = [
+    "rich>=15.0.0",
+]
 
 [dependency-groups]
 dev = [

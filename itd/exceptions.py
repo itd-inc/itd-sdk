@@ -1,14 +1,3 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-from functools import wraps
-from time import sleep
-from datetime import datetime, timedelta
-
-from requests import Response
-
-if TYPE_CHECKING:
-    from itd.client import Client
-
 class ITDException(Exception):
     code: str | None = None # ['error']['code']
     message: str | None = None # ['error']['message']
@@ -18,62 +7,6 @@ class ITDException(Exception):
 
     def __str__(self) -> str:
         return self.text
-
-
-def catch_errors(*exceptions: ITDException):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Response | None:
-            print(f'exec {func.__name__} {str(args)[:1000]} {str(kwargs)[:1000]}')
-            res: Response = func(*args, **kwargs)
-            assert isinstance(res, Response)
-            if res.status_code == 204:
-                return
-
-            for exception in exceptions:
-                if (
-                    getattr(exception, '_reply_comment_user_not_found', False) and res.status_code == 500 and 'Failed query' in res.text or
-                    getattr(exception, '_delete_comment_not_found', False) and res.status_code == 500 and res.text == 'Комментарий не найден' or
-                    getattr(exception, '_liked_posts_user_not_found', False) and res.status_code == 404 and res.text == 'NOT_FOUND' or
-                    getattr(exception, '_report_target_not_found', False) and res.status_code == 400 and 'не найден' in res.json().get('error', {}).get('message', '') or
-                    getattr(exception, '_subscription_not_found', False) and res.json().get('error') == 'Активная подписка не найдена' or
-                    getattr(exception, '_hashtag_not_found', False) and res.json().get('data', {}).get('hashtag', '') == None or
-                    getattr(exception, '_notification_read_error', False) and res.json().get('success') is False or
-                    isinstance(exception, ValidationError) and res.status_code == 422 and 'found' in res.json() or
-
-                    exception.status_code is not None and res.status_code == exception.status_code or
-                    exception.code is not None and res.json().get('error', {}).get('code') == exception.code or
-                    exception.message is not None and res.json().get('error', {}).get('message') == exception.message
-                ):
-                    if isinstance(exception, ValidationError) and res.json().get('error', {}).get('code') == exception.code:
-                        exception.text = res.json()['error']['message']
-                    raise exception
-            res.raise_for_status()
-            return res
-
-        return wrapper
-    return decorator
-
-
-def rate_limit(default_delay: float | None = None):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(client: Client, *args, **kwargs) -> Response | None:
-            default = default_delay or client.default_delay
-
-            if datetime.now() - timedelta(seconds=default) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
-                sleep(default - (datetime.now() - client.last_actions[func.__name__]).seconds)
-            client.last_actions[func.__name__] = datetime.now()
-
-            while True:
-                try:
-                    return func(client, *args, **kwargs)
-                except RateLimitExceeded as e:
-                    print(f'rate limit, wait {e.retry_after or 10}s')
-                    sleep(e.retry_after or 10)
-
-        return wrapper
-    return decorator
 
 
 class NoCookie(Exception):

@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from itd.client import Client
-from itd.exceptions import catch_errors, rate_limit, ValidationError
+from itd.exceptions import ValidationError
+from itd.base import catch_errors, rate_limit
 
 @rate_limit()
 @catch_errors(ValidationError())

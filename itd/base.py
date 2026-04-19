@@ -1,16 +1,22 @@
 from __future__ import annotations
 from typing import Any, Callable, TYPE_CHECKING
 from functools import wraps
+from time import sleep
+from datetime import datetime, timedelta
 
+from requests import Response
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefinedType
 
 from itd._default import get_default_client
-
+from itd.logger import get_logger
+from itd.exceptions import ITDException, ValidationError, RateLimitExceeded
 if TYPE_CHECKING:
-    from itd.client import Client as ITDClient
+    from itd.client import Client
 
+
+l = get_logger('base')
 
 def _getattr(self: object, name: str, default: Any | None = None) -> Any:
     try:
@@ -36,7 +42,7 @@ class ITDBaseModel:
     _fields_from_data: set[str] = set()
     _validator: Callable[[Any], type[BaseModel]] | None = None # callable (pls use lambda), becuase we havent validator at that moment (it depends on this class)
 
-    def __init__(self, client: ITDClient | None = None) -> None:
+    def __init__(self, client: Client | None = None) -> None:
         self._client = client or get_default_client()
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -45,15 +51,14 @@ class ITDBaseModel:
         object.__setattr__(self, name, value)
 
     @property
-    def client(self) -> ITDClient:
+    def client(self) -> Client:
         return self._client
 
-    def _token(self, client: ITDClient | None = None) -> str: # should be property, but it needs client param
+    def _token(self, client: Client | None = None) -> str: # should be property, but it needs client param
         return (client or self._client).token
 
     def refresh(self) -> Any:
-        if self._refreshable:
-            raise NotImplementedError(f"{type(self).__name__} must implement refresh()")
+        l.warning('refresh is not implemented but have called')
         self._loaded = True
 
 
@@ -68,12 +73,16 @@ class ITDBaseModel:
                 return attr
 
             fields_from_data = _getattr(self, '_fields_from_data', ())
-            if not _getattr(self, '_loaded') and (
-                (name not in fields_from_data and _field_has_default(type(self), name)) or
-                (attr is None and not _field_has_default(type(self), name)) or
-                isinstance(attr, FieldInfo) or
-                (isinstance(attr, ITDBaseModel) and attr._load_with_parent)
-            ):
+            triggers = {
+                'default': name not in fields_from_data and _field_has_default(type(self), name),
+                'none': attr is None and not _field_has_default(type(self), name),
+                'field-info': isinstance(attr, FieldInfo),
+                'loads-with-parent': isinstance(attr, ITDBaseModel) and attr._load_with_parent
+            }
+            if not _getattr(self, '_loaded') and any(triggers.values()):
+                l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
+                    next((k for k, v in triggers.items() if v))
+                )
                 self.refresh()
 
         return _getattr(self, name)
@@ -81,7 +90,7 @@ class ITDBaseModel:
 
 def refresh_wrapper(func):
     @wraps(func)
-    def wrapper(self, client: ITDClient | None = None):
+    def wrapper(self, client: Client | None = None):
         # if self._loading:
         #     return
 
@@ -90,6 +99,7 @@ def refresh_wrapper(func):
         if self._validator:
             validated = self._validator().model_validate(data)
             self._fields_from_data = validated.model_fields_set
+            l.debug('refresh %s; recieved %s', self.__class__.__name__.lower(), self._fields_from_data)
             for name, value in validated.__dict__.items():
                 setattr(self, name, value)
 
@@ -97,3 +107,63 @@ def refresh_wrapper(func):
         self._loaded = True
 
     return wrapper
+
+
+
+def catch_errors(*exceptions: ITDException):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(client: Client, *args, **kwargs) -> Response | None:
+            l.info('exec %s %s %s', func.__name__, str(args)[:1000], str(kwargs)[:1000])
+            res: Response = func(client, *args, **kwargs)
+
+            assert isinstance(res, Response)
+            if res.status_code == 204:
+                return res
+
+            for exception in exceptions:
+                if (
+                    getattr(exception, '_reply_comment_user_not_found', False) and res.status_code == 500 and 'Failed query' in res.text or
+                    getattr(exception, '_delete_comment_not_found', False) and res.status_code == 500 and res.text == 'Комментарий не найден' or
+                    getattr(exception, '_liked_posts_user_not_found', False) and res.status_code == 404 and res.text == 'NOT_FOUND' or
+                    getattr(exception, '_report_target_not_found', False) and res.status_code == 400 and 'не найден' in res.json().get('error', {}).get('message', '') or
+                    getattr(exception, '_subscription_not_found', False) and res.json().get('error') == 'Активная подписка не найдена' or
+                    getattr(exception, '_hashtag_not_found', False) and res.json().get('data', {}).get('hashtag', '') == None or
+                    getattr(exception, '_notification_read_error', False) and res.json().get('success') is False or
+                    isinstance(exception, ValidationError) and res.status_code == 422 and 'found' in res.json() or
+
+                    exception.status_code is not None and res.status_code == exception.status_code or
+                    exception.code is not None and res.json().get('error', {}).get('code') == exception.code or
+                    exception.message is not None and res.json().get('error', {}).get('message') == exception.message
+                ):
+                    if isinstance(exception, ValidationError) and res.json().get('error', {}).get('code') == exception.code:
+                        exception.text = res.json()['error']['message']
+                    raise exception
+            res.raise_for_status()
+            return res
+
+        return wrapper
+    return decorator
+
+
+def rate_limit(default_delay: float | None = None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(client: Client, *args, **kwargs) -> Response | None:
+            default = default_delay or client.default_delay
+
+            if datetime.now() - timedelta(seconds=default) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
+                delay = default - (datetime.now() - client.last_actions[func.__name__]).seconds
+                l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
+                sleep(delay)
+            client.last_actions[func.__name__] = datetime.now()
+
+            while True:
+                try:
+                    return func(client, *args, **kwargs)
+                except RateLimitExceeded as e:
+                    l.info('rate limit on %s; wait %ss', func.__name__, e.retry_after or 10)
+                    sleep(e.retry_after or 10)
+
+        return wrapper
+    return decorator
