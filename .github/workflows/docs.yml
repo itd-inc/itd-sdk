@@ -8,6 +8,9 @@ on:
       - 'mkdocs.yml'
       - 'itd/**'
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,7 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs-material mkdocstrings[python] griffe-typingdoc
+          pip install -e .
+          pip install "mkdocs<2.0.0" mkdocs-material "mkdocstrings[python]" griffe-typingdoc
 
       - name: Build docs
         run: mkdocs build -d site

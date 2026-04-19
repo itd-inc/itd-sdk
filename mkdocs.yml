@@ -58,7 +58,7 @@ plugins:
     - mkdocstrings:
         handlers:
           python:
-            paths: [itd]
+            paths: [.]
             options:
               extensions:
                 - griffe_typingdoc
