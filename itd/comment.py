@@ -4,7 +4,7 @@ from math import ceil
 
 from pydantic import Field, BaseModel, field_validator
 
-from itd.base import ITDBaseModel
+from itd.base import ITDBaseModel, ITDList
 from itd.client import Client
 from itd.enums import CommentSorting, All, ALL, ReportTargetType, ReportReason
 from itd.report import Report
@@ -28,7 +28,7 @@ class Comment(ITDBaseModel):
     is_liked: bool = Field(False, alias='isLiked')
 
     attachments: list[CommentAttach]
-    replies: 'Replies'
+    replies: 'Replies' = Field(default_factory=lambda: Replies())
     reply_to: User | None = None # author of replied comment, if this comment is reply
 
     _post_id: UUID | None = None
@@ -156,12 +156,12 @@ class _CommentValidate(BaseModel, Comment):
 
 
 
-class Comments(ITDBaseModel, list[Comment]):
+class Comments(ITDList, list[Comment]):
     """Список комментариев с функцией дозагрузки"""
     _refreshable = False
+    _limit = 500
 
     _post_id: UUID
-    has_more: bool = True
     total: int
     _sorting: CommentSorting = CommentSorting.POPULAR
 
@@ -169,68 +169,27 @@ class Comments(ITDBaseModel, list[Comment]):
         super().__init__()
         self.extend([Comment(comment) for comment in data])
 
+    def _fetch(self, client: Client, limit: int):
+        return get_comments(client, self._post_id, len(self), limit).json()['data']
 
-    def load(self, count: int | All = 100, limit: int = 500, client: Client | None = None) -> 'Comments':
-        """Загрузить комментарии
+    def _extend(self, objects: list, client: Client):
+        self.extend([Comment(comment, self._post_id, client=client) for comment in objects])
 
-        Args:
-            count (int | None, optional): Количество (None - все). Defaults to 100.
-            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
-            client (Client | None, optional): Клиент. Defaults to None.
-        """
-        if isinstance(count, All):
-            ncount = None
-        else:
-            ncount = count
+    @staticmethod
+    def _get_objects(data: dict) -> list[dict]:
+        return data['comments']
 
-        left = ncount or limit # if None get [LIMIT] firstly
+    @staticmethod
+    def _get_has_more(data: dict) -> bool:
+        return data['hasMore']
 
-        while left > 0: # can be !=, but what if something went wrong
-            data = get_comments(
-                client or self._client,
-                self._post_id,
-                len(self), # cursor equals already loaded
-                min(limit, left) # not always [LIMIT] to not overflow (if left < [LIMIT], use left, [LIMIT] otherwise)
-            ).json()['data']
-
-            self.has_more = data['hasMore']
-            self.total = data['total']
-
-            if ncount is None:
-                left = self.total - len(self)
-            elif self.total < ncount:
-                left = 0
-
-            comments = data['comments']
-            left -= len(comments)
-            if not comments:
-                break
-
-            print(f'fetched {len(comments)} left={left} (was {len(self)})')
-            self.extend([Comment(comment, self._post_id, client=client or self.client) for comment in comments])
-        return self
-
-
-    def load_all(self, limit: int = 500, client: Client | None = None) -> 'Comments': # dont know why you should change client to load comments but
-        """Загрузить все комментарии
-
-        Args:
-            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 500). Defaults to 500.
-            client (Client | None, optional): Клиент. Defaults to None.
-        """
-        return self.load(ALL, limit, client)
-
-    def refresh(self, count: int | None = None, client: Client | None = None, limit: int = 500) -> 'Comments': # "None" count means already loaded count
-        count = count or len(self)
-        self.clear()
-        return self.load(count, limit, client)
-
+    def _get_total(self, data: dict) -> int:
+        return data['total']
 
     def new(self, content: str | None = None, attachments: ATTACHMENTS = [], client: Client | None = None) -> Comment:
         comment = Comment.new(self._post_id, content, attachments, client=client or self.client)
         self.insert(0, comment)
         return comment
-
 
     @property
     def sorting(self) -> CommentSorting:
@@ -241,79 +200,48 @@ class Comments(ITDBaseModel, list[Comment]):
         self._sorting = value
         self.refresh()
 
-    @property
-    def all(self) -> 'Comments':
-        return self.load_all()
-
 
     def __setattr__(self, name: str, value) -> None:
         if name == '_client':
-            for comment in self:
+            for comment in self.copy():
                 comment._client = value
         elif name == '_post_id':
-            for comment in self:
+            for comment in self.copy():
                 comment._post_id = value
         super().__setattr__(name, value)
 
 
 
 class Replies(Comments):
+    _limit = 100
     _comment: 'Comment'
 
-    def load(self, count: int | All = 100, limit: int = 100, client: Client | None = None) -> 'Replies':
-        """Загрузить ответы
+    def _fetch(self, client: Client, limit: int):
+        return get_replies(
+            client or self._client,
+            self._comment.id,
+            ceil(max(len(self), 1) / limit), # page equals already loaded divide by [LIMIT]
+            limit
+        ).json()['data']
 
-        Args:
-            count (int | None, optional): Количество (None - все). Defaults to 100.
-            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
-            client (Client | None, optional): Клиент. Defaults to None.
-        """
-        if isinstance(count, All):
-            ncount = None
-        else:
-            ncount = count
+    @staticmethod
+    def _get_has_more(data: dict) -> bool:
+        return data['pagination']['hasMore']
 
-        left = ncount or limit # if None get [LIMIT] firstly
+    @staticmethod
+    def _get_objects(data: dict) -> list[dict]:
+        return data['replies']
 
-        while left > 0: # can be !=, but what if something went wrong
-            data = get_replies(
-                client or self._client,
-                self._comment.id,
-                ceil(max(len(self), 1) / min(limit, left)), # page equals already loaded divide by [LIMIT]
-                min(limit, left), # not always [LIMIT] to not overflow (if left < [LIMIT], use left, [LIMIT] otherwise)
-            ).json()['data']
-            self.has_more = data['pagination']['hasMore']
-            self.total = data['pagination']['total']
+    def _get_total(self, data: dict) -> int:
+        return self._comment.replies_count
 
-            if ncount is None:
-                left = self.total - len(self)
-
-            replies = data['replies']
-            left -= len(replies)
-
-            if not replies:
-                break
-
-            if left < 0: # um what
-                replies = replies[:len(replies) + left] # cut extra (stupid api)
-
-            print(f'loaded {len(replies)} left={left} was={len(self)}')
-            self.extend([Comment(comment, comment_id=self._comment.id, client=client or self.client) for comment in replies])
-        return self
-
-    def load_all(self, limit: int = 100, client: Client | None = None) -> 'Replies':
-        """Загрузить все ответы
-
-        Args:
-            limit (int, optional): Лимит загрузки за раз (1 >= limit >= 100). Defaults to 100.
-            client (Client | None, optional): Клиент. Defaults to None.
-        """
-        return self.load(ALL, limit, client)
+    def _extend(self, objects: list, client: Client) -> None:
+        self.extend([Comment(comment, comment_id=self._comment.id, client=client) for comment in objects])
 
 
     def __setattr__(self, name: str, value) -> None:
         if name == '_comment':
-            for comment in self:
+            for comment in self.copy():
                 comment._comment_id = value.id
 
         super().__setattr__(name, value)

@@ -8,8 +8,8 @@ from threading import Thread
 from pydantic import Field, BaseModel, field_validator
 from sseclient import SSEClient
 
-from itd.base import ITDBaseModel, refresh_wrapper
-from itd.client import Client as ITDClient
+from itd.base import ITDBaseModel, ITDList
+from itd.client import Client
 from itd.enums import NotificationTargetType, NotificationType, All, ALL
 from itd.user import User
 from itd.routes.notifications import (
@@ -64,59 +64,30 @@ class _NotificationValidate(BaseModel, Notification):
 
 
 
-class Notifications(ITDBaseModel, list[Notification]):
-    _refreshable = False
+class Notifications(ITDList, list[Notification]):
+    _limit = 1000
     _unread: int | None = None
 
-    has_more: bool = True
-    total: int = 0
 
+    def _fetch(self, client: Client, limit: int) -> dict:
+        return get_notifications(client, limit, len(self)).json()
 
-    def _fetch(self, client: Client, page: int) -> dict:
-        return get_notifications(client, page).json()['data']
+    @staticmethod
+    def _get_objects(data: dict) -> list[dict]:
+        return data['notifications']
 
-    def load(self, count: int | All = 1000, limit: int = 1000, client: Client | None = None) -> 'Notifications':
-        if isinstance(count, All):
-            ncount = None
-        else:
-            ncount = count
+    @staticmethod
+    def _get_has_more(data: dict) -> bool:
+        return data['hasMore']
 
-        left = ncount or limit # if None get [1000] firstly
-
-        while left > 0: # can be !=, but what if something went wrong
-            data = get_notifications(client or self.client, min(limit, left), len(self)).json()
-            self.has_more = data['hasMore']
-
-            notifications = data['notifications']
-            if ncount is None:
-                left = self.total - len(self)
-
-            left -= len(notifications)
-            self.extend([Notification(notification, self, self.client) for notification in notifications])
-
-            if len(notifications) < limit or not self.has_more:
-                break
-
-            print(f'fetched {len(notifications)} left={left} (was {len(self)})')
-        return self
-
-    def load_all(self, limit: int = 1000) -> 'Notifications':
-        return self.load(ALL, limit)
-
-    def refresh(self, count: int | None = None, limit: int = 1000) -> 'Notifications': # "None" count means already loaded count
-        count = count or len(self)
-        self.clear()
-        return self.load(count, limit)
+    def _extend(self, objects: list, client: Client):
+        return self.extend([Notification(notification, self, client) for notification in objects])
 
     def __setattr__(self, name: str, value) -> None:
         if name == '_client':
-            for notification in self:
+            for notification in self.copy():
                 notification._client = value
         super().__setattr__(name, value)
-
-    @property
-    def all(self) -> "Notifications":
-        return self.load_all()
 
     def read_all(self):
         mark_all_as_read(self.client)

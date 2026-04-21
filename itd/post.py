@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import Field, BaseModel, field_validator
 
-from itd.base import ITDBaseModel, refresh_wrapper
+from itd.base import ITDBaseModel, refresh_wrapper, ITDList
 from itd.client import Client
 from itd.comment import Comment, Comments
 from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, All, ALL
@@ -33,7 +33,7 @@ class _BasePost(ITDBaseModel):
     comments: Comments = Field(default_factory=lambda: Comments())
 
     likes_count: int = Field(0, alias='likesCount')
-    comments_count: int = Field(0, alias='commentsCount')
+    comments_count: int = Field(0, alias='commentsCount') # ! Comments + replies, so len(comments) != comments_count
     reposts_count: int = Field(0, alias='repostsCount')
     views_count: int = Field(0, alias='viewsCount')
 
@@ -446,33 +446,27 @@ class _OriginalPostValidate(BaseModel, OriginalPost):
 
 
 
-class _BasePosts(ITDBaseModel, list[Post]):
-    _refreshable = False
-    _set_loaded: bool = True
+class _BasePosts(ITDList, list[Post]):
+    _limit = 50
 
-    def load(self, count: int = 50, limit: int = 50, client: Client | None = None) -> '_BasePosts':
-        left = count
+    @staticmethod
+    def _get_cursor(data: dict):
+        return data['pagination']['nextCursor']
 
-        while left > 0: # can be !=, but what if something went wrong
-            data = self._fetch(
-                client or self.client, min(limit, left) # limit versus how left, defaults will be limit, but when left < limit use left to not getting more than need
-            )
-            self.has_more = data['pagination']['hasMore']
-            self.cursor = data['pagination']['nextCursor']
+    @staticmethod
+    def _get_has_more(data: dict):
+        return data['pagination']['hasMore']
 
-            posts = data['posts']
-            if len(posts) < min(limit, left):
-                left = 0
-            else:
-                left -= len(posts)
+    @staticmethod
+    def _get_objects(data: dict) -> list[dict]:
+        return data['posts']
 
-            print(f'fetched {len(posts)} left={left} (was {len(self)})')
-            self.extend([Post._from_dict(post, self._set_loaded, self.client) for post in posts])
-        return self
+    def _extend(self, objects: list, client: Client):
+        self.extend([Post._from_dict(post, client=client) for post in objects])
 
     def __setattr__(self, name: str, value) -> None:
         if name == '_client':
-            for post in self:
+            for post in self.copy():
                 post._client = value
         super().__setattr__(name, value)
 
@@ -485,7 +479,7 @@ class Posts(_BasePosts):
         super().__init__(client)
         self.tab = tab
 
-    def _fetch(self, client: Client, limit: int = 50) -> dict:
+    def _fetch(self, client: Client, limit: int) -> dict:
         return get_posts(client, self.cursor, limit, self.tab).json()['data']
 
     @classmethod
@@ -505,45 +499,12 @@ class Posts(_BasePosts):
         return cls(PostsTab.CLAN, client)
 
 
-class _FinitePosts(_BasePosts):
-    def load(self, count: int | All = 50, limit: int = 50, client: Client | None = None):
-        left = count or limit # if None get [LIMIT] firstly
-
-        while left > 0: # can be !=, but what if something went wrong
-            data = self._fetch(client or self.client, min(limit, left))
-            self.has_more = data['pagination']['hasMore']
-            self.cursor = data['pagination']['nextCursor']
-
-            posts = data['posts']
-
-            if len(posts) < min(limit, left):
-                left = 0
-            elif isinstance(count, All):
-                left = limit
-            else:
-                left -= len(posts)
-
-            print(f'fetched {len(posts)} left={left} (was {len(self)})')
-            self.extend([Post._from_dict(post, self._set_loaded, self.client) for post in posts])
-        return self
-
-    def refresh(self, count: int | All | None = None, client: Client | None = None, limit: int = 50):
-        count = count or len(self)
-        self.clear()
-        self.cursor = None
-        return self.load(count, limit, client)
-
-    def load_all(self, limit: int = 50, client: Client | None = None):
-        return self.load(ALL, limit, client)
-
-    @property
-    def all(self):
-        return self.load_all()
-
-
-class UserPosts(_FinitePosts):
+class UserPosts(_BasePosts):
     _load_with_parent = False
     cursor: datetime | None = None
+
+    # def _get_total(self, data: dict):
+    #     return self.user.posts_count
 
     def __init__(self, user: str | UUID | _UserBase, sorting: UserPostSorting = UserPostSorting.NEW, client: Client | None = None) -> None:
         super().__init__(client)
@@ -554,36 +515,42 @@ class UserPosts(_FinitePosts):
 
         self.sorting = sorting # sort is busy
 
-    def _fetch(self, client: Client, limit: int = 50) -> dict:
+    def _fetch(self, client: Client, limit: int) -> dict:
         if self.sorting == UserPostSorting.NEW:
             return get_user_posts(client, self.user._identifier, self.cursor, limit, self.user.pinned_post_id, self.sorting).json()['data']
         return get_user_posts(client, self.user._identifier, self.cursor, limit, sort=self.sorting).json()['data'] # you dont need pinned post for popular -_-
 
     @classmethod
-    def popular(cls, username_or_id: str | UUID, client: Client | None = None):
-        return cls(username_or_id, UserPostSorting.POPULAR, client)
+    def popular(cls, user: str | UUID | _UserBase, client: Client | None = None):
+        return cls(user, UserPostSorting.POPULAR, client)
 
     @classmethod
-    def new(cls, username_or_id: str | UUID, client: Client | None = None):
-        return cls(username_or_id, UserPostSorting.NEW, client)
+    def new(cls, user: str | UUID | _UserBase, client: Client | None = None):
+        return cls(user, UserPostSorting.NEW, client)
 
 
-class LikedPosts(_FinitePosts): # [] if forbidden
+class LikedPosts(_BasePosts): # [] if forbidden
     _load_with_parent = False
-    cursor: datetime | None = None
+    cursor: datetime | None = None # actually datetime but in runtime its string
 
-    def __init__(self, username_or_id: str | UUID, client: Client | None = None) -> None:
+    def __init__(self, user: str | UUID | _UserBase, client: Client | None = None) -> None:
         super().__init__(client)
-        self.username_or_id = username_or_id
+        if isinstance(user, _UserBase):
+            self.user = user
+        else:
+            self.user = User(user)
 
-    def _fetch(self, client: Client, limit: int = 50) -> dict:
-        return get_liked_posts(client, self.username_or_id, self.cursor, limit).json()['data']
+    def _fetch(self, client: Client, limit: int) -> dict:
+        return get_liked_posts(client, self.user._identifier, self.cursor, limit).json()['data']
+
+    @staticmethod
+    def _get_has_more(data: dict):
+        return data['pagination']['hasMore']
 
 
-class HashtagPosts(_FinitePosts):
+class HashtagPosts(_BasePosts):
     hashtag: Hashtag
     cursor: UUID | None = None
-    _set_loaded = False
 
     def __init__(self, hashtag: Hashtag | str, client: Client | None = None) -> None:
         super().__init__(client)
@@ -592,7 +559,15 @@ class HashtagPosts(_FinitePosts):
             hashtag = Hashtag(hashtag, self.client)
         self.hashtag = hashtag
 
-    def _fetch(self, client: Client, limit: int = 50) -> dict:
-        data = get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']
-        self.total = data['hashtag']['postsCount']
-        return data
+    def _fetch(self, client: Client, limit: int) -> dict:
+        return get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']
+
+    def _extend(self, objects: list, client: Client):
+        self.extend([Post._from_dict(post, False, client=client) for post in objects])
+
+    def _get_total(self, data: dict):
+        return data['hashtag']['postsCount']
+
+    @staticmethod
+    def _get_has_more(data: dict):
+        return data['pagination']['hasMore']

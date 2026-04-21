@@ -12,6 +12,7 @@ from pydantic_core import PydanticUndefinedType
 from itd._default import get_default_client
 from itd.logger import get_logger
 from itd.exceptions import ITDException, ValidationError, RateLimitExceeded
+from itd.enums import All, ALL
 if TYPE_CHECKING:
     from itd.client import Client
 
@@ -152,11 +153,11 @@ def rate_limit(default_delay: float | None = None):
         def wrapper(client: Client, *args, **kwargs) -> Response | None:
             default = default_delay or client.default_delay
 
-            if datetime.now() - timedelta(seconds=default) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
-                delay = default - (datetime.now() - client.last_actions[func.__name__]).seconds
-                l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
-                sleep(delay)
-            client.last_actions[func.__name__] = datetime.now()
+            # if datetime.now() - timedelta(seconds=default) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
+            #     delay = default - (datetime.now() - client.last_actions[func.__name__]).seconds
+            #     l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
+            #     sleep(delay)
+            # client.last_actions[func.__name__] = datetime.now()
 
             while True:
                 try:
@@ -167,3 +168,95 @@ def rate_limit(default_delay: float | None = None):
 
         return wrapper
     return decorator
+
+
+class ITDList(ITDBaseModel, list):
+    _limit: int
+    _get_total = None
+    _refreshable = False
+    idx = 0
+
+    def _fetch(self, client: Client, limit: int) -> dict:
+        return {}
+
+    # edited by calude, thats so fucking crazy pagination
+    def load(self, count: int | All | None = None, limit: int | None = None, client: Client | None = None):
+        limit = limit or self._limit
+        if isinstance(count, int) and count < limit:
+            limit = count
+
+        # None = load one batch (limit), All = load everything, int = load exactly N
+        left = None if isinstance(count, All) else (count or limit)
+
+        while left is None or left > 0:
+            batch = limit if left is None else min(limit, left)
+            data = self._fetch(client or self.client, batch)
+            objects = self._get_objects(data)
+            self.has_more = self._get_has_more(data)
+            self.cursor = self._get_cursor(data)
+
+            if self._get_total:
+                self.total = self._get_total(data)
+                if getattr(self, '_min_total', None) and self._min_total > self.total:
+                    raise IndexError(f'Given index ({self._min_total - 1}) is too high. Total items is {self.total}')
+
+            if left is not None:
+                left -= len(objects)
+
+            l.info('fetched %s %s (was %s)', len(objects), self.__class__.__name__.lower(), len(self))
+            self._extend(objects, client or self.client)
+
+            if not self.has_more or not objects:
+                break
+
+        return self
+
+    def _extend(self, objects: list, client: Client):
+        pass
+
+    @staticmethod
+    def _get_has_more(data: dict) -> bool:
+        return True
+
+    @staticmethod
+    def _get_cursor(data: dict):
+        return 0
+
+    @staticmethod
+    def _get_objects(data: dict) -> list[dict]:
+        return []
+
+    def refresh(self, count: int | All | None = None, client: Client | None = None, limit: int | None = None):
+        count = count or len(self)
+        self.clear()
+        self.cursor = None
+        return self.load(count, limit, client)
+
+    def load_all(self, limit: int | None = None, client: Client | None = None):
+        return self.load(ALL, limit, client)
+
+    def __getitem__(self, index: int):  # pyright: ignore[reportIncompatibleMethodOverride]
+        if index > len(self) - 1:
+            self._min_total = index + 1
+            self.load(index - len(self) + 1)
+        return super().__getitem__(index)
+
+    def __next__(self):
+        if getattr(self, 'total', None) and self.idx >= self.total:
+            raise StopIteration()
+        if self.idx >= len(self):
+            l.debug('not enough items to call next - load')
+            self.load()
+        if self.idx >= len(self):
+            raise StopIteration()
+        item = self[self.idx]
+        self.idx += 1
+        return item
+
+    def __iter__(self):
+        self.idx = 0
+        return self
+
+    @property
+    def all(self):
+        return self.load_all()
