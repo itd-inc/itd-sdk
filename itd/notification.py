@@ -16,9 +16,12 @@ from itd.routes.notifications import (
     mark_as_read, mark_all_as_read, get_notifications, get_unread_notifications_count,
     stream_notifications
 )
+from itd.logger import get_logger
 if TYPE_CHECKING:
     from itd.client import Client
 
+
+l = get_logger('notifications')
 
 class Notification(ITDBaseModel):
     _refreshable = False
@@ -101,21 +104,24 @@ class Notifications(ITDList, list[Notification]):
 
     def stream(self) -> Iterator[Notification]:
         self._stream = stream_notifications(self.client)
-        print('start stream')
+        l.info('start stream')
 
         for event in SSEClient(cast(Iterator[bytes], self._stream)).events():
             data = loads(event.data)
 
             if 'userId' in data and 'timestamp' in data and 'type' not in data:
-                print('got init message')
+                l.debug('got init message')
                 continue # initial message
 
             notification = Notification(data, self, self.client)
             self.insert(0, notification)
 
+            l.info('call %s', notification.type.value)
             exec(f'self.on_{notification.type.value}(notification)')
 
             yield notification
+
+        l.info('stop stream')
 
     def stream_bg(self) -> Thread:
         def _stream():
