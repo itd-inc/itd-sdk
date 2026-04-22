@@ -137,36 +137,10 @@ fetch(c.token, 'метод', 'эндпоинт', {'данные': 'данные'
 > [!NOTE]
 > `xn--d1ah4a.com` - punycode от "итд.com"
 
-## itd-sdk 2.0
-Сейчас ведется разработка 2 версии sdk (ветка "v2"). Пример кода на новой версии:
-```python
-# первым аргументом сразу реверш токен, без "refresh_token="
-c = ITDClient('676767676767')
-c.set_action_delay(10) # установить задержку между действиями  # по умолчанию рекоммендованная задержка
-
-# автопагинация постов
-for post in c.stream_posts(delay=1):
-    post.like() # классы с методами
-
-user = User('03442f74-a407-40ec-9723-f9b5bb2cca2e') # возможность писать UUID как str и пользучать данные через класс
-user.follow()
-
-for post in user.stream_posts(tab='like'): # возможность писать enum как str
-    post.add_comment('ахахаха')
-
-    post.comments # список загруженных сейчас
-    post.comments.load(10) # догрузить 10
-    post.comments.get(15) # догрузить 15 + вернуть все
-    post.comments.load_all() # догрузить все
-    post.comments.refresh() # перезагрузить все
-    post.comments.refresh(10) # удалить все и загрузить заново 10 последних
-
-    post.report('abuse')
-```
-
 ## Прочее
-Лицезия: [MIT](./LICENSE)  
-Идея (и часть эндпоинтов): https://github.com/FriceKa/ITD-SDK-js
- - По сути этот проект является реворком, просто на другом языке
+ - Лицезия: [MIT](./LICENSE)
+ - Автор:
+   - ИТД: [itd_sdk](https://xn--d1ah4a.com/@itd_sdk) или [@fdg](https://xn--d1ah4a.com/@pingbot)
+   - ТГ: [@desicars](https://t.me/desicars)
 
-Автор: [itd_sdk](https://xn--d1ah4a.com/@itd_sdk) (в итд) [@desicars](https://t.me/desicars) (в тг)
+[![Star History Chart](https://api.star-history.com/chart?repos=itd-sdk/itd-sdk&type=date&legend=top-left)](https://www.star-history.com/?repos=itd-sdk%2Fitd-sdk&type=date&legend=top-left)
