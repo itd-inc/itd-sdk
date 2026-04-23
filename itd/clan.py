@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 from itd.base import ITDBaseModel
-from itd.routes.etc import get_top_clans
+from itd.api.etc import get_top_clans
 
 class Clan(BaseModel):
     avatar: str

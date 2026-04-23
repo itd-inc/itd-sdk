@@ -13,13 +13,13 @@ from itd.poll import NewPoll
 from itd.report import Report
 from itd.span import Span
 from itd.utils import to_uuid, ATTACHMENTS
-from itd.routes.etc import get_who_to_follow
-from itd.routes.users import (
+from itd.api.etc import get_who_to_follow
+from itd.api.users import (
     get_user, follow, unfollow, block, unblock, get_followers, get_following, delete_account,
     restore_account, get_blocked, get_privacy, update_privacy, update_profile, get_profile
 )
-from itd.routes.pins import get_pins, remove_pin
-from itd.routes.subscription import get_subscription, pay_subscription, get_payment_methods, toggle_subscription_auto_renewal
+from itd.api.pins import get_pins, remove_pin
+from itd.api.subscription import get_subscription, pay_subscription, get_payment_methods, toggle_subscription_auto_renewal
 if TYPE_CHECKING:
     from itd.client import Client
     from itd.post import Post

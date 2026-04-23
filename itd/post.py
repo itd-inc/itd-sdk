@@ -14,11 +14,11 @@ from itd.report import Report
 from itd.span import Span
 from itd.user import User, _UserBase
 from itd.utils import to_uuid, parse_datetime, format_attachments, ATTACHMENTS
-from itd.routes.posts import (
+from itd.api.posts import (
     get_post, create_post, like_post, unlike_post, repost, view_post, pin_post, unpin_post,
     delete_post, restore_post, edit_post, get_posts, get_user_posts, get_liked_posts
 )
-from itd.routes.hashtags import get_posts_by_hashtag
+from itd.api.hashtags import get_posts_by_hashtag
 
 
 

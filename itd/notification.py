@@ -12,7 +12,7 @@ from itd.base import ITDBaseModel, ITDList
 from itd.client import Client
 from itd.enums import NotificationTargetType, NotificationType, All, ALL
 from itd.user import User
-from itd.routes.notifications import (
+from itd.api.notifications import (
     mark_as_read, mark_all_as_read, get_notifications, get_unread_notifications_count,
     stream_notifications
 )

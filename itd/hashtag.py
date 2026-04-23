@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from itd.routes.hashtags import get_hashtags, get_posts_by_hashtag
+from itd.api.hashtags import get_hashtags, get_posts_by_hashtag
 from itd.base import ITDBaseModel, refresh_wrapper
 if TYPE_CHECKING:
     from itd.client import Client

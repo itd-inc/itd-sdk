@@ -9,7 +9,7 @@ from itd.client import Client
 from itd.enums import CommentSorting, All, ALL, ReportTargetType, ReportReason
 from itd.report import Report
 from itd.utils import parse_datetime, to_nullable_uuid, format_attachments, ATTACHMENTS
-from itd.routes.comments import get_comments, add_comment, add_reply_comment, get_replies, like_comment, unlike_comment, delete_comment
+from itd.api.comments import get_comments, add_comment, add_reply_comment, get_replies, like_comment, unlike_comment, delete_comment
 from itd.user import User
 from itd.file import CommentAttach
 

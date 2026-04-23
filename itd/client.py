@@ -12,8 +12,8 @@ from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
 from itd.enums import RateLimitMode, All, DebugResponseMode
 from itd.user import Me, User
-from itd.routes.auth import refresh_token, change_password, logout
-from itd.routes.search import search
+from itd.api.auth import refresh_token, change_password, logout
+from itd.api.search import search
 from itd.logger import get_logger
 
 

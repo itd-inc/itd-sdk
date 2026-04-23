@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel
 
 from itd.base import ITDBaseModel
-from itd.routes.pins import set_pin, remove_pin
+from itd.api.pins import set_pin, remove_pin
 
 if TYPE_CHECKING:
     from itd.client import Client

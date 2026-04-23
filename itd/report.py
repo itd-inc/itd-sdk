@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from itd.base import ITDBaseModel, refresh_wrapper
 from itd.enums import ReportReason, ReportTargetType
-from itd.routes.reports import report
+from itd.api.reports import report
 if TYPE_CHECKING:
     from itd.client import Client
 

@@ -9,7 +9,7 @@ from requests import get
 
 from itd.base import ITDBaseModel, refresh_wrapper
 from itd.enums import AttachType
-from itd.routes.files import upload_file, delete_file
+from itd.api.files import upload_file, delete_file
 if TYPE_CHECKING:
     from itd.client import Client
 
