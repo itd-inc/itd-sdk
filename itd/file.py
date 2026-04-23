@@ -92,4 +92,4 @@ class CommentAttach(PostAttach):
 
     def download(self, name: str | None = None) -> None:
         with open(name or self.filename, 'wb') as fl:
-            fl.write(get(self.url).content)
+            fl.write(get(self.url, timeout=60).content)
