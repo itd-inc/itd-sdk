@@ -54,11 +54,6 @@ class _BasePost(ITDBaseModel):
             return self.id == other.id
         return False
 
-    def __ne__(self, other) -> bool:
-        if isinstance(other, _BasePost):
-            return self.id != other.id
-        return True
-
     def __contains__(self, item) -> bool:
         return item in self.content
 
