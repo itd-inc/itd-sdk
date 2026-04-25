@@ -52,41 +52,6 @@ def _solve_ddos_guard(session: Session, response: Response, domain: str = 'xn--d
 
     return True
 
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0'
-
-
-def _get_jhash(b: int) -> int:
-    """Вычислить DDoS-Guard challenge hash (порт JS get_jhash)."""
-    x = 123456789
-    k = 0
-    for i in range(1677696):
-        x = ((x + b) ^ (x + (x % 3) + (x % 17) + b) ^ i) % 16776960
-        if x % 117 == 0:
-            k = (k + 1) % 1111
-    return k
-
-
-def _solve_ddos_guard(session: Session, response: Response) -> bool:
-    """Решить DDoS-Guard JS challenge. Возвращает True если решён (нужен повторный запрос)."""
-    if '<html>' not in response.text[:500] or 'get_jhash' not in response.text:
-        return False
-
-    js_p = session.cookies.get('__js_p_')
-    if not js_p:
-        return False
-
-    params = js_p.split(',')
-    code = int(params[0])
-
-    print('solving DDoS-Guard challenge (code=%s)', code)
-    jhash = _get_jhash(code)
-    print('solved: jhash=%s', jhash)
-
-    session.cookies.set('__jhash_', str(jhash), domain='xn--d1ah4a.com', path='/')
-    session.cookies.set('__jua_', quote(UA, safe=''), domain='xn--d1ah4a.com', path='/')
-
-    return True
-
 
 def decode_jwt_payload(jwt_token: str) -> dict[str, Any]:
     """Декодирует payload jwt.
