@@ -43,7 +43,6 @@ class Comment(ITDBaseModel):
         self._post_id = post_id
         if comment_id:
             self._comment_id = comment_id
-        # print(self.id, self.reply_to)
         self.replies._comment = self
 
     def __str__(self) -> str:
