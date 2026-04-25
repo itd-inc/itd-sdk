@@ -1,10 +1,14 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = 'itd'
+module-root = ''
 
 [project]
 name = "itd-sdk"
-version = "1.7.0"
+version = "2.0.0"
 description = "ITD client for python"
 readme = "README.md"
 authors = [
@@ -14,14 +18,20 @@ license = "MIT"
 dependencies = [
   "requests~=2.32.5",
   "pydantic~=2.12.5",
-  "sseclient-py~=1.9.0"
+  "sseclient-py~=1.9.0",
 ]
 requires-python = ">=3.9"
 
+[project.optional-dependencies]
+filetype = [
+    "filetype>=1.2.0",
+]
+logs = [
+    "rich>=15.0.0",
+]
+
 [dependency-groups]
 dev = [
-    "griffe-typingdoc>=0.3.0",
-    "mkdocs<2.0.0",
-    "mkdocs-material>=9.7.4",
-    "mkdocstrings[python]>=0.30.1",
+    "pytest>=8.4.2",
+    "python-dotenv>=1.2.1",
 ]

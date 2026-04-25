@@ -1,12 +1,50 @@
-# Писал ии, у меня у самого не получилось. Мой код можете найти в комите cd27baa8d65b36cfb1d030bc5a578ac6efb45445 в комментарии
+from uuid import UUID
 from html.parser import HTMLParser
+from datetime import datetime
 import re
 
-from itd.models.post import Span
+from itd.span import Span
+from itd.file import File
 from itd.enums import SpanType
 
 
-class _HTMLSpanParser(HTMLParser):
+def to_uuid(value: str | UUID) -> UUID:
+    if isinstance(value, str):
+        return UUID(value)
+    return value
+
+def to_nullable_uuid(value: str | UUID | None) -> UUID | None:
+    if value is None:
+        return None
+
+    return to_uuid(value)
+
+
+def parse_datetime(value: str) -> datetime:
+    v = value.replace('Z', '+00:00')
+    try:
+        return datetime.strptime(v + '00', '%Y-%m-%d %H:%M:%S.%f%z')
+    except ValueError:
+        return datetime.fromisoformat(v)
+
+
+ATTACHMENTS = File | UUID | str | list[File | UUID | str]
+def format_attachments(attachments: ATTACHMENTS = []) -> list[UUID]:
+    if isinstance(attachments, list):
+        formatted = []
+        for attachment in attachments:
+            if isinstance(attachment, File):
+                formatted.append(attachment.id)
+            else:
+                formatted.append(to_uuid(attachment))
+        return formatted
+    else:
+        if isinstance(attachments, File):
+            return [attachments.id]
+        return [to_uuid(attachments)]
+
+
+class HTMLSpanParser(HTMLParser):
     """Парсер HTML для извлечения текста и spans с форматированием."""
 
     TAG_MAP = {
@@ -16,7 +54,7 @@ class _HTMLSpanParser(HTMLParser):
         'u': SpanType.UNDERLINE,
         'code': SpanType.MONOSPACE,
         'spoiler': SpanType.SPOILER,
-        'q': SpanType.QUOTE,
+        'q': SpanType.QUOTE
     }
 
     def __init__(self):
@@ -33,9 +71,8 @@ class _HTMLSpanParser(HTMLParser):
                 if attr_name == 'href' and attr_value:
                     href = attr_value
                     break
-            if href:
-                self.stack.append(('a', SpanType.LINK, self.text_offset, href))
-                return
+            self.stack.append(('a', SpanType.LINK, self.text_offset, href))
+
         elif tag in self.TAG_MAP:
             self.stack.append((tag, self.TAG_MAP[tag], self.text_offset, None))
 
@@ -44,9 +81,13 @@ class _HTMLSpanParser(HTMLParser):
         for i in range(len(self.stack) - 1, -1, -1):
             if self.stack[i][0] == tag:
                 _, span_type, text_start, url = self.stack.pop(i)
+                offset = text_start
+                length = self.text_offset - text_start
+                if span_type == SpanType.LINK and url is None:
+                    url = self.get_text()[offset: offset + length]
                 self.spans.append(Span(
-                    length=self.text_offset - text_start,
-                    offset=text_start,
+                    length=length,
+                    offset=offset,
                     type=span_type,
                     url=url
                 ))
@@ -65,10 +106,12 @@ class _HTMLSpanParser(HTMLParser):
 
 
 def parse_html(text: str) -> tuple[str, list[Span]]:
-    r"""
+    """
     Парсит HTML-текст, извлекает чистый текст и spans с форматированием.
 
-    Поддерживаемые теги: `<b>`, `<i>`, `<s>`, `<u>`, `<code>`, `<spoiler>`, `<q>`, `<a href="URL">` (ссылки)
+    Поддерживаемые теги:
+    - <b>, <i>, <s>, <u>, <code>, <spoiler>, <q>
+    - <a href="url">text</a> или <а>url</а> (ссылки)
 
     Args:
         text: HTML-строка для парсинга
@@ -77,12 +120,12 @@ def parse_html(text: str) -> tuple[str, list[Span]]:
         str: чистая строка
         list[Span]: список спанов
     """
-    parser = _HTMLSpanParser()
+    parser = HTMLSpanParser()
     parser.feed(text)
     return parser.get_text(), parser.get_spans()
 
 
-_DELIMITERS = {
+DELIMITERS = {
     '**': SpanType.BOLD,
     '*': SpanType.ITALIC,
     '~~': SpanType.STRIKE,
@@ -94,8 +137,8 @@ _DELIMITERS = {
 
 
 def _split_with_delimiters(s: str):
-    escaped_delimiters = [re.escape(d) for d in sorted(_DELIMITERS.keys(), key=len, reverse=True)]
-    link_pattern = r'\[[^\]]+\]\([^\)]+\)'
+    escaped_delimiters = [re.escape(d) for d in sorted(DELIMITERS.keys(), key=len, reverse=True)]
+    link_pattern = r'\[[^\]]+\]\([^\)]*\)'
     pattern = '(' + '|'.join([r'\\.', link_pattern] + escaped_delimiters) + ')'
     return list(filter(len, re.split(pattern, s)))
 
@@ -104,15 +147,20 @@ def parse_md(s: str) -> tuple[str, list[Span]]:
     r"""
     Парсит markdown, извлекает чистый текст и spans с форматированием.
 
-    `**жирный**`, `*курсив*`, `~~зачёркнутый~~`, `__подчёркнутый__`, \`моноширный\`, `||спойлер||`, `>цитата>`
+    \**жирный**, \*курсив*, \~~зачёркнутый~~, __подчёркнутый__, \`моноширный`, \||спойлер||, \>цитата>
 
-    Теги могут пересекаться, например: `__111*1234__32342*`
+    Теги могут пересекаться, например: __111\*1234__32342*
 
-    Теги могут быть вложенными: `__1231*1323*__`
+    Теги могут быть вложенными: __1231\*1323*__
 
-    `[текст ссылки](url)`
+    \[текст ссылки](url)
 
     Внутри ссылки остальные теги не парсятся
+
+    Если url пустой, на его место будет поставлен текст ссылки, то есть:
+
+    \[текст ссылки]() = \[текст ссылки](текст ссылки)
+
 
     используйте \ для экранирования символов
 
@@ -135,18 +183,20 @@ def parse_md(s: str) -> tuple[str, list[Span]]:
             spans.append(Span(
                 offset=start,
                 length=len(result) - start,
-                type=_DELIMITERS[token]
+                type=DELIMITERS[token]
             ))
-        elif token in _DELIMITERS:
+        elif token in DELIMITERS:
             starts[token] = len(result)
-        elif match := re.match(r'\[([^\]]+)\]\(([^\)]+)\)', token):
+        elif match := re.match(r'\[([^\]]+)\]\(([^\)]*)\)', token):
+            text = match.group(1)
+            url = match.group(2)
             spans.append(Span(
                 offset=len(result),
-                length=len(match.group(1)),
+                length=len(text),
                 type=SpanType.LINK,
-                url=match.group(2),
+                url=url if len(url) != 0 else text,
             ))
-            result += match.group(1)
+            result += text
         else:
             result += token
 
