@@ -217,8 +217,8 @@ class User(_UserBase):
     _validator = lambda _: _UserValidate
     _fields_from_data: set[str] = set()
 
-    _followers: list = []
-    _following: list = []
+    _followers: list[User] = []
+    _following: list[User] = []
 
     is_following: bool = Field(False, alias='isFollowing')
     is_followed_by: bool = Field(False, alias='isFollowedBy')
@@ -355,13 +355,13 @@ class User(_UserBase):
         return Post.new(content, spans, self, attachments, poll, client or self.client)
 
     @property
-    def following(self) -> list:
+    def following(self) -> list[User]:
         if not self._following:
             self._following = [User._from_dict(user, False, self.client) for user in get_following(self.client, self._identifier).json()['data']['users']]
         return self._following
 
     @property
-    def followers(self) -> list:
+    def followers(self) -> list[User]:
         if not self._followers:
             self._followers = [User._from_dict(user, False, self.client) for user in get_followers(self.client, self._identifier).json()['data']['users']]
         return self._followers
