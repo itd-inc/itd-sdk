@@ -570,4 +570,5 @@ class WhoToFollow(ITDBaseModel, list[User]):
         self.refresh()
 
     def refresh(self):
+        self.clear()
         self.extend([User._from_dict(user, False, self.client) for user in get_who_to_follow(self.client).json()['users']])
