@@ -177,9 +177,6 @@ class _UserBase(ITDBaseModel):
     following_count: int | None = Field(None, alias='followingCount')
     posts_count: int = Field(0, alias='postsCount')
 
-    is_blocked: bool = Field(False, alias='isBlockedByMe')
-    is_blocking: bool = Field(False, alias='isBlockedByThem')
-
     pinned_post_id: UUID | None = Field(None, alias='pinnedPostId') # none if no or blocked
 
     created_at: datetime | None = Field(None, alias='createdAt') # none if blocked
@@ -223,6 +220,8 @@ class User(_UserBase):
     is_following: bool = Field(False, alias='isFollowing')
     is_followed_by: bool = Field(False, alias='isFollowedBy')
 
+    is_blocked_by: bool = Field(False, alias='isBlockedByMe')
+    is_blocking: bool = Field(False, alias='isBlockedByThem')
     blocked_at: datetime | None = Field(None, alias='blockedAt')
 
     wall_access: AccessType | None = Field(None, alias='wallAccess') # none if blocked
