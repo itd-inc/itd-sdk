@@ -64,14 +64,14 @@ class ITDBaseModel:
 
 
     def __getattribute__(self, name: str) -> Any:
-        if _getattr(self, '_refreshable'):
+        if _getattr(self, '_refreshable') and not name.startswith('_') or name in ('client', 'model_fields_set'):
             try:
                 attr = _getattr(self, name)
             except AttributeError:
                 attr = None
 
-            if name.startswith('_') or callable(attr) or name in ('client', 'model_fields_set'):
-                return attr
+            if callable(attr):
+                return object.__getattribute__(self, name)
 
             fields_from_data = _getattr(self, '_fields_from_data', ())
             triggers = {
