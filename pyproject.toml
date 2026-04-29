@@ -14,6 +14,15 @@ readme = "README.md"
 authors = [
   { name = "firedotguy", email = "nta16022013@gmail.com" }
 ]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Natural Language :: Russian',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Framework :: Pydantic :: 2',
+    'License :: OSI Approved :: MIT License'
+]
+keywords = ['itd', 'itdsocial']
 license = "MIT"
 dependencies = [
   "requests~=2.32.5",
@@ -21,6 +30,10 @@ dependencies = [
   "sseclient-py~=1.9.0",
 ]
 requires-python = ">=3.9"
+
+[project.urls]
+Homepage = 'https://itdsdk.qzz.io'
+Documentation = 'https://itdsdk.qzz.io/docs'
 
 [project.optional-dependencies]
 filetype = [
