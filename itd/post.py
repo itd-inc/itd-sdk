@@ -311,6 +311,7 @@ class Post(ITDBaseModel):
     def __getattribute__(self, name: str):
         value = super().__getattribute__(name)
         if name == 'comments' and getattr(value, '_post_id', None) is None:
+            value = Comments()
             value._post_id = self.id
         return value
 

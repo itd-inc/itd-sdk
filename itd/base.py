@@ -78,10 +78,14 @@ class ITDBaseModel:
             triggers = {
                 'default': name not in fields_from_data and _field_has_default(type(self), name),
                 'none': attr is None and not _field_has_default(type(self), name),
-                'field-info': isinstance(attr, FieldInfo),
-                'loads-with-parent': isinstance(attr, ITDBaseModel) and attr._load_with_parent
+                'field-info': isinstance(attr, FieldInfo)
             }
-            if not _getattr(self, '_loaded') and any(triggers.values()) and self.client.config.auto_load:
+            if (
+                not _getattr(self, '_loaded') and
+                any(triggers.values()) and
+                _getattr(self, 'client').config.auto_load and
+                not (name == 'comments' and not _getattr(self, 'client').config.load_comments_from_post) # да я хотел сделать нормально, поставить проперти на comments и тд, но это херня кака ято крч просто нахардкожу
+            ):
                 l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
                     next((k for k, v in triggers.items() if v))
                 )

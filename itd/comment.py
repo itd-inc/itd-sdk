@@ -164,6 +164,10 @@ class Comments(ITDList, list[Comment]):
     total: int
     _sorting: CommentSorting = CommentSorting.POPULAR
 
+    @property
+    def _load_with_parent(self): # pyright: ignore[reportIncompatibleVariableOverride]
+        return self.client.config.load_comments_from_post
+
     def __init__(self, data: list[dict] = []):
         super().__init__()
         self.extend([Comment(comment) for comment in data])

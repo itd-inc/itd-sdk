@@ -42,6 +42,7 @@ class Config:
     url_api: str | None = None
     user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0' # my ua btw
     solve_challenge: bool = True
+    load_comments_from_post: bool = False
     # parse_mode = None
 
     def __post_init__(self):
