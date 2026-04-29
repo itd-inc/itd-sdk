@@ -354,7 +354,7 @@ class User(_UserBase):
         client: Client | None = None
     ) -> Post:
         from itd.post import Post # stupid circular import
-        return Post.new(content, spans, self, attachments, poll, client or self.client)
+        return Post.new(content, spans, attachments, poll, self, client or self.client)
 
     @property
     def following(self) -> list:
