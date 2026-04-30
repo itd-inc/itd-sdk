@@ -411,6 +411,7 @@ class Me(_UserBase):
         for name in _UserValidate.model_fields:
             if hasattr(self, name):
                 setattr(instance, name, getattr(self, name))
+        instance._identifier = self.id
         instance._loaded = False
         return instance
 
