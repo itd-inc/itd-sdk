@@ -210,5 +210,10 @@ class ModerationFailed(ITDException):
     code = 'CONTENT_MODERATION_ERROR'
     text = 'Unable to moderate image'
 
+class BannedWordError(ITDException):
+    code = 'BANNED_WORD'
+    def __init__(self, obj: str) -> None:
+        self.text = f'{obj} contains prohibited content'
+
 
 DEFAULT_ERRORS = (RateLimitExceeded(), InvalidAccessToken(), Unauthorized(), AccessTokenExpired(), AccountBanned())

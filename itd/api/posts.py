@@ -7,14 +7,14 @@ from itd.enums import PostsTab, UserPostSorting
 from itd.poll import NewPoll
 from itd.exceptions import (
     NotFound, Forbidden, RequiresVerification, ValidationError, AlreadyReposted, CantRepostYourPost,
-    NotPinned, EditExpired
+    NotPinned, EditExpired, BannedWordError
 )
 from itd.base import rate_limit, catch_errors
 if TYPE_CHECKING:
     from itd.client import Client
 
 @rate_limit(1, 10, 30)
-@catch_errors(NotFound('Wall recipient'), Forbidden('post - some files not owned'), RequiresVerification('Video uploading'), ValidationError())
+@catch_errors(NotFound('Wall recipient'), Forbidden('post - some files not owned'), RequiresVerification('Video uploading'), BannedWordError('Post'), ValidationError())
 def create_post(
     client: Client,
     content: str | None = None,

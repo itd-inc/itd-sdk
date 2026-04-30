@@ -3,18 +3,18 @@ from uuid import UUID
 from typing import TYPE_CHECKING
 
 from itd.base import catch_errors, rate_limit
-from itd.exceptions import ValidationError, NotFound, AlreadyDeleted
+from itd.exceptions import ValidationError, NotFound, AlreadyDeleted, BannedWordError
 
 if TYPE_CHECKING:
     from itd.client import Client
 
 @rate_limit(5, 20, 80)
-@catch_errors(ValidationError(), NotFound('Post'))
+@catch_errors(ValidationError(), NotFound('Post'), BannedWordError('Comment'))
 def add_comment(client: Client, post_id: UUID, content: str | None = None, attachment_ids: list[UUID] = []):
     return client.request('post', f'posts/{post_id}/comments', {'content': content or '', "attachmentIds": list(map(str, attachment_ids))})
 
 @rate_limit(1, 10, 30)
-@catch_errors(ValidationError(), NotFound('Comment'), NotFound('User', _reply_comment_user_not_found=True))
+@catch_errors(ValidationError(), NotFound('Comment'), NotFound('User', _reply_comment_user_not_found=True), BannedWordError('Reply'))
 def add_reply_comment(client: Client, comment_id: UUID, author_id: UUID, content: str | None = None, attachment_ids: list[UUID] = []):
     return client.request('post', f'comments/{comment_id}/replies', {'content': content or '', 'replyToUserId': str(author_id), "attachmentIds": list(map(str, attachment_ids))})
 
