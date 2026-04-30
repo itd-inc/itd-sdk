@@ -436,9 +436,12 @@ class UserPosts(_BasePosts):
         self.sorting = sorting # sort is busy
 
     def _fetch(self, client: Client, limit: int) -> dict:
+        identifier = self.user._identifier
+        if identifier == 'me': # idk why but me is not allowed
+            identifier = self.user.id
         if self.sorting == UserPostSorting.NEW and client.config.userposts_add_pinned_post:
-            return get_user_posts(client, self.user._identifier, self.cursor, limit, self.user.pinned_post_id, self.sorting).json()['data']
-        return get_user_posts(client, self.user._identifier, self.cursor, limit, sort=self.sorting).json()['data'] # you dont need pinned post for popular -_-
+            return get_user_posts(client, identifier, self.cursor, limit, self.user.pinned_post_id, self.sorting).json()['data']
+        return get_user_posts(client, identifier, self.cursor, limit, sort=self.sorting).json()['data'] # you dont need pinned post for popular -_-
 
     @classmethod
     def popular(cls, user: str | UUID | _UserBase, client: Client | None = None):
