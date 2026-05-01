@@ -17,7 +17,7 @@ def pay_subscription(client: Client):
     return client.request('post', 'v1/subscription/pay')
 
 @rate_limit()
-@catch_errors(NotFoundError('Subsciption', _subscription_not_found=True))
+@catch_errors(NotFoundError('Subsciption', json_check=lambda json: json.get('error') == 'Активная подписка не найдена'))
 def toggle_subscription_auto_renewal(client: Client, enabled: bool):
     return client.request('post', 'v1/subscription/auto-renewal', {'enabled': enabled})
 

@@ -251,24 +251,17 @@ def catch_errors(*exceptions: ITDException):
 
             for exception in DEFAULT_ERRORS + exceptions:
                 if (
-                    getattr(exception, '_reply_comment_user_not_found', False) and res.status_code == 500 and 'Failed query' in res.text or
-                    getattr(exception, '_delete_comment_not_found', False) and res.status_code == 500 and res.text == 'Комментарий не найден' or
-                    getattr(exception, '_liked_posts_user_not_found', False) and res.status_code == 404 and res.text == 'NOT_FOUND' or
-                    isinstance(exception, InvalidAccessTokenError) and res.text == 'UNAUTHORIZED' or
-                    getattr(exception, '_report_target_not_found', False) and res.status_code == 400 and 'не найден' in json.get('error', {}).get('message', '') or
-                    getattr(exception, '_subscription_not_found', False) and json.get('error') == 'Активная подписка не найдена' or
-                    getattr(exception, '_hashtag_not_found', False) and json.get('data', {}).get('hashtag', '') is None or
-                    getattr(exception, '_notification_read_error', False) and json.get('success') is False or
-                    isinstance(exception, ValidationError) and res.status_code == 422 and 'found' in json or
-                    isinstance(exception, RateLimitError) and json.get('error') == 'Too Many Requests' or
+                    (exception.res_check and exception.res_check(res)) or
+                    (exception.text_check and exception.text_check(res.text)) or
+                    (exception.json_check and exception.json_check(json)) or
 
                     exception.status_code is not None and res.status_code == exception.status_code or
                     exception.code is not None and json.get('error', {}).get('code') == exception.code or
                     exception.message is not None and json.get('error', {}).get('message') == exception.message
                 ):
-                    if isinstance(exception, ValidationError) and json.get('error', {}).get('code') == exception.code:
+                    if isinstance(exception, ValidationError):
                         exception.text = json['error']['message']
-                    if isinstance(exception, RateLimitError) and isinstance(json.get('error'), dict) and json['error'].get('code') == exception.code:
+                    if isinstance(exception, RateLimitError):
                         exception.retry_after = json['error'].get('retryAfter', 0)
 
                     raise exception

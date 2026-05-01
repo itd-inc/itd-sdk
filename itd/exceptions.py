@@ -1,8 +1,14 @@
+from typing import Callable
+
+from requests import Response
+
 class ITDException(Exception):
     code: str | None = None # ['error']['code']
     message: str | None = None # ['error']['message']
     status_code: int | None = None # response status code
-
+    res_check: Callable[[Response], bool] | None = None
+    text_check: Callable[[str], bool] | None = None
+    json_check: Callable[[dict], bool] | None = None
     text: str # python error message
 
     def __str__(self) -> str:
@@ -14,11 +20,16 @@ class ValidateError(ITDException): pass
 class ValidationError(ValidateError):
     text = 'Failed validation'
     code = 'VALIDATION_ERROR'
+    status_code = 422
+    json_check = lambda json: 'found' in json
 
 class RateLimitError(ITDException):
     code = 'RATE_LIMIT_EXCEEDED'
+    json_check = lambda json: json.get('error') == 'Too Many Requests'
+
     def __init__(self, retry_after: int = 0):
         self.retry_after = retry_after
+
     def __str__(self) -> str:
         return f'Rate limit exceeded - too much requests. Retry after {self.retry_after} seconds'
 
@@ -29,24 +40,16 @@ class NotFoundError(ITDException):
         self,
         obj: str,
         message: str | None = None,
-        _reply_comment_user_not_found: bool = False,
-        _subscription_not_found: bool = False,
-        _hashtag_not_found: bool = False,
-        _liked_posts_user_not_found: bool = False,
-        _report_target_not_found: bool = False,
-        _notification_read_error: bool = False
+        json_check: Callable[[dict], bool] | None = None,
+        res_check: Callable[[Response], bool] | None = None
     ):
         self.text = f'{obj} not found'
+        self.json_check = json_check
+        self.res_check = res_check
         if message:
             self.message = message
         if obj == 'Profile':
             self.code = 'PROFILE_NOT_FOUND'
-        self._reply_comment_user_not_found = _reply_comment_user_not_found
-        self._subscription_not_found = _subscription_not_found
-        self._hashtag_not_found = _hashtag_not_found
-        self._liked_posts_user_not_found = _liked_posts_user_not_found
-        self._report_target_not_found = _report_target_not_found
-        self._notification_read_error = _notification_read_error
 
 class TooLargeError(ITDException):
     def __init__(self, obj: str, code: int = 414):
@@ -77,6 +80,7 @@ class UnauthorizedError(AuthError):
 
 class InvalidAccessTokenError(AuthError):
     text = 'Invalid access token'
+    text_check = lambda text: text == 'UNAUTHORIZED'
 
 class SessionRevokedError(AuthError):
     code = 'SESSION_REVOKED'
@@ -139,8 +143,7 @@ class CantFollowYourselfError(YourselfError):
     message = text = 'Cannot follow yourself'
 
 class CantRepostYourselfError(YourselfError):
-    message = 'Cannot repost your own post'
-    text = 'Cannot repost your own post'
+    message = text = 'Cannot repost your own post'
 
 class CantBlockYourselfError(YourselfError):
     message = text = 'Cannot block yourself'
@@ -162,9 +165,10 @@ class AlreadyFollowingError(AlreadyError):
 
 class AlreadyDeletedError(AlreadyError):
     code = 'ALREADY_DELETED'
-    def __init__(self, obj: str, _delete_comment_not_found: bool = False):
+    def __init__(self, obj: str):
         self.text = f'{obj} already deleted'
-        self._delete_comment_not_found = _delete_comment_not_found
+        if obj == 'Comment':
+            self.res_check = lambda res: res.status_code == 500 and res.text == 'Комментарий не найден'
 
 class AlreadyBlockedError(AlreadyError):
     code = 'CONFLICT'

@@ -92,7 +92,7 @@ def get_liked_posts(client: Client, username_or_id: str | UUID, cursor: datetime
     return client.request('get', f'posts/user/{username_or_id}/liked', {'limit': limit, 'cursor': cursor})
 
 @rate_limit()
-@catch_errors(ValidationError(), NotFoundError('User', _liked_posts_user_not_found=True))
+@catch_errors(ValidationError(), NotFoundError('User', res_check=lambda res: res.status_code == 404 and res.text == 'NOT_FOUND'))
 def get_user_posts(client: Client, username_or_id: str | UUID, cursor: datetime | None = None, limit: int = 20, pinned_post_id: UUID | None = None, sort: UserPostSorting = UserPostSorting.NEW):
     return client.request('get', f'posts/user/{username_or_id}', {'limit': limit, 'cursor': cursor, 'pinnedPostId': pinned_post_id, 'sort': sort.value})
 

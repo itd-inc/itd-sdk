@@ -14,7 +14,7 @@ def add_comment(client: Client, post_id: UUID, content: str | None = None, attac
     return client.request('post', f'posts/{post_id}/comments', {'content': content or '', "attachmentIds": list(map(str, attachment_ids))})
 
 @rate_limit(1, 10, 30)
-@catch_errors(ValidationError(), NotFoundError('Comment'), NotFoundError('User', _reply_comment_user_not_found=True), BannedWordError('Reply'))
+@catch_errors(ValidationError(), NotFoundError('Comment'), NotFoundError('User', res_check=lambda res: res.status_code == 500 and 'Failed query' in res.text), BannedWordError('Reply'))
 def add_reply_comment(client: Client, comment_id: UUID, author_id: UUID, content: str | None = None, attachment_ids: list[UUID] = []):
     return client.request('post', f'comments/{comment_id}/replies', {'content': content or '', 'replyToUserId': str(author_id), "attachmentIds": list(map(str, attachment_ids))})
 
@@ -34,7 +34,7 @@ def unlike_comment(client: Client, comment_id: UUID):
     return client.request('delete', f'comments/{comment_id}/like')
 
 @rate_limit()
-@catch_errors(NotFoundError('Comment'), AlreadyDeletedError('Comment', _delete_comment_not_found=True))
+@catch_errors(NotFoundError('Comment'), AlreadyDeletedError('Comment'))
 def delete_comment(client: Client, comment_id: UUID):
     return client.request('delete', f'comments/{comment_id}')
 
