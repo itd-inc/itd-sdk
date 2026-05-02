@@ -8,7 +8,7 @@ from requests.utils import default_user_agent
 from requests.adapters import HTTPAdapter
 
 from itd._default import _default_client, set_default_client
-from itd.exceptions import UnauthorizedError, InsufficientAuthLevelError
+from itd.exceptions import UnauthorizedError, InsufficientAuthLevelError, AccessTokenExpiredError
 from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
 from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent
@@ -118,7 +118,7 @@ class Client:
 
         try:
             return _fetch()
-        except UnauthorizedError:
+        except (UnauthorizedError, AccessTokenExpiredError):
             self.refresh_auth()
             return _fetch()
 
