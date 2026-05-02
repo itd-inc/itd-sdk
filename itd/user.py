@@ -176,10 +176,6 @@ class _UserBase(ITDBaseModel):
     banner: str | None = None
     bio: str | None = None
 
-    followers_count: int | None = Field(None, alias='followersCount')
-    following_count: int | None = Field(None, alias='followingCount')
-    posts_count: int = Field(0, alias='postsCount')
-
     created_at: datetime | None = Field(None, alias='createdAt') # none if blocked
 
     def __init__(self, username_or_id: str | UUID, client: Client | None = None) -> None:
@@ -221,9 +217,13 @@ class User(_UserBase):
     is_following: bool = Field(False, alias='isFollowing')
     is_followed_by: bool = Field(False, alias='isFollowedBy')
 
-    is_blocked_by: bool = Field(False, alias='isBlockedByMe')
-    is_blocking: bool = Field(False, alias='isBlockedByThem')
+    is_blocked_by: bool = Field(False, alias='isBlockedByThem') # not 100% true, server returns value only if isBlockedByThem is True and isBlockedByMe is False
+    is_blocking: bool = Field(False, alias='isBlockedByMe')
     blocked_at: datetime | None = Field(None, alias='blockedAt')
+
+    followers_count: int | None = Field(None, alias='followersCount')
+    following_count: int | None = Field(None, alias='followingCount')
+    posts_count: int | None = Field(None, alias='postsCount')
 
     wall_access: AccessType | None = Field(None, alias='wallAccess') # none if blocked
     likes_visibility: AccessType | None = Field(None, alias='likesVisibility') # none if blocked
@@ -382,16 +382,15 @@ class _UserValidate(BaseModel, User):
 class Me(_UserBase):
     _validator = lambda _: _MeValidate
 
-    _followers: 'Followers'
-    _following: 'Following'
-    _blocked: 'Blocked'
-    _pins: list[Pin]
-
     wall_access: AccessType = Field(alias='wallAccess')
     likes_visibility: AccessType = Field(alias='likesVisibility')
     is_private: bool = Field(False, alias='isPrivate')
     is_phone_verified: bool = Field(alias='isPhoneVerified')
     subscription: Subscription
+
+    followers_count: int = Field(alias='followersCount')
+    following_count: int = Field(alias='followingCount')
+    posts_count: int = Field(alias='postsCount')
 
     def __init__(self, client: Client | None = None) -> None:
         super().__init__('me', client)
