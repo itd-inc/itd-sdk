@@ -18,6 +18,7 @@ class PollOption(ITDBaseModel):
     id: UUID
     text: str
     votes: int = Field(0, alias='votesCount')
+    position: int
     _post_id: UUID
 
     def __init__(self, data: dict, client: Client | None = None):

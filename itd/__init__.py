@@ -8,4 +8,5 @@ from itd.file import File
 from itd.hashtag import Hashtag
 from itd.notification import Notifications
 from itd.post import Post, Posts, UserPosts, HashtagPosts, LikedPosts
+from itd.poll import NewPoll
 from itd.user import User, Me

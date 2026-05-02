@@ -12,7 +12,7 @@ from pydantic_core import PydanticUndefinedType
 
 from itd._default import get_default_client
 from itd.logger import get_logger
-from itd.exceptions import ITDException, ValidationError, RateLimitError, DEFAULT_ERRORS
+from itd.exceptions import ITDException, ValidationError, RateLimitError, UnauthorizedError, AccessTokenExpiredError, DEFAULT_ERRORS
 from itd.enums import All, ALL, DebugResponseMode, RateLimitMode, BATCH, Batch
 if TYPE_CHECKING:
     from itd.client import Client
@@ -235,10 +235,11 @@ def _filter_bytes(args: tuple):
             filtered.append(arg)
     return filtered
 
+# user calls `Me` -> model calls `get_me` -> `catch_errors` wrapper: (`get_me` -> `client.request` -> `fetch` -> responses 401 -> `refresh_auth` from `catch_errors` -> `client.resuest` -> `fetch` -> token refreshed -> `catch_errors` backs to main query -> `get_me` -> `client.request` -> `fetch` -> user fetched) -> model recieves data -> pydantic fills model # hell what the monster i did
 def catch_errors(*exceptions: ITDException):
     def decorator(func):
         @wraps(func)
-        def wrapper(client: Client, *args, **kwargs) -> Response | None:
+        def wrapper(client: Client, *args, _retrying: bool = False, **kwargs) -> Response | None:
             l.info('exec %s %s %s', func.__name__, _filter_bytes(args), kwargs)
             res: Response = func(client, *args, **kwargs)
 
@@ -271,6 +272,9 @@ def catch_errors(*exceptions: ITDException):
                         exception.text = json.get('error', {}).get('message', 'Failed validation')
                     if isinstance(exception, RateLimitError) and isinstance(json.get('error'), dict):
                         exception.retry_after = json.get('error', {}).get('retryAfter', 0)
+                    if isinstance(exception, (UnauthorizedError, AccessTokenExpiredError)) and client.refresh_token and not _retrying:
+                        client.refresh_auth()
+                        return wrapper(client, *args, _retrying=True, **kwargs)
 
                     raise exception
 

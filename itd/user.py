@@ -441,7 +441,7 @@ class Me(_UserBase):
         update_profile(self.client, bio, display_name, username, banner_id)
 
     def update_from_fields(self):
-        update_profile(self.client, self.bio, self.display_name, self.username, self.banner_id)
+        update_profile(self.client, self.bio, self.display_name, self.username)
 
     def remove_pin(self) -> None:
         if object.__getattribute__(self, 'pin'):
