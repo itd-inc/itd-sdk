@@ -67,7 +67,7 @@ class _NotificationValidate(BaseModel, Notification):
 
 
 
-class Notifications(ITDList, list[Notification]):
+class Notifications(ITDList[Notification]):
     _limit = 1000
     _unread: int | None = None
 

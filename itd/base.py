@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING, TypeVar
 from functools import wraps
 from time import sleep
 from datetime import datetime, timedelta
@@ -94,8 +94,9 @@ class ITDBaseModel:
         return object.__getattribute__(self, name)
 
 
+T = TypeVar('T', bound=ITDBaseModel)
 
-class ITDList(ITDBaseModel, list):
+class ITDList[T](ITDBaseModel, list[T]):
     _limit: int = 20
     _get_total = None
     _refreshable = False

@@ -533,7 +533,7 @@ class _MeValidate(BaseModel, Me):
 
 
 
-class Followers(ITDList, list[User]):
+class Followers(ITDList[User]):
     _load_with_parent = False
     _user_id: UUID
     cursor: int = 1

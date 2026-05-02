@@ -155,7 +155,7 @@ class _CommentValidate(BaseModel, Comment):
 
 
 
-class Comments(ITDList, list[Comment]):
+class Comments(ITDList[Comment]):
     """Список комментариев с функцией дозагрузки"""
     _refreshable = False
     _limit = 500
