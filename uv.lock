@@ -221,7 +221,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "filetype", marker = "extra == 'filetype'", specifier = ">=1.2.0" },
-    { name = "pydantic", specifier = "~=2.12.5" },
+    { name = "pydantic", specifier = ">=2.12.5,<2.14.0" },
     { name = "requests", specifier = "~=2.32.5" },
     { name = "rich", marker = "extra == 'logs'", specifier = ">=15.0.0" },
     { name = "sseclient-py", specifier = "~=1.9.0" },

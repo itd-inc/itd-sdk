@@ -2,10 +2,16 @@ from uuid import UUID
 from html.parser import HTMLParser
 from datetime import datetime
 import re
+from sys import version
 
 from itd.span import Span
 from itd.file import File
 from itd.enums import SpanType
+
+
+def get_sdk_user_agent():
+    from itd import __version__ # i fucking hate circular imports this is sooo stupid
+    return f'itd-sdk/{__version__} (Python/{version})'
 
 
 def to_uuid(value: str | UUID) -> UUID:

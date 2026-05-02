@@ -85,8 +85,9 @@ def fetch(client: 'Client', method: str, url: str, params: dict = {}, files: dic
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        'User-Agent': client.config.user_agent,
     }
+    if client.config._user_agent:
+        headers['User-Agent'] = client.config._user_agent
     if client.access_token:
         headers['Authorization'] = 'Bearer ' + client.access_token
 
@@ -113,7 +114,7 @@ def fetch(client: 'Client', method: str, url: str, params: dict = {}, files: dic
     res = _do_request()
     if client.config.solve_challenge:
         for _ in range(3):
-            if not _solve_ddos_guard(client.session, res, client.config.url, client.config.user_agent):
+            if not _solve_ddos_guard(client.session, res, client.config.url, client.config._user_agent):
                 break
             l.debug('ddos-guard cookies: %s', {c.name: c.value for c in client.session.cookies if c.name.startswith('__')})
             res = _do_request()

@@ -13,6 +13,12 @@ class DebugResponseMode(Enum):
     AFTER = 'after' # after error checks, beautitfied
     KEYS = 'keys' # display only keys (after)
 
+class UserAgent(Enum):
+    BROWSER = 'browser'
+    SDK = 'sdk'
+    DEFAULT = 'default'
+    EMPTY = 'empty'
+
 class NotificationType(Enum):
     LIKE = 'like'
     COMMENT = 'comment'

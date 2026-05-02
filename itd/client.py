@@ -4,18 +4,19 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 from requests import Session
+from requests.utils import default_user_agent
 from requests.adapters import HTTPAdapter
 
 from itd._default import _default_client, set_default_client
 from itd.exceptions import UnauthorizedError, InsufficientAuthLevelError
 from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
-from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH
+from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent
 from itd.user import Me, User
 from itd.api.auth import refresh_token, change_password, logout
 from itd.api.search import search
 from itd.api.users import get_follow_status
-from itd.utils import to_uuid
+from itd.utils import to_uuid, get_sdk_user_agent
 from itd.logger import get_logger
 
 
@@ -40,7 +41,7 @@ class Config:
     timeout_file: float = 120
     url: str = 'xn--d1ah4a.com'
     url_api: str | None = None
-    user_agent: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0' # my ua btw
+    user_agent: UserAgent | str = UserAgent.BROWSER
     solve_challenge: bool = True
     load_comments_from_post: bool = False
     parse_mode: ParseMode = ParseMode.NO
@@ -57,6 +58,18 @@ class Config:
 
         self._url_api = self.url_api if self.url_api else f'https://{self.url}/api'
         self.url = self.url.split('https://')[0].split('http://')[0]
+
+        match self.user_agent:
+            case UserAgent.DEFAULT:
+                self._user_agent = default_user_agent()
+            case UserAgent.SDK:
+                self._user_agent = get_sdk_user_agent()
+            case UserAgent.EMPTY:
+                self._user_agent = ''
+            case UserAgent.BROWSER:
+                self._user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0'
+            case _:
+                self._user_agent = self.user_agent
 
 
 
