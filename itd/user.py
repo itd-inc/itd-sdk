@@ -429,7 +429,7 @@ class Me(_UserBase):
     ):
         self.privacy.update(is_private, wall_access, likes_visibility, show_last_seen)
 
-    def update_profile(
+    def update(
         self,
         bio: str | None = None,
         display_name: str | None = None,
@@ -439,6 +439,9 @@ class Me(_UserBase):
         if isinstance(banner_id, str):
             banner_id = to_uuid(banner_id)
         update_profile(self.client, bio, display_name, username, banner_id)
+
+    def update_from_fields(self):
+        update_profile(self.client, self.bio, self.display_name, self.username, self.banner_id)
 
     def remove_pin(self) -> None:
         if object.__getattribute__(self, 'pin'):
