@@ -309,7 +309,7 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
             if datetime.now() - timedelta(seconds=delay) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
                 delay -= (datetime.now() - client.last_actions[func.__name__]).seconds
                 l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
-                sleep(delay)
+                sleep(max(delay, 0))
             client.last_actions[func.__name__] = datetime.now()
 
             while True:
