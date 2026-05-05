@@ -187,6 +187,22 @@ class Client:
         res = search(self, query, users_limit, hashtags_limit).json()['data']
         return [User._from_dict(user, False, self) for user in res['users']], [Hashtag._from_dict(hashtag, self) for hashtag in res['hashtags']]
 
+    def search_users(self, query: str, limit: int = 20) -> list[User]:
+        return self.search(query, 1, limit)[0] # cant hashtags_limit=9 because it gives validation, ну это вам только хуже будет так что сервера страдайте
+
+    def search_hashtags(self, query: str, limit: int = 20) -> list[Hashtag]:
+        return self.search(query, limit, 1)[1]
+
+    def search_user(self, query: str) -> User | None:
+        user = self.search_users(query, 1)
+        if user:
+            return user[0]
+
+    def search_hashtag(self, query: str) -> Hashtag | None:
+        hashtag = self.search_hashtags(query, 1)
+        if hashtag:
+            return hashtag[0]
+
     def get_follow_status(self, users: list[User | UUID | str] | User | UUID | str) -> dict[UUID, bool] | bool:
         user_ids: list[UUID] = []
         if isinstance(users, list):
