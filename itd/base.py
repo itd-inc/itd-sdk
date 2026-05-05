@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, TYPE_CHECKING, Iterator, TypeVar
 from functools import wraps
 from time import sleep
 from datetime import datetime, timedelta
@@ -37,6 +37,7 @@ def _field_has_default(cls: type, name: str) -> bool:
 
 
 class ITDBaseModel:
+    """Базовый класс модельки"""
     _refreshable: bool = True
     _loaded: bool = False
     _loading: bool = False
@@ -55,9 +56,6 @@ class ITDBaseModel:
     @property
     def client(self) -> Client:
         return self._client
-
-    def _token(self, client: Client | None = None) -> str: # should be property, but it needs client param
-        return (client or self._client).token
 
     def refresh(self) -> Any:
         l.warning('refresh is not implemented but have called')
@@ -97,6 +95,7 @@ class ITDBaseModel:
 T = TypeVar('T', bound=ITDBaseModel)
 
 class ITDList[T](ITDBaseModel, list[T]):
+    """Базовый класс списка"""
     _limit: int = 20
     _get_total = None
     _refreshable = False
@@ -108,7 +107,17 @@ class ITDList[T](ITDBaseModel, list[T]):
 
     # edited by calude, thats so fucking crazy pagination
     # ai begin ---
-    def load(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None):
+    def load(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Загрузить объекты
+
+        Args:
+            count (int | All | Batch, optional): Количество объектов. Defaults to BATCH.
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Весь список (с новыми объектами)
+        """
         if not (self.has_more or self.client.config.force_load_lists):
             return self
 
@@ -159,16 +168,35 @@ class ITDList[T](ITDBaseModel, list[T]):
     def _get_objects(data: dict) -> list[dict]:
         return []
 
-    def refresh(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None):
+    def refresh(self, count: int | All | Batch | None = None, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Обновить список (удалить все элементы и загрузить заново)
+
+        Args:
+            count (int | All | Batch, optional): Количество объектов (None - количество на данный момент). Defaults to None.
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Обновленный список
+        """
         count = count or len(self)
         self.clear()
         self.cursor = None
         return self.load(count, limit, client)
 
-    def load_all(self, limit: int | Batch = BATCH, client: Client | None = None):
+    def load_all(self, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Загрузить все объекты (эквивалент self.load(ALL))
+
+        Args:
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Список
+        """
         return self.load(ALL, limit, client)
 
-    def __getitem__(self, index: int):  # pyright: ignore[reportIncompatibleMethodOverride]
+    def __getitem__(self, index: int) -> T:  # pyright: ignore[reportIncompatibleMethodOverride]
         if index > len(self) - 1 and self.client.config.load_on_getitem is not None:
             self._min_total = index + 1
             if isinstance(self.client.config.load_on_getitem, All):
@@ -182,7 +210,7 @@ class ITDList[T](ITDBaseModel, list[T]):
                 self.load(index - len(self) + self.client.config.load_on_getitem)
         return super().__getitem__(index)
 
-    def __next__(self):
+    def __next__(self) -> T:
         assert self.client.config.load_on_iter is not None
         if getattr(self, 'total', None) and self.idx >= self.total:
             raise StopIteration()
@@ -195,18 +223,19 @@ class ITDList[T](ITDBaseModel, list[T]):
         self.idx += 1
         return item
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         if self.client.config.load_on_iter is None:
             return super().__iter__()
         self.idx = 0
         return self
 
     @property
-    def all(self):
+    def all(self) -> list[T]:
         return self.load_all()
 
 
 def refresh_wrapper(func):
+    """Декоратор для self.refresh"""
     @wraps(func)
     def wrapper(self, client: Client | None = None):
         # if self._loading:
@@ -238,6 +267,11 @@ def _filter_bytes(args: tuple):
 
 # user calls `Me` -> model calls `get_me` -> `catch_errors` wrapper: (`get_me` -> `client.request` -> `fetch` -> responses 401 -> `refresh_auth` from `catch_errors` -> `client.resuest` -> `fetch` -> token refreshed -> `catch_errors` backs to main query -> `get_me` -> `client.request` -> `fetch` -> user fetched) -> model recieves data -> pydantic fills model # hell what the monster i did
 def catch_errors(*exceptions: ITDException):
+    """Декоратор для отлавливания ошибок
+
+    Args:
+        *exceptions (ITDException): Список ошибок для отлавливания
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(client: Client, *args, _retrying: bool = False, **kwargs) -> Response | None:
@@ -294,6 +328,13 @@ def catch_errors(*exceptions: ITDException):
 
 
 def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, delay_max: float | None = None):
+    """Декоратор для рейт лимита
+
+    Args:
+        delay_min (float | None, optional): Задержка для RateLimitMode.MIN. Defaults to None.
+        delay_mid (float | None, optional): Задержка для RateLimitMode.MID. Defaults to None.
+        delay_max (float | None, optional): Задержка для RateLimitMode.MAX. Defaults to None.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(client: Client, *args, **kwargs) -> Response | None:

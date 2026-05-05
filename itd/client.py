@@ -184,26 +184,78 @@ class Client:
 
 
     def search(self, query: str, hashtags_limit: int = 20, users_limit: int = 20) -> tuple[list[User], list[Hashtag]]:
+        """Поиск пользователей и хэштэгов
+
+        Args:
+            query (str): Запрос
+            hashtags_limit (int, optional): Лимит хэштэгов. Defaults to 20.
+            users_limit (int, optional): Лимит пользователей. Defaults to 20.
+
+        Returns:
+            tuple[list[User], list[Hashtag]]: Результат поиска
+        """
         res = search(self, query, users_limit, hashtags_limit).json()['data']
         return [User._from_dict(user, False, self) for user in res['users']], [Hashtag._from_dict(hashtag, self) for hashtag in res['hashtags']]
 
     def search_users(self, query: str, limit: int = 20) -> list[User]:
+        """Поиск пользователей
+
+        Args:
+            query (str): Запрос
+            limit (int, optional): Лимит. Defaults to 20.
+
+        Returns:
+            list[User]: Список пользователей
+        """
         return self.search(query, 1, limit)[0] # cant hashtags_limit=9 because it gives validation, ну это вам только хуже будет так что сервера страдайте
 
     def search_hashtags(self, query: str, limit: int = 20) -> list[Hashtag]:
+        """Поиск хэштэгов
+
+        Args:
+            query (str): Запрос
+            limit (int, optional): Лимит. Defaults to 20.
+
+        Returns:
+            list[Hashtag]: Список хэштэгов
+        """
         return self.search(query, limit, 1)[1]
 
     def search_user(self, query: str) -> User | None:
+        """Поиск пользователя
+
+        Args:
+            query (str): Запрос
+
+        Returns:
+            User | None: Пользователь
+        """
         user = self.search_users(query, 1)
         if user:
             return user[0]
 
     def search_hashtag(self, query: str) -> Hashtag | None:
+        """Поиск хэштэга
+
+        Args:
+            query (str): Запрос
+
+        Returns:
+            Hashtag | None: Хэштэг
+        """
         hashtag = self.search_hashtags(query, 1)
         if hashtag:
             return hashtag[0]
 
     def get_follow_status(self, users: list[User | UUID | str] | User | UUID | str) -> dict[UUID, bool] | bool:
+        """Получить статус подписки
+
+        Args:
+            users (list[User | UUID | str] | User | UUID | str): Пользователи для проверки (можно как и списком, так и как одиночным объектом)
+
+        Returns:
+            dict[UUID, bool] | bool: Результат
+        """
         user_ids: list[UUID] = []
         if isinstance(users, list):
             for user in users:
