@@ -78,6 +78,7 @@ class Client:
     access_token: str | None = None
     refresh_token: str | None = None
     _user = None
+    _refreshing: bool = False
 
     def __init__(self, refresh: str | None = None, access: str | None = None, config: Config = Config()):
         l.info('init client refresh=%s access=%s', refresh is not None, access is not None)
