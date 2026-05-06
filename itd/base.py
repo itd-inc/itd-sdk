@@ -62,34 +62,35 @@ class ITDBaseModel:
         self._loaded = True
 
 
-    def __getattribute__(self, name: str) -> Any:
-        if _getattr(self, '_refreshable') and not name.startswith('_') or name in ('client', 'model_fields_set'):
-            try:
-                attr = _getattr(self, name)
-            except AttributeError:
-                attr = None
+    if not TYPE_CHECKING:
+        def __getattribute__(self, name: str) -> Any:
+            if _getattr(self, '_refreshable') and not name.startswith('_') or name in ('client', 'model_fields_set'):
+                try:
+                    attr = _getattr(self, name)
+                except AttributeError:
+                    attr = None
 
-            if callable(attr):
-                return object.__getattribute__(self, name)
+                if callable(attr):
+                    return object.__getattribute__(self, name)
 
-            fields_from_data = _getattr(self, '_fields_from_data', ())
-            triggers = {
-                'default': name not in fields_from_data and _field_has_default(type(self), name),
-                'none': attr is None and not _field_has_default(type(self), name),
-                'field-info': isinstance(attr, FieldInfo)
-            }
-            if (
-                not _getattr(self, '_loaded') and
-                any(triggers.values()) and
-                _getattr(self, 'client').config.auto_load and
-                not (name == 'comments' and not _getattr(self, 'client').config.load_comments_from_post) # да я хотел сделать нормально, поставить проперти на comments и тд, но это херня кака ято крч просто нахардкожу
-            ):
-                l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
-                    next((k for k, v in triggers.items() if v))
-                )
-                self.refresh()
+                fields_from_data = _getattr(self, '_fields_from_data', ())
+                triggers = {
+                    'default': name not in fields_from_data and _field_has_default(type(self), name),
+                    'none': attr is None and not _field_has_default(type(self), name),
+                    'field-info': isinstance(attr, FieldInfo)
+                }
+                if (
+                    not _getattr(self, '_loaded') and
+                    any(triggers.values()) and
+                    _getattr(self, 'client').config.auto_load and
+                    not (name == 'comments' and not _getattr(self, 'client').config.load_comments_from_post) # да я хотел сделать нормально, поставить проперти на comments и тд, но это херня кака ято крч просто нахардкожу
+                ):
+                    l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
+                        next((k for k, v in triggers.items() if v))
+                    )
+                    self.refresh()
 
-        return object.__getattribute__(self, name)
+            return object.__getattribute__(self, name)
 
 
 T = TypeVar('T', bound=ITDBaseModel)

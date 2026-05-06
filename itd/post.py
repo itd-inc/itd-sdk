@@ -440,10 +440,12 @@ class UserPosts(_BasePosts):
         super().__init__(client)
         if isinstance(user, Me):
             self.user = user.to_user()
-        elif isinstance(user, _UserBase):
+        elif isinstance(user, User):
             self.user = user
-        else:
+        elif isinstance(user, str | UUID):
             self.user = User(user, client)
+        else:
+            raise ValueError('User must be instance of User or Me class')
 
         self.sorting = sorting # sort is busy
 

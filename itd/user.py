@@ -191,9 +191,6 @@ class _UserBase(ITDBaseModel):
     def __str__(self) -> str:
         return self.display_name
 
-    def __int__(self) -> int:
-        return self.followers_count or 0
-
     @refresh_wrapper
     def refresh(self, client: Client | None = None):
         return get_user(client or self.client, self._identifier).json()
