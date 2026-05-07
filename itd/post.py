@@ -48,7 +48,7 @@ class Post(ITDBaseModel):
     is_reposted: bool = Field(False, alias='isReposted')
     is_viewed: bool = Field(False, alias='isViewed')
     is_owner: bool = Field(False, alias='isOwner')
-    is_pinned_post: bool | None = Field(None, alias='isPinned')  # only for user wall # PLS dont use this value - use post.is_pinned
+    is_pinned: bool = Field(False, alias='isPinned')
 
     dominant: str | None = Field(None, alias='dominantEmoji')
     original_post: 'Post | None' = Field(None, alias='originalPost')  # for reposts
@@ -63,13 +63,6 @@ class Post(ITDBaseModel):
 
     def for_client(self, client: Client):
         return Post(self.id, client=client)
-
-    @property
-    def is_pinned(self) -> bool:
-        if object.__getattribute__(self, 'is_pinned_post') is None or isinstance(object.__getattribute__(self, 'is_pinned_post'), FieldInfo):
-            self.is_pinned_post = self.author.pinned_post_id == self.id
-            self._fields_from_data.add('is_pinned_post')
-        return object.__getattribute__(self, 'is_pinned_post')
 
 
     @classmethod
