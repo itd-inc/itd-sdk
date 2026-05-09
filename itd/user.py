@@ -204,7 +204,7 @@ class _UserBase(ITDBaseModel):
 
     @property
     def liked_posts(self) -> LikedPosts:
-        if not hasattr(self, '_posts'):
+        if not hasattr(self, '_liked_posts'):
             from itd.post import LikedPosts
             self._liked_posts = LikedPosts(self, client=self.client)
         return self._liked_posts
