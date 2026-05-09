@@ -1,5 +1,7 @@
 from uuid import UUID
 from datetime import datetime
+from typing import Literal, overload
+from time import sleep
 
 from pydantic import Field, BaseModel, field_validator
 from pydantic.fields import FieldInfo
@@ -7,7 +9,7 @@ from pydantic.fields import FieldInfo
 from itd.base import ITDBaseModel, refresh_wrapper, ITDList
 from itd.client import Client
 from itd.comment import Comment, Comments
-from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode
+from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL
 from itd.file import PostAttach
 from itd.hashtag import Hashtag
 from itd.poll import Poll, NewPoll, PollOption
@@ -20,7 +22,9 @@ from itd.api.posts import (
     delete_post, restore_post, edit_post, get_posts, get_user_posts, get_liked_posts
 )
 from itd.api.hashtags import get_posts_by_hashtag
+from itd.logger import get_logger
 
+l = get_logger('post')
 
 
 class Post(ITDBaseModel):
@@ -48,7 +52,7 @@ class Post(ITDBaseModel):
     is_reposted: bool = Field(False, alias='isReposted')
     is_viewed: bool = Field(False, alias='isViewed')
     is_owner: bool = Field(False, alias='isOwner')
-    is_pinned_post: bool | None = Field(None, alias='isPinned')  # only for user wall # PLS dont use this value - use post.is_pinned
+    is_pinned: bool = Field(False, alias='isPinned')
 
     dominant: str | None = Field(None, alias='dominantEmoji')
     original_post: 'Post | None' = Field(None, alias='originalPost')  # for reposts
@@ -63,13 +67,6 @@ class Post(ITDBaseModel):
 
     def for_client(self, client: Client):
         return Post(self.id, client=client)
-
-    @property
-    def is_pinned(self) -> bool:
-        if object.__getattribute__(self, 'is_pinned_post') is None or isinstance(object.__getattribute__(self, 'is_pinned_post'), FieldInfo):
-            self.is_pinned_post = self.author.pinned_post_id == self.id
-            self._fields_from_data.add('is_pinned_post')
-        return object.__getattribute__(self, 'is_pinned_post')
 
 
     @classmethod
@@ -432,7 +429,9 @@ class Posts(_BasePosts):
 class UserPosts(_BasePosts):
     _load_with_parent = False
     cursor: datetime | None = None
+    _force_remove_pinned_post: bool = False
 
+    # ! not includes posts from other users (wall posts)
     # def _get_total(self, data: dict):
     #     return self.user.posts_count
 
@@ -440,17 +439,19 @@ class UserPosts(_BasePosts):
         super().__init__(client)
         if isinstance(user, Me):
             self.user = user.to_user()
-        elif isinstance(user, _UserBase):
+        elif isinstance(user, User):
             self.user = user
-        else:
+        elif isinstance(user, str | UUID):
             self.user = User(user, client)
+        else:
+            raise ValueError('User must be instance of User or Me class')
 
         self.sorting = sorting # sort is busy
 
     def _fetch(self, client: Client, limit: int) -> dict:
-        if self.sorting == UserPostSorting.NEW and client.config.userposts_add_pinned_post:
+        if self.sorting == UserPostSorting.NEW and client.config.userposts_add_pinned_post and not self._force_remove_pinned_post:
             return get_user_posts(client, self.user._identifier, self.cursor, limit, self.user.pinned_post_id, self.sorting).json()['data']
-        return get_user_posts(client, self.user._identifier, self.cursor, limit, sort=self.sorting).json()['data'] # you dont need pinned post for popular -_-
+        return get_user_posts(client, self.user._identifier, self.cursor, limit, sort=self.sorting).json()['data'] # you dont need pinned post for popular
 
     @classmethod
     def popular(cls, user: str | UUID | _UserBase, client: Client | None = None):
@@ -459,6 +460,19 @@ class UserPosts(_BasePosts):
     @classmethod
     def new(cls, user: str | UUID | _UserBase, client: Client | None = None):
         return cls(user, UserPostSorting.NEW, client)
+
+    def wait_for_post(self, delay: float = 5, include_pinned_post: bool = False) -> Post:
+        self._force_remove_pinned_post = not include_pinned_post
+        post = self[0]
+        l.info('userposts wait_for_post init')
+        while True:
+            sleep(delay)
+            l.debug('userposts wait_for_post check for new posts')
+            self.refresh()
+            if self[0].id != post.id:
+                l.debug('userposts wait_for_post found diff old=%s new=%s', post.id, self[0].id)
+                self._force_remove_pinned_post = include_pinned_post
+                return self[0]
 
 
 class LikedPosts(_BasePosts): # [] if forbidden
@@ -478,6 +492,17 @@ class LikedPosts(_BasePosts): # [] if forbidden
     @staticmethod
     def _get_has_more(data: dict):
         return data['pagination']['hasMore']
+
+    def wait_for_post(self, delay: float = 5) -> Post:
+        post = self[0]
+        l.info('likedposts wait_for_post init')
+        while True:
+            sleep(delay)
+            l.debug('likedposts wait_for_post check for new posts')
+            self.refresh()
+            if self[0].id != post.id:
+                l.debug('likedposts wait_for_post found diff old=%s new=%s', post.id, self[0].id)
+                return self[0]
 
 
 class HashtagPosts(_BasePosts):
@@ -503,3 +528,35 @@ class HashtagPosts(_BasePosts):
     @staticmethod
     def _get_has_more(data: dict):
         return data['pagination']['hasMore']
+
+
+    @overload
+    def wait_for_posts(self, delay: float, *, client: Client | None) -> list[Post]: ...
+
+    @overload
+    def wait_for_posts(self, delay: float, find_post: Literal[True], client: Client | None) -> list[Post]: ...
+
+    @overload
+    def wait_for_posts(self, delay: float, find_post: Literal[False], client: Client | None) -> None: ...
+
+    def wait_for_posts(self, delay: float = 5, find_post: bool = True, client: Client | None = None) -> list[Post] | None:
+        count = self.hashtag.posts_count
+
+        posts = set([post.id for post in self]) if find_post else ()
+
+        l.info('hashtagposts wait_for_post init')
+        while True:
+            sleep(delay)
+            l.debug('hashtagposts wait_for_post check for new posts')
+            self.hashtag.refresh(client=client)
+            if count < self.hashtag.posts_count:
+                l.info('hashtagposts wait_for_post found diff old=%s new=%s', count, self.hashtag.posts_count)
+                if find_post:
+                    self.refresh(ALL, client=client)
+                    l.debug('%s %s', [post.id for post in self], posts)
+                    return [post for post in self if post.id not in posts]
+                return
+            count = self.hashtag.posts_count
+
+    def wait_for_post(self, delay: float = 5, client: Client | None = None) -> Post | None:
+        return self.wait_for_posts(delay, client=client)[0]

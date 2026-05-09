@@ -50,6 +50,15 @@ class Hashtag(ITDBaseModel):
         return self._posts
 
 
-
 class _HashtagValidate(BaseModel, Hashtag):
     pass
+
+
+
+class Hashtags(ITDBaseModel, list[Hashtag]):
+    _refreshable = False
+
+    def load(self, count: int = 10):
+        self.clear()
+        self.extend([Hashtag._from_dict(hashtag) for hashtag in get_hashtags(self.client, count).json()['data']['hashtags']])
+        return self

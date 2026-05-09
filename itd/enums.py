@@ -119,9 +119,13 @@ UNSET = Unset()
 class Batch:
     def __bool__(self) -> Literal[False]:
         return False
+    def __str__(self) -> str:
+        return 'batch'
 BATCH = Batch()
 
 class All:
     def __bool__(self) -> Literal[False]:
         return False
+    def __str__(self) -> str:
+        return 'all'
 ALL = All()

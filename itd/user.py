@@ -22,7 +22,7 @@ from itd.api.pins import get_pins, remove_pin
 from itd.api.subscription import get_subscription, pay_subscription, get_payment_methods, toggle_subscription_auto_renewal
 if TYPE_CHECKING:
     from itd.client import Client
-    from itd.post import Post, UserPosts
+    from itd.post import Post, UserPosts, LikedPosts
 
 
 class ProfileUser(BaseModel):
@@ -191,19 +191,23 @@ class _UserBase(ITDBaseModel):
     def __str__(self) -> str:
         return self.display_name
 
-    def __int__(self) -> int:
-        return self.followers_count or 0
-
     @refresh_wrapper
     def refresh(self, client: Client | None = None):
         return get_user(client or self.client, self._identifier).json()
 
     @property
-    def posts(self) -> 'UserPosts':
+    def posts(self) -> UserPosts:
         if not hasattr(self, '_posts'):
             from itd.post import UserPosts
             self._posts = UserPosts(self, client=self.client)
         return self._posts
+
+    @property
+    def liked_posts(self) -> LikedPosts:
+        if not hasattr(self, '_posts'):
+            from itd.post import LikedPosts
+            self._liked_posts = LikedPosts(self, client=self.client)
+        return self._liked_posts
 
 
 

@@ -13,5 +13,5 @@ examples/upload_gif.py
 examples/testapi_old.py
 followed.json
 vitalies.json
-*.txt
 site/
+*.txt

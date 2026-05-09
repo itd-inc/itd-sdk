@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, TYPE_CHECKING, Iterator, TypeVar
 from functools import wraps
 from time import sleep
 from datetime import datetime, timedelta
@@ -37,6 +37,7 @@ def _field_has_default(cls: type, name: str) -> bool:
 
 
 class ITDBaseModel:
+    """Базовый класс модельки"""
     _refreshable: bool = True
     _loaded: bool = False
     _loading: bool = False
@@ -56,47 +57,46 @@ class ITDBaseModel:
     def client(self) -> Client:
         return self._client
 
-    def _token(self, client: Client | None = None) -> str: # should be property, but it needs client param
-        return (client or self._client).token
-
     def refresh(self) -> Any:
         l.warning('refresh is not implemented but have called')
         self._loaded = True
 
 
-    def __getattribute__(self, name: str) -> Any:
-        if _getattr(self, '_refreshable') and not name.startswith('_') or name in ('client', 'model_fields_set'):
-            try:
-                attr = _getattr(self, name)
-            except AttributeError:
-                attr = None
+    if not TYPE_CHECKING:
+        def __getattribute__(self, name: str) -> Any:
+            if _getattr(self, '_refreshable') and not name.startswith('_') or name in ('client', 'model_fields_set'):
+                try:
+                    attr = _getattr(self, name)
+                except AttributeError:
+                    attr = None
 
-            if callable(attr):
-                return object.__getattribute__(self, name)
+                if callable(attr):
+                    return object.__getattribute__(self, name)
 
-            fields_from_data = _getattr(self, '_fields_from_data', ())
-            triggers = {
-                'default': name not in fields_from_data and _field_has_default(type(self), name),
-                'none': attr is None and not _field_has_default(type(self), name),
-                'field-info': isinstance(attr, FieldInfo)
-            }
-            if (
-                not _getattr(self, '_loaded') and
-                any(triggers.values()) and
-                _getattr(self, 'client').config.auto_load and
-                not (name == 'comments' and not _getattr(self, 'client').config.load_comments_from_post) # да я хотел сделать нормально, поставить проперти на comments и тд, но это херня кака ято крч просто нахардкожу
-            ):
-                l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
-                    next((k for k, v in triggers.items() if v))
-                )
-                self.refresh()
+                fields_from_data = _getattr(self, '_fields_from_data', ())
+                triggers = {
+                    'default': name not in fields_from_data and _field_has_default(type(self), name),
+                    'none': attr is None and not _field_has_default(type(self), name),
+                    'field-info': isinstance(attr, FieldInfo)
+                }
+                if (
+                    not _getattr(self, '_loaded') and
+                    any(triggers.values()) and
+                    _getattr(self, 'client').config.auto_load and
+                    not (name == 'comments' and not _getattr(self, 'client').config.load_comments_from_post) # да я хотел сделать нормально, поставить проперти на comments и тд, но это херня кака ято крч просто нахардкожу
+                ):
+                    l.info('load %s.%s reason=%s', self.__class__.__name__.lower(), name,
+                        next((k for k, v in triggers.items() if v))
+                    )
+                    self.refresh()
 
-        return object.__getattribute__(self, name)
+            return object.__getattribute__(self, name)
 
 
 T = TypeVar('T', bound=ITDBaseModel)
 
 class ITDList[T](ITDBaseModel, list[T]):
+    """Базовый класс списка"""
     _limit: int = 20
     _get_total = None
     _refreshable = False
@@ -108,15 +108,27 @@ class ITDList[T](ITDBaseModel, list[T]):
 
     # edited by calude, thats so fucking crazy pagination
     # ai begin ---
-    def load(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None):
-        if not (self.has_more or self.client.config.force_load_lists):
+    def load(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Загрузить объекты
+
+        Args:
+            count (int | All | Batch, optional): Количество объектов. Defaults to BATCH.
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Весь список (с новыми объектами)
+        """
+        if not (self.has_more or (client or self.client).config.force_load_lists):
+            l.warning('skip load because has_more=False')
             return self
 
         limit = limit or self._limit
         if isinstance(count, int) and count < limit:
             limit = count
+        l.debug('load %s count=%s limit=%s', self.__class__.__name__.lower(), count, limit)
 
-        # None = load one batch (limit), All = load everything, int = load exactly N
+        # Batch = load one batch (limit), All = load everything, int = load exactly N
         left = None if isinstance(count, All) else (count or limit)
 
         while left is None or left > 0:
@@ -132,10 +144,15 @@ class ITDList[T](ITDBaseModel, list[T]):
                 if getattr(self, '_min_total', None) and self._min_total > self.total:
                     raise IndexError(f'Given index ({self._min_total - 1}) is too high. Total items is {self.total}')
 
-            if left is not None:
-                left -= len(objects)
+            length = len(objects)
+            if objects and (client or self.client).config.userposts_add_pinned_post and length == batch + 1: # skip pinned post
+                length -= 1
+            l.debug('%s', objects)
 
-            l.info('fetched %s %s (was %s) cursor=%s has_more=%s', len(objects), self.__class__.__name__.lower(), len(self), self.cursor, self.has_more)
+            if left is not None:
+                left -= length
+
+            l.info('fetched %s %s (was %s) cursor=%s has_more=%s', length, self.__class__.__name__.lower(), len(self), self.cursor, self.has_more)
             self._extend(objects, client or self.client)
 
             if not self.has_more or not objects:
@@ -159,16 +176,40 @@ class ITDList[T](ITDBaseModel, list[T]):
     def _get_objects(data: dict) -> list[dict]:
         return []
 
-    def refresh(self, count: int | All | Batch = BATCH, limit: int | Batch = BATCH, client: Client | None = None):
-        count = count or len(self)
+    def refresh(self, count: int | All | Batch | None = None, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Обновить список (удалить все элементы и загрузить заново)
+
+        Args:
+            count (int | All | Batch, optional): Количество объектов (None - количество на данный момент). Defaults to None.
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Обновленный список
+        """
+        if count is None:
+            count = len(self)
+            if self and getattr(self[0], 'is_pinned', False): # skip pinned post
+                count -= 1
         self.clear()
         self.cursor = None
+        self.has_more = True # also refresh has_more
+        l.debug('refresh %s count=%s limit=%s', self.__class__.__name__.lower(), str(count), limit)
         return self.load(count, limit, client)
 
-    def load_all(self, limit: int | Batch = BATCH, client: Client | None = None):
+    def load_all(self, limit: int | Batch = BATCH, client: Client | None = None) -> list[T]:
+        """Загрузить все объекты (эквивалент self.load(ALL))
+
+        Args:
+            limit (int | Batch, optional): Лимит. Defaults to BATCH.
+            client (Client | None, optional): Клиент. Defaults to None.
+
+        Returns:
+            list[T]: Список
+        """
         return self.load(ALL, limit, client)
 
-    def __getitem__(self, index: int):  # pyright: ignore[reportIncompatibleMethodOverride]
+    def __getitem__(self, index: int) -> T:  # pyright: ignore[reportIncompatibleMethodOverride]
         if index > len(self) - 1 and self.client.config.load_on_getitem is not None:
             self._min_total = index + 1
             if isinstance(self.client.config.load_on_getitem, All):
@@ -182,7 +223,7 @@ class ITDList[T](ITDBaseModel, list[T]):
                 self.load(index - len(self) + self.client.config.load_on_getitem)
         return super().__getitem__(index)
 
-    def __next__(self):
+    def __next__(self) -> T:
         assert self.client.config.load_on_iter is not None
         if getattr(self, 'total', None) and self.idx >= self.total:
             raise StopIteration()
@@ -195,18 +236,19 @@ class ITDList[T](ITDBaseModel, list[T]):
         self.idx += 1
         return item
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         if self.client.config.load_on_iter is None:
             return super().__iter__()
         self.idx = 0
         return self
 
     @property
-    def all(self):
+    def all(self) -> list[T]:
         return self.load_all()
 
 
 def refresh_wrapper(func):
+    """Декоратор для self.refresh"""
     @wraps(func)
     def wrapper(self, client: Client | None = None):
         # if self._loading:
@@ -238,9 +280,14 @@ def _filter_bytes(args: tuple):
 
 # user calls `Me` -> model calls `get_me` -> `catch_errors` wrapper: (`get_me` -> `client.request` -> `fetch` -> responses 401 -> `refresh_auth` from `catch_errors` -> `client.resuest` -> `fetch` -> token refreshed -> `catch_errors` backs to main query -> `get_me` -> `client.request` -> `fetch` -> user fetched) -> model recieves data -> pydantic fills model # hell what the monster i did
 def catch_errors(*exceptions: ITDException):
+    """Декоратор для отлавливания ошибок
+
+    Args:
+        *exceptions (ITDException): Список ошибок для отлавливания
+    """
     def decorator(func):
         @wraps(func)
-        def wrapper(client: Client, *args, _retrying: bool = False, **kwargs) -> Response | None:
+        def wrapper(client: Client, *args, **kwargs) -> Response | None:
             l.info('exec %s %s %s', func.__name__, _filter_bytes(args), kwargs)
             res: Response = func(client, *args, **kwargs)
 
@@ -273,9 +320,13 @@ def catch_errors(*exceptions: ITDException):
                         exception.text = json.get('error', {}).get('message', 'Failed validation')
                     if isinstance(exception, RateLimitError) and isinstance(json.get('error'), dict):
                         exception.retry_after = json.get('error', {}).get('retryAfter', 0)
-                    if isinstance(exception, (UnauthorizedError, AccessTokenExpiredError)) and client.refresh_token and not _retrying:
-                        client.refresh_auth()
-                        return wrapper(client, *args, _retrying=True, **kwargs)
+                    if isinstance(exception, (UnauthorizedError, AccessTokenExpiredError)) and client.refresh_token and not getattr(client, '_refreshing', False):
+                        client._refreshing = True
+                        try:
+                            client.refresh_auth()
+                        finally:
+                            client._refreshing = False
+                        return wrapper(client, *args, **kwargs)
 
                     raise exception
 
@@ -294,6 +345,13 @@ def catch_errors(*exceptions: ITDException):
 
 
 def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, delay_max: float | None = None):
+    """Декоратор для рейт лимита
+
+    Args:
+        delay_min (float | None, optional): Задержка для RateLimitMode.MIN. Defaults to None.
+        delay_mid (float | None, optional): Задержка для RateLimitMode.MID. Defaults to None.
+        delay_max (float | None, optional): Задержка для RateLimitMode.MAX. Defaults to None.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(client: Client, *args, **kwargs) -> Response | None:
@@ -309,7 +367,7 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
             if datetime.now() - timedelta(seconds=delay) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
                 delay -= (datetime.now() - client.last_actions[func.__name__]).seconds
                 l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
-                sleep(delay)
+                sleep(max(delay, 0))
             client.last_actions[func.__name__] = datetime.now()
 
             while True:

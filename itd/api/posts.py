@@ -81,7 +81,7 @@ def repost(client: Client, id: UUID, content: str | None = None):
         data['content'] = content
     return client.request('post', f'posts/{id}/repost', data)
 
-@rate_limit()
+@rate_limit(0, 0.05)
 @catch_errors(NotFoundError('Post'))
 def view_post(client: Client, id: UUID):
     return client.request('post', f'posts/{id}/view')
