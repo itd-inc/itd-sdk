@@ -49,7 +49,7 @@ def get_post(client: Client, id: UUID):
     return client.request('get', f'posts/{id}')
 
 @rate_limit(None, 1, 5)
-@catch_errors(NotFoundError('Post'), ForbiddenError('edit post'), EditExpiredError())
+@catch_errors(NotFoundError('Post'), ForbiddenError('edit post'), EditExpiredError(), BannedWordError('Post'))
 def edit_post(client: Client, id: UUID, content: str, spans: list[dict] = []):
     return client.request('put', f'posts/{id}', {'content': content, 'spans': spans})
 
