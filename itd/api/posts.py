@@ -74,7 +74,7 @@ def unpin_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}/pin')
 
 @rate_limit(1, 10, 30)
-@catch_errors(NotFoundError('Post'), AlreadyRepostedError(), CantRepostYourselfError(), ValidationError())
+@catch_errors(NotFoundError('Post'), AlreadyRepostedError(), CantRepostYourselfError(), ValidationError(), BannedWordError('Post'))
 def repost(client: Client, id: UUID, content: str | None = None):
     data = {}
     if content:
