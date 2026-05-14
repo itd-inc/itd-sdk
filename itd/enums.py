@@ -1,6 +1,24 @@
 from enum import Enum
 from typing import Literal
 
+class ViewSource(Enum):
+    FEED_GLOBAL = 1
+    FEED_FOLLOWING = 2
+    FEED_CLAN = 3
+    PROFILE = 4
+    HASHTAG = 5
+    POST_PAGE = 6
+    LINK = 7
+    SEARCH = 8
+
+class ViewReason(Enum):
+    NORMAL = 0 # стандартное
+    BLUR = 1 # страница скрыта (listener blur)
+    HIDDEN = 2 # тоже страница скрыты (listener visibilitychange и доп.проверка что document.hidden)
+    PAGE_HIDE = 3 # тоже страница скрыта (listener pagehiden)
+    UNOBSERVE = 4 # что то заумное на фронтедерском
+    THRESHOLD_MET = 5 # трэшхолд типо плавный просмотр, я не осбо понял для чего это
+
 class AuthLevel(Enum):
     NO = 'no'
     ACCESS = 'access'

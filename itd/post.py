@@ -1,9 +1,12 @@
-from uuid import UUID
-from datetime import datetime
+from __future__ import annotations
+from uuid import UUID, uuid4
+from datetime import datetime, timedelta
 from typing import Literal, overload, TYPE_CHECKING
 from time import sleep
+from threading import Thread
+from atexit import register
 
-from pydantic import Field, BaseModel, field_validator
+from pydantic import Field, BaseModel, field_validator, field_serializer
 
 from itd.comment import Comment, Comments
 from itd.file import PostAttach
@@ -18,11 +21,13 @@ from itd.api.posts import (
     delete_post, restore_post, edit_post, get_posts, get_user_posts, get_liked_posts
 )
 from itd.api.hashtags import get_posts_by_hashtag
+from itd.api.dwell import send_dwell
 from itd.base import ITDBaseModel, refresh_wrapper, ITDList
-from itd.client import Client
-from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL
+from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL, ViewReason, ViewSource
 from itd.logger import get_logger
 from itd.utils import to_uuid, parse_datetime, format_attachments, ATTACHMENTS, parse_html, parse_md
+if TYPE_CHECKING:
+    from itd.client import Client
 
 l = get_logger('post')
 
@@ -35,6 +40,88 @@ l = get_logger('post')
 #             self.s = self.source = [ViewSource(source) for source in payload['s']]
 #         else:
 #             self.s = self.source = ViewSource(payload['s'])
+
+class DwellEvent(BaseModel):
+    vs: str = Field(alias='v')
+    duration: int = Field(alias='md')
+    entered_at: int = Field(alias='et')
+    exited_at: int = Field(alias='xt')
+    reason: ViewReason = Field(alias='r')
+    source: ViewSource = Field(alias='s')
+    source_context: str | None = Field(None, alias='sc')
+    has_seen: bool = Field(False, alias='b')
+
+    @field_serializer('has_seen', mode='plain')
+    @classmethod
+    def serialize_has_seen(cls, value: int):
+        return bool(value)
+
+
+class DwellTracker(ITDBaseModel):
+    def __init__(self, client: Client | None = None) -> None:
+        super().__init__(client)
+        self.events: list[DwellEvent] = []
+        self.seen_posts: set[UUID] = set()
+        self.sid = uuid4()
+        self._thread: Thread | None = None
+
+    def send(self) -> bool: # call on app visibilitychange
+        """Отправить события (api/v1/i) и очистить буффер
+
+        Returns:
+            bool: Статус (False если буффер пустой)
+        """
+        if not self.events:
+            return False
+        l.info('dwell send batch')
+        send_dwell(self.client, [event.model_dump(mode='json') for event in self.events], self.sid)
+        self.events.clear()
+        return True
+
+    def record(self, id: UUID, vs: str, duration: int, entered_at: datetime, source: ViewSource, reason: ViewReason = ViewReason.NORMAL):
+        """Записать событие просмотра
+
+        Args:
+            id (UUID): ID поста
+            vs (str): VS
+            duration (int): Время на просмотр (сколько времени пользователь читал пост). Желательно должно быть 250+
+            entered_at (datetime): Дата открытия поста (когда пользователь увидел пост)
+            reason (ViewReason): Причина просмотра
+            source (ViewSource): Страница, с которой произошел просмотр
+        """
+        l.info('dwell add record id=%s vs=%s', id, vs)
+        self.events.append(
+            DwellEvent( # stupid pydantic i want validate by name
+                v=vs,
+                md=duration,
+                et=round(entered_at.timestamp()),
+                xt=round(entered_at.timestamp() + duration),
+                r=reason,
+                s=source,
+                sc=None,
+                b=id in self.seen_posts
+            )
+        )
+        self.seen_posts.add(id)
+        if len(self.events) >= self.client.config.dwell_max_buffer:
+            self.send()
+
+    def _start_timer(self):
+        def loop():
+            while True:
+                sleep(self.client.config.dwell_send_interval)
+                self.send()
+        self._thread = Thread(target=loop)
+        self._thread.daemon = True
+        self._thread.start()
+
+        def on_exit():
+            if self._thread:
+                self._thread.join(timeout=0)
+            self.send()
+
+        register(on_exit)
+
 
 
 class Post(ITDBaseModel):
@@ -232,14 +319,18 @@ class Post(ITDBaseModel):
 
         return Post._from_dict(post, client=client)
 
-    def view(self, client: Client | None = None) -> None:
+    def view(self, client: Client | None = None, entered_at: datetime | None = None, duration: int = 250, view_source: ViewSource = ViewSource.POST_PAGE, reason: ViewReason = ViewReason.NORMAL) -> None:
         """Просмотреть пост
 
         Args:
             client (Client | None, optional): Клиент. Defaults to None.
         """
-        view_post(client or self.client, self.id)
-        if (client or self.client) == self.client:
+        c = client or self.client
+        if c.dwell_tracker is not None:
+            c.dwell_tracker.record(self.id, self.vs, duration, entered_at or datetime.now() - timedelta(seconds=duration), view_source, reason)
+        else:
+            view_post(c, self.id)
+        if c == self.client:
             self.is_viewed = True
         # post can be already viewed, so view will not add; thats why do not change views_count
 
