@@ -1302,7 +1302,7 @@
 <h2 id="-_2">Авто-дозагрузка</h2>
 <p>Дозагрузка листов при итерации или получении индекса.<br />
 В базовой модели стоят методы <code>__getitem__</code> и <code>__next__</code>, перехватывающие попытку получения значения которого пока не существует.<br />
-Можно выключить в конфиге (см. <a href="../config/#load_on_getitem-bool">load_on_getitem</a>)
+Можно выключить в конфиге (см. <a href="../config/#load_on_getitem-all-batchint-all-batch">load_on_getitem</a>)
 <div class="highlight"><pre><span></span><code><span class="n">posts</span> <span class="o">=</span> <span class="n">Posts</span><span class="p">()</span>
 <span class="n">posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># равносильно posts.load(1)</span>
 <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">:</span> <span class="c1"># равносильно for post in posts.load_all():</span>

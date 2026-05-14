@@ -413,10 +413,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load_on_getitem-bool" class="md-nav__link">
+  <a href="#load_on_getitem-all-batchint-all-batch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        load_on_getitem bool
+        load_on_getitem | ALL | BATCHint | All | Batch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load_on_iter-all-batchint-all-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_on_iter | ALL | BATCHint | All | Batch
       
     </span>
   </a>
@@ -527,6 +538,83 @@
     <span class="md-ellipsis">
       
         parse_mode ParseMode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate_limit_wait-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rate_limit_wait int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_on_rate_limits-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_on_rate_limits bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_enabled-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_enabled bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_delay-float" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_delay float
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_max_retries-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_max_retries int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_exceptions-listtypeexception-tupletypeexception" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_exceptions list[type[Exception]] | tuple[type[Exception]]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bypass_auth_level-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bypass_auth_level bool
       
     </span>
   </a>
@@ -1291,10 +1379,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load_on_getitem-bool" class="md-nav__link">
+  <a href="#load_on_getitem-all-batchint-all-batch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        load_on_getitem bool
+        load_on_getitem | ALL | BATCHint | All | Batch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load_on_iter-all-batchint-all-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_on_iter | ALL | BATCHint | All | Batch
       
     </span>
   </a>
@@ -1411,6 +1510,83 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rate_limit_wait-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rate_limit_wait int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_on_rate_limits-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_on_rate_limits bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_enabled-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_enabled bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_delay-float" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_delay float
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_max_retries-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_max_retries int
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry_exceptions-listtypeexception-tupletypeexception" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retry_exceptions list[type[Exception]] | tuple[type[Exception]]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bypass_auth_level-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bypass_auth_level bool
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1469,29 +1645,30 @@
 <h4 id="userposts_add_pinned_post-bool">userposts_add_pinned_post <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
 <p>Добавлять ли закрепленный пост при получении постов пользователя (<code>UserPosts</code>). Для этого потребуется отдельный запрос. По умолчанию <code>True</code>.</p>
 <h4 id="auto_load-bool">auto_load <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
-<p>Нужно ли автоматически загружать данные при попытке получение (перехват в <code>__getattribute__</code>). Если выключено, то для получения данных придется перед получением писать <code>obj.refresh()</code>.<br />
-По умолчанию <code>True</code>.</p>
-<h4 id="load_on_getitem-bool">load_on_getitem <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
-<p>Количество доп. загружаемых объектов при попытке получить еще не загруженный элемент списка (например <code>Posts()[10]</code>). Может выдать <code>AttributeError</code>, если даже после загрузки всех объектов количество меньше желаемого индекса, или если известно общее количество объектов и индекс будет больше него. По умолчанию <code>1</code>. <code>All</code> - загрузить все. <code>Batch</code> - загрузить следующий батч (следующий по курсору).</p>
+<p>Нужно ли автоматически загружать данные при попытке получение (перехват в <code>__getattribute__</code>). Если выключено, то для получения данных придется перед получением писать <code>obj.refresh()</code>. По умолчанию <code>True</code>.</p>
+<h4 id="load_on_getitem-all-batchint-all-batch">load_on_getitem <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span> | ALL | BATCH</span><span class="mdx-badge__text">int | All | Batch</span></span></h4>
+<p>Количество загружаемых объектов при попытке получить еще не загруженный элемент списка (например <code>Posts()[10]</code>). Может выдать <code>AttributeError</code>, если даже после загрузки всех объектов количество меньше желаемого индекса, или если известно общее количество объектов и индекс будет больше него. По умолчанию <code>1</code>. <code>All</code> - загрузить все. <code>Batch</code> - загрузить следующий батч (следующий по курсору). <code>None</code> - выключить авто загрузку.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem_count</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="highlight"><pre><span></span><code><span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">posts</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span> <span class="c1"># 6</span>
 
-<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem_count</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">posts</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span> <span class="c1"># 12</span>
 
-<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem_count</span> <span class="o">=</span> <span class="n">ALL</span>
+<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem</span> <span class="o">=</span> <span class="n">ALL</span>
 <span class="n">posts</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span> <span class="c1"># 50</span>
 
 <span class="n">posts</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem_count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">config</span><span class="o">.</span><span class="n">load_on_getitem</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">posts</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="c1"># AttributeError</span>
 </code></pre></div>
 </div>
+<h4 id="load_on_iter-all-batchint-all-batch">load_on_iter <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span> | ALL | BATCH</span><span class="mdx-badge__text">int | All | Batch</span></span></h4>
+<p>Количество загружаемых объектов при итерации списка (например <code>for post in Posts()</code>). По умолчанию <code>BATCH</code>. <code>All</code> - загрузить все. <code>Batch</code> - загрузить следующий батч (следующий по курсору). <code>None</code> - выключить авто загрузку.</p>
 <h4 id="force_load_lists-bool">force_load_lists <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
 <p>Загружать список, даже если <code>has_more = False</code>. Может уйти в бесконечный цикл при итерации. По умолчанию <code>False</code>.</p>
 <h4 id="debug_response-debugresponsemode">debug_response <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 5h3l-1.5 2zM5 2h14a2 2 0 0 1 2 2v16c0 1.11-.89 2-2 2H5a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2m0 2v4h14V4zm0 16h14V10H5zm2-8h10v2H7zm0 4h10v2H7z"/></svg></span></span><span class="mdx-badge__text">DebugResponseMode</span></span></h4>
@@ -1514,17 +1691,54 @@
 <h4 id="url_api-str">url_api <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
 <p>URL к API ИТД (<code>https://xn--d1ah4a.com/api</code>). Если не указан, берется из <a href="#url-str">url</a>.</p>
 <h4 id="user_agent-str">user_agent <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
-<p>User-Agent, под которым обращатся к API ИТД. Если вы делаете свой клиент, можете поставить агент как его имя. По умолчанию стоит дефолтный файрфоксовский user-agent.</p>
+<p>User-Agent, под которым обращатся к API ИТД. Если вы делаете свой клиент, можете поставить агент как его имя. По умолчанию стоит дефолтный браузерный user-agent.</p>
 <h4 id="solve_challenge-bool">solve_challenge <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
 <p>Нужно ли проходить JS-challenge (защита от скриптов). Иногда включается при запросах к API. Если выключена, скрипт может упасть с ошибкой <code>fail to parse json</code>.</p>
-<h3 id="load_comments_from_post-bool">load_comments_from_post <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h3>
+<h4 id="load_comments_from_post-bool">load_comments_from_post <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
 <p>Нужно ли брать комментарии из уже полученного поста (ИТД дает 3-4 комментария при получении поста). При загрузке следующего батча комментарии могут дублироваться. По умолчанию <code>False</code>.</p>
-<h3 id="parse_mode-parsemode">parse_mode <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22.27 19.385H1.73A1.73 1.73 0 0 1 0 17.655V6.345a1.73 1.73 0 0 1 1.73-1.73h20.54A1.73 1.73 0 0 1 24 6.345v11.308a1.73 1.73 0 0 1-1.73 1.731zM5.769 15.923v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.078h-2.308l-2.307 2.885-2.308-2.885H3.46v7.847zM21.232 12h-2.309V8.077h-2.307V12h-2.308l3.461 4.039z"/></svg></span></span><span class="mdx-badge__text">ParseMode</span></span></h3>
+<h4 id="parse_mode-parsemode">parse_mode <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22.27 19.385H1.73A1.73 1.73 0 0 1 0 17.655V6.345a1.73 1.73 0 0 1 1.73-1.73h20.54A1.73 1.73 0 0 1 24 6.345v11.308a1.73 1.73 0 0 1-1.73 1.731zM5.769 15.923v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.078h-2.308l-2.307 2.885-2.308-2.885H3.46v7.847zM21.232 12h-2.309V8.077h-2.307V12h-2.308l3.461 4.039z"/></svg></span></span><span class="mdx-badge__text">ParseMode</span></span></h4>
 <p>Режим парсинга (автоматически генерирует <code>spans</code> при создании или редоктаировании постов).
  - <code>ParseMode.NO</code>: Выключить парсинг
  - <code>ParseMode.MARKDOWN</code>: Markdown парсинг
  - <code>ParseMode.HTML</code>: HTML парсинг
 По умолчанию <code>ParseMode.NO</code></p>
+<h4 id="rate_limit_wait-int">rate_limit_wait <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
+<div class="admonition danger">
+<p class="admonition-title">Deprecated</p>
+<p>Параметр будет удален в 2.2.0. Используйте <a href="#retry_delay-float">retry_delay</a>.</p>
+</div>
+<p>Время ожидания при рейт-лимите.</p>
+<h4 id="retry_on_rate_limits-bool">retry_on_rate_limits <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
+<div class="admonition danger">
+<p class="admonition-title">Deprecated</p>
+<p>Параметр будет удален в 2.2.0. Используйте <a href="#retry_enabled-bool">retry_enabled</a>.</p>
+</div>
+<p>Нужно ли ловить рейт-лимит и автоматически переотправлять вызванную функцию.</p>
+<h4 id="retry_enabled-bool">retry_enabled <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
+<p>Нужно ли повторять запрос при ошибке сети или рейт лимите. По умолчанию <code>True</code></p>
+<h4 id="retry_delay-float">retry_delay <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">float</span></span></h4>
+<p>Задержка перед следующим повтором запроса.</p>
+<h4 id="retry_max_retries-int">retry_max_retries <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
+<p>Максимальное количество попыток повторов запроса. По умолчанию <code>None</code>. <code>None</code> - без лимита.</p>
+<h4 id="retry_exceptions-listtypeexception-tupletypeexception">retry_exceptions <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2c5.53 0 10 4.47 10 10s-4.47 10-10 10S2 17.53 2 12 6.47 2 12 2m3.59 5L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg></span></span><span class="mdx-badge__text">list[type[Exception]] | tuple[type[Exception]]</span></span></h4>
+<p>Список ошибок, при которых нужно повторить запрос. По умолчанию <code>RateLimitError</code>, <code>InternalError</code> и стандартные ошибки из <code>requests</code> (<code>RequestException</code>)</p>
+<h4 id="bypass_auth_level-bool">bypass_auth_level <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
+<p>Bypass пре-валидации на проверку уровня авторизации. По умолчанию <code>False</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>В sdk существует 3 уровня авторизации:</p>
+<ul>
+<li><code>NO</code>: <strong>Без авторизации</strong> - доступен поиск</li>
+<li><code>ACCESS</code>: <strong>Access-токен</strong> - доступно большинство всех возможностей</li>
+<li><code>REFRESH</code>: <strong>Refresh-token</strong> - то же, что и <code>ACCESS</code> + обновление токена и выход</li>
+</ul>
+<p>Если вы попытаетесь выполнить запрос который выше по масти, будет вызвана ошибка <code>InsufficientAuthLevelError</code>.<br />
+Чтобы этой ошибки не было, нужно поставить <code>bypass_auth_level=True</code>. Тогда будет вызвана стандартная ошибка от самого ИТД (<code>RefreshTokenMissingError</code> / <code>UnauthorizedError</code> или похожие)</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>При вызове ошибок <code>RefreshTokenMissingError</code> и <code>UnauthorizedError</code> может попросить оставить Issue на github. Если у вас включен <code>bypass_auth_level</code>, игнорируйте эту просьбу.</p>
+</div>
 
 
 
