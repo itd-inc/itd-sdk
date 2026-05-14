@@ -3,12 +3,13 @@ from typing import TYPE_CHECKING
 
 from requests import Response
 
-from itd.base import catch_errors
+from itd.base import catch_errors, rate_limit
 from itd.enums import AuthLevel
 from itd.exceptions import InvalidPasswordError, SamePasswordError, InvalidOldPasswordError, SessionNotFoundError, SessionExpiredError, SessionRevokedError
 if TYPE_CHECKING:
     from itd.client import Client
 
+@rate_limit()
 @catch_errors(SessionExpiredError(), SessionNotFoundError(), SessionRevokedError())
 def refresh_token(client: Client) -> Response:
     return client.request('post', 'v1/auth/refresh', level=AuthLevel.REFRESH)

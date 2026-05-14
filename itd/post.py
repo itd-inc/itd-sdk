@@ -5,25 +5,37 @@ from time import sleep
 
 from pydantic import Field, BaseModel, field_validator
 
-from itd.base import ITDBaseModel, refresh_wrapper, ITDList
-from itd.client import Client
 from itd.comment import Comment, Comments
-from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL
 from itd.file import PostAttach
 from itd.hashtag import Hashtag
 from itd.poll import Poll, NewPoll, PollOption
 from itd.report import Report
 from itd.span import Span
 from itd.user import User, _UserBase, Me
-from itd.utils import to_uuid, parse_datetime, format_attachments, ATTACHMENTS, parse_html, parse_md
+
 from itd.api.posts import (
     get_post, create_post, like_post, unlike_post, repost, view_post, pin_post, unpin_post,
     delete_post, restore_post, edit_post, get_posts, get_user_posts, get_liked_posts
 )
 from itd.api.hashtags import get_posts_by_hashtag
+from itd.base import ITDBaseModel, refresh_wrapper, ITDList
+from itd.client import Client
+from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL, ViewSource
 from itd.logger import get_logger
+from itd.request import decode_jwt_payload
+from itd.utils import to_uuid, parse_datetime, format_attachments, ATTACHMENTS, parse_html, parse_md
 
 l = get_logger('post')
+
+# class ViewerSession:
+#     def __init__(self, payload: dict) -> None:
+#         self.p = self.post_id = UUID(payload['p'])
+#         self.u = self.user_id = UUID(payload['u'])
+#         self.e = self.expires_at = datetime.fromtimestamp(payload['e'])
+#         if isinstance(payload['s'], list):
+#             self.s = self.source = [ViewSource(source) for source in payload['s']]
+#         else:
+#             self.s = self.source = ViewSource(payload['s'])
 
 
 class Post(ITDBaseModel):
@@ -58,6 +70,8 @@ class Post(ITDBaseModel):
 
     wall_recipient_id: UUID | None = Field(None, alias='wallRecipientId')
     wall_recipient: User | None = Field(None, alias='wallRecipient')
+    # vs: ViewerSession
+    vs: str # from 13.05 it is string token
 
 
     def __init__(self, id: str | UUID, client: Client | None = None) -> None:
@@ -369,6 +383,11 @@ class _PostValidate(BaseModel, Post): # BaseModel MUST be first or you ll have s
     def validate_wall_recipient(cls, wall_recipient: dict | None):
         if wall_recipient is not None:
             return User._from_dict(wall_recipient, False)
+
+    # @field_validator('vs', mode='plain')
+    # @classmethod
+    # def validate_vs(cls, vs: str):
+    #     return ViewerSession(decode_jwt_payload(vs))
 
 
 
