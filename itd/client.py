@@ -80,10 +80,10 @@ class Config:
                 self._user_agent = self.user_agent
 
         if self.rate_limit_wait is not None:
-            l.warning('config.rate_limit_wait is deprecated and will be removed in 2.2.0. Please use config.retry_delay')
+            l.warning('config.rate_limit_wait is deprecated and will be removed in 2.4.0. Please use config.retry_delay')
             self.retry_delay = self.rate_limit_wait
         if self.retry_on_rate_limits is not None:
-            l.warning('config.retry_on_rate_limits is deprecated and will be removed in 2.2.0. Please use config.retry_enabled')
+            l.warning('config.retry_on_rate_limits is deprecated and will be removed in 2.4.0. Please use config.retry_enabled')
             self.retry_enabled = self.retry_on_rate_limits
 
         self._retry_exceptions = (tuple(self.retry_exceptions) if isinstance(self.retry_exceptions, list) else self.retry_exceptions) or (RateLimitError, InternalError, RequestException)
