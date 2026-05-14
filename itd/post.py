@@ -20,9 +20,8 @@ from itd.api.posts import (
 from itd.api.hashtags import get_posts_by_hashtag
 from itd.base import ITDBaseModel, refresh_wrapper, ITDList
 from itd.client import Client
-from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL, ViewSource
+from itd.enums import PostsTab, UserPostSorting, ReportReason, ReportTargetType, ParseMode, ALL
 from itd.logger import get_logger
-from itd.request import decode_jwt_payload
 from itd.utils import to_uuid, parse_datetime, format_attachments, ATTACHMENTS, parse_html, parse_md
 
 l = get_logger('post')
