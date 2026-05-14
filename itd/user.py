@@ -106,10 +106,11 @@ class Privacy(ITDBaseModel):
         instance._user = user
         return instance
 
-    def __getattribute__(self, name: str):
-        if name in ('is_private', 'wall_access', 'likes_visibility') and object.__getattribute__(self, '_user'):
-            setattr(self, name, getattr(object.__getattribute__(self, '_user'), name))
-        return super().__getattribute__(name)
+    if not TYPE_CHECKING:
+        def __getattribute__(self, name: str):
+            if name in ('is_private', 'wall_access', 'likes_visibility') and object.__getattribute__(self, '_user'):
+                setattr(self, name, getattr(object.__getattribute__(self, '_user'), name))
+            return super().__getattribute__(name)
 
 
 class _PrivacyValidate(BaseModel, Privacy):
@@ -204,7 +205,7 @@ class _UserBase(ITDBaseModel):
 
     @property
     def liked_posts(self) -> LikedPosts:
-        if not hasattr(self, '_posts'):
+        if not hasattr(self, '_liked_posts'):
             from itd.post import LikedPosts
             self._liked_posts = LikedPosts(self, client=self.client)
         return self._liked_posts
@@ -515,11 +516,12 @@ class Me(_UserBase):
             self._pins = [Pin(pin, self) for pin in get_pins(self.client).json()['data']['pins']]
         return self._pins
 
-    def __getattribute__(self, name: str):
-        value = super().__getattribute__(name)
-        if name == 'pin' and value is not None and getattr(value, '_user', None) is None:
-            value._user = self
-        return value
+    if not TYPE_CHECKING:
+        def __getattribute__(self, name: str):
+            value = super().__getattribute__(name)
+            if name == 'pin' and value is not None and getattr(value, '_user', None) is None:
+                value._user = self
+            return value
 
 
 

@@ -12,7 +12,7 @@ from pydantic_core import PydanticUndefinedType
 
 from itd._default import get_default_client
 from itd.logger import get_logger
-from itd.exceptions import ITDException, ValidationError, RateLimitError, UnauthorizedError, AccessTokenExpiredError, DEFAULT_ERRORS
+from itd.exceptions import ITDException, ValidationError, RateLimitError, UnauthorizedError, AccessTokenExpiredError, DEFAULT_ERRORS, InternalError
 from itd.enums import All, ALL, DebugResponseMode, RateLimitMode, BATCH, Batch
 if TYPE_CHECKING:
     from itd.client import Client
@@ -147,7 +147,6 @@ class ITDList[T](ITDBaseModel, list[T]):
             length = len(objects)
             if objects and (client or self.client).config.userposts_add_pinned_post and length == batch + 1: # skip pinned post
                 length -= 1
-            l.debug('%s', objects)
 
             if left is not None:
                 left -= length
@@ -370,12 +369,16 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
                 sleep(max(delay, 0))
             client.last_actions[func.__name__] = datetime.now()
 
+            if not client.config.retry_enabled:
+                return func(client, *args, **kwargs)
+
             while True:
                 try:
                     return func(client, *args, **kwargs)
-                except RateLimitError as e:
-                    l.info('rate limit on %s; wait %ss', func.__name__, e.retry_after or 10)
-                    sleep(e.retry_after or 10)
+                except (client.config._retry_exceptions) as e:
+                    retry_after = getattr(e, 'retry_after', client.config.rate_limit_wait) or client.config.retry_delay
+                    l.info('%s on %s: wait %ss', e.__class__.__name__, func.__name__, retry_after)
+                    sleep(retry_after)
 
         return wrapper
     return decorator

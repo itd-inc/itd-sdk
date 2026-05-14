@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from itd.enums import PostsTab, UserPostSorting
 from itd.poll import NewPoll
 from itd.exceptions import (
-    NotFoundError, ForbiddenError, RequiresVerificationError, ValidationError, AlreadyRepostedError, CantRepostYourselfError,
+    NotFoundError, ForbiddenError, RequiresSubscriptionError, ValidationError, AlreadyRepostedError, CantRepostYourselfError,
     NotPinnedError, EditExpiredError, BannedWordError
 )
 from itd.base import rate_limit, catch_errors
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from itd.client import Client
 
 @rate_limit(1, 10, 30)
-@catch_errors(NotFoundError('Wall recipient'), ForbiddenError('post - some files not owned'), RequiresVerificationError('Video uploading'), BannedWordError('Post'), ValidationError())
+@catch_errors(NotFoundError('Wall recipient'), ForbiddenError('post - some files not owned'), RequiresSubscriptionError('Video uploading'), BannedWordError('Post'), ValidationError())
 def create_post(
     client: Client,
     content: str | None = None,
@@ -49,7 +49,7 @@ def get_post(client: Client, id: UUID):
     return client.request('get', f'posts/{id}')
 
 @rate_limit(None, 1, 5)
-@catch_errors(NotFoundError('Post'), ForbiddenError('edit post'), EditExpiredError())
+@catch_errors(NotFoundError('Post'), ForbiddenError('edit post'), EditExpiredError(), BannedWordError('Post'))
 def edit_post(client: Client, id: UUID, content: str, spans: list[dict] = []):
     return client.request('put', f'posts/{id}', {'content': content, 'spans': spans})
 
@@ -74,7 +74,7 @@ def unpin_post(client: Client, id: UUID):
     return client.request('delete', f'posts/{id}/pin')
 
 @rate_limit(1, 10, 30)
-@catch_errors(NotFoundError('Post'), AlreadyRepostedError(), CantRepostYourselfError(), ValidationError())
+@catch_errors(NotFoundError('Post'), AlreadyRepostedError(), CantRepostYourselfError(), ValidationError(), BannedWordError('Post'))
 def repost(client: Client, id: UUID, content: str | None = None):
     data = {}
     if content:

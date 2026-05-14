@@ -6,12 +6,13 @@ from dataclasses import dataclass, field
 from requests import Session
 from requests.utils import default_user_agent
 from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
 
 from itd._default import _default_client, set_default_client
-from itd.exceptions import UnauthorizedError, InsufficientAuthLevelError, AccessTokenExpiredError
+from itd.exceptions import UnauthorizedError, InsufficientAuthLevelError, AccessTokenExpiredError, RateLimitError, InternalError
 from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
-from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent
+from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent, AuthLevel
 from itd.user import Me, User
 from itd.api.auth import refresh_token, change_password, logout
 from itd.api.search import search
@@ -45,6 +46,13 @@ class Config:
     solve_challenge: bool = True
     load_comments_from_post: bool = False
     parse_mode: ParseMode = ParseMode.NO
+    rate_limit_wait: int | None = None # DEPRECATED
+    retry_on_rate_limits: bool | None = None # DEPRECATED
+    retry_enabled: bool = True
+    retry_delay: float = 10 # delay before next attempt (after rate limit error) if retry_after is not provided in request
+    retry_max_retries: int | None = None # none for no limit
+    retry_exceptions: tuple[type[Exception]] | list[type[Exception]] | None = None
+    bypass_auth_level: bool = False
 
     def __post_init__(self):
         if self.rate_limit_default:
@@ -71,10 +79,19 @@ class Config:
             case _:
                 self._user_agent = self.user_agent
 
+        if self.rate_limit_wait is not None:
+            l.warning('config.rate_limit_wait is deprecated and will be removed in 2.2.0. Please use config.retry_delay')
+            self.retry_delay = self.rate_limit_wait
+        if self.retry_on_rate_limits is not None:
+            l.warning('config.retry_on_rate_limits is deprecated and will be removed in 2.2.0. Please use config.retry_enabled')
+            self.retry_enabled = self.retry_on_rate_limits
+
+        self._retry_exceptions = (tuple(self.retry_exceptions) if isinstance(self.retry_exceptions, list) else self.retry_exceptions) or (RateLimitError, InternalError, RequestException)
 
 
 
 class Client:
+    auth_level: AuthLevel = AuthLevel.NO
     access_token: str | None = None
     refresh_token: str | None = None
     _user = None
@@ -90,18 +107,20 @@ class Client:
         self.session.mount('https://', adapter)
 
         if access:
+            self.auth_level = AuthLevel.ACCESS
             self.access_token = access.replace('Bearer ', '')
 
         if refresh:
+            self.auth_level = AuthLevel.REFRESH
             self.refresh_token = refresh
             self.session.cookies.set('refresh_token', refresh, path='/', domain=self.config.url)
-            if access is None:
-                self.refresh_auth()
+            # if access is None:
+            #     self.refresh_auth()
 
         if _default_client is None or config.is_default:
             set_default_client(self)
 
-    def request(self, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}):
+    def request(self, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}, level=AuthLevel.ACCESS):
         """Сделать запрос
 
         Args:
@@ -110,11 +129,18 @@ class Client:
             params (dict, optional): Параметры. Defaults to {}.
             files (dict[str, tuple[str, BufferedReader | bytes]], optional): Файлы. Defaults to {}.
         """
-        l.debug('%s %s params=%s', method.upper(), url, params)
+        l.debug('%s %s params=%s authlevel=%s', method.upper(), url, params, level.value)
+
+        if level > self.auth_level and not self.config.bypass_auth_level:
+            raise InsufficientAuthLevelError(self.auth_level, level)
+
+        if level >= AuthLevel.ACCESS and self.access_token is None and url != 'v1/auth/refresh':
+            self.refresh_auth()
+
         def _fetch():
             return fetch(self, method, url, params, files)
 
-        if not self.refresh_token:
+        if not self.refresh_token or url == 'v1/auth/refresh':
             return _fetch()
 
         try:
@@ -130,8 +156,6 @@ class Client:
             str: Токен
         """
         l.debug('refresh token')
-        if not self.refresh_token:
-            raise InsufficientAuthLevelError()
 
         res = refresh_token(self)
         res.raise_for_status()

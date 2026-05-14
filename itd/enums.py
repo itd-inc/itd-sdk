@@ -1,6 +1,26 @@
 from enum import Enum
 from typing import Literal
 
+class AuthLevel(Enum):
+    NO = 'no'
+    ACCESS = 'access'
+    REFRESH = 'refresh'
+    # LOGIN = 'login' # 🤫
+
+    def __gt__(self, other):
+        return _AUTH_LEVEL_HIERARCHY.index(self) > _AUTH_LEVEL_HIERARCHY.index(other)
+
+    def __lt__(self, other):
+        return _AUTH_LEVEL_HIERARCHY.index(self) < _AUTH_LEVEL_HIERARCHY.index(other)
+
+    def __ge__(self, other):
+        return _AUTH_LEVEL_HIERARCHY.index(self) >= _AUTH_LEVEL_HIERARCHY.index(other)
+
+    def __le__(self, other):
+        return _AUTH_LEVEL_HIERARCHY.index(self) <= _AUTH_LEVEL_HIERARCHY.index(other)
+
+_AUTH_LEVEL_HIERARCHY = [AuthLevel.NO, AuthLevel.ACCESS, AuthLevel.REFRESH]
+
 class RateLimitMode(Enum):
     NO = 'no'
     MIN = 'min' # for one-time actions (eg script just to like post)
@@ -81,18 +101,18 @@ class AccessType(Enum):
     EVERYONE = 'everyone' # все
 
     def __gt__(self, other):
-        return _HIERARCHY.index(self) > _HIERARCHY.index(other)
+        return _ACCESS_TYPE_HIERARCHY.index(self) > _ACCESS_TYPE_HIERARCHY.index(other)
 
     def __lt__(self, other):
-        return _HIERARCHY.index(self) < _HIERARCHY.index(other)
+        return _ACCESS_TYPE_HIERARCHY.index(self) < _ACCESS_TYPE_HIERARCHY.index(other)
 
     def __ge__(self, other):
-        return _HIERARCHY.index(self) >= _HIERARCHY.index(other)
+        return _ACCESS_TYPE_HIERARCHY.index(self) >= _ACCESS_TYPE_HIERARCHY.index(other)
 
     def __le__(self, other):
-        return _HIERARCHY.index(self) <= _HIERARCHY.index(other)
+        return _ACCESS_TYPE_HIERARCHY.index(self) <= _ACCESS_TYPE_HIERARCHY.index(other)
 
-_HIERARCHY = [AccessType.EVERYONE, AccessType.FOLLOWERS, AccessType.MUTUAL, AccessType.EVERYONE] # 100% that hierarcy is spelled wrong
+_ACCESS_TYPE_HIERARCHY = [AccessType.EVERYONE, AccessType.FOLLOWERS, AccessType.MUTUAL, AccessType.EVERYONE] # 100% that hierarcy is spelled wrong
 
 
 class SpanType(Enum):

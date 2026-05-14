@@ -3,15 +3,16 @@ from typing import TYPE_CHECKING
 
 from requests import Response
 
-from itd.base import catch_errors
-from itd.request import fetch
+from itd.base import catch_errors, rate_limit
+from itd.enums import AuthLevel
 from itd.exceptions import InvalidPasswordError, SamePasswordError, InvalidOldPasswordError, SessionNotFoundError, SessionExpiredError, SessionRevokedError
 if TYPE_CHECKING:
     from itd.client import Client
 
+@rate_limit()
 @catch_errors(SessionExpiredError(), SessionNotFoundError(), SessionRevokedError())
 def refresh_token(client: Client) -> Response:
-    return fetch(client, 'post', 'v1/auth/refresh')
+    return client.request('post', 'v1/auth/refresh', level=AuthLevel.REFRESH)
 
 @catch_errors(InvalidPasswordError(), SamePasswordError(), InvalidOldPasswordError())
 def change_password(client: Client, old: str, new: str) -> Response:
@@ -19,4 +20,4 @@ def change_password(client: Client, old: str, new: str) -> Response:
 
 @catch_errors()
 def logout(client: Client) -> Response:
-    return client.request('post', 'v1/auth/logout')
+    return client.request('post', 'v1/auth/logout', level=AuthLevel.REFRESH)

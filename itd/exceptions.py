@@ -2,6 +2,9 @@ from typing import Callable
 
 from requests import Response
 
+from itd.enums import AuthLevel
+
+
 class ITDException(Exception):
     code: str | None = None # ['error']['code']
     message: str | None = None # ['error']['message']
@@ -110,8 +113,8 @@ class InvalidPasswordError(PasswordError, ValidateError):
 class NoRightsError(ITDException): pass
 
 class InsufficientAuthLevelError(NoRightsError):
-    def __init__(self) :
-        self.text = 'Insufficient auth level'
+    def __init__(self, current: AuthLevel, requires: AuthLevel) :
+        self.text = f'Insufficient auth level (current is {current.name}, requires {requires.name})'
 
 class PinNotOwnedError(NoRightsError):
     code = "PIN_NOT_OWNED"
@@ -128,6 +131,11 @@ class RequiresVerificationError(NoRightsError):
     code = 'GIF_REQUIRES_VERIFICATION'
     def __init__(self, obj: str):
         self.text = f'{obj} allowed only for verificated users'
+
+class RequiresSubscriptionError(NoRightsError):
+    code = 'VIDEO_REQUIRES_NUKSTA'
+    def __init__(self, obj: str):
+        self.text = f'{obj} allowed only for users with НУКСТА subscription'
 
 
 class UsernameTakenError(ValidateError):
@@ -226,6 +234,7 @@ class NotPinnedError(ITDException):
     text = 'Post not found or is not pinned'
 
 class InternalError(ITDException):
+    status_code = 502
     code = 'INTERNAL_ERROR'
     text = 'Internal server error'
 
@@ -247,4 +256,4 @@ class ProfileRequiredError(ITDException):
     text = 'No profile. Please create your profile first'
 
 
-DEFAULT_ERRORS = (RateLimitError(), InvalidAccessTokenError(), UnauthorizedError(), AccessTokenExpiredError(), AccountBannedError(), InternalError(), ProfileRequiredError())
+DEFAULT_ERRORS = (RateLimitError(), InvalidAccessTokenError(), UnauthorizedError(), AccessTokenExpiredError(), AccountBannedError(), InternalError(), ProfileRequiredError(), RefreshTokenMissingError())
