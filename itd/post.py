@@ -53,8 +53,8 @@ class DwellEvent(BaseModel):
 
     @field_serializer('has_seen', mode='plain')
     @classmethod
-    def serialize_has_seen(cls, value: int):
-        return bool(value)
+    def serialize_has_seen(cls, value: bool):
+        return int(value)
 
 
 class DwellTracker(ITDBaseModel):
@@ -74,11 +74,11 @@ class DwellTracker(ITDBaseModel):
         if not self.events:
             return False
         l.info('dwell send batch')
-        send_dwell(self.client, [event.model_dump(mode='json') for event in self.events], self.sid)
+        send_dwell(self.client, [event.model_dump(mode='json', by_alias=True) for event in self.events], self.sid)
         self.events.clear()
         return True
 
-    def record(self, id: UUID, vs: str, duration: int, entered_at: datetime, source: ViewSource, reason: ViewReason = ViewReason.NORMAL):
+    def record(self, id: UUID, vs: str, duration: int, entered_at: datetime, source: ViewSource, source_context: str | None = None, reason: ViewReason = ViewReason.NORMAL):
         """Записать событие просмотра
 
         Args:
@@ -98,7 +98,7 @@ class DwellTracker(ITDBaseModel):
                 xt=round(entered_at.timestamp() + duration),
                 r=reason,
                 s=source,
-                sc=None,
+                sc=source_context,
                 b=id in self.seen_posts
             )
         )
@@ -107,6 +107,9 @@ class DwellTracker(ITDBaseModel):
             self.send()
 
     def _start_timer(self):
+        if not self.client.config.dwell_send_interval:
+            return
+
         def loop():
             while True:
                 sleep(self.client.config.dwell_send_interval)
@@ -116,11 +119,13 @@ class DwellTracker(ITDBaseModel):
         self._thread.start()
 
         def on_exit():
+            l.debug('stop dwell timer')
             if self._thread:
                 self._thread.join(timeout=0)
             self.send()
 
-        register(on_exit)
+        if self.client.config.dwell_save_on_quit:
+            register(on_exit)
 
 
 
@@ -160,8 +165,11 @@ class Post(ITDBaseModel):
     vs: str | None = None # from 13.05 it is string token  # none for just created posts
 
 
-    def __init__(self, id: str | UUID, client: Client | None = None) -> None:
+    def __init__(self, id: str | UUID, source: ViewSource = ViewSource.POST_PAGE, source_context: str | None = None, client: Client | None = None) -> None:
         self.id = to_uuid(id)
+        self.source = source
+        self.source_context = source_context
+
         super().__init__(client)
 
     def for_client(self, client: Client):
@@ -222,7 +230,7 @@ class Post(ITDBaseModel):
         return instance
 
     @classmethod
-    def _from_dict(cls, data: dict, set_loaded: bool = True, client: Client | None = None) -> 'Post':
+    def _from_dict(cls, data: dict, source: ViewSource = ViewSource.POST_PAGE, source_context: str | None = None, set_loaded: bool = True, client: Client | None = None) -> 'Post':
         instance = cls.__new__(cls)
         super(Post, instance).__init__(client)
 
@@ -232,6 +240,8 @@ class Post(ITDBaseModel):
             setattr(instance, name, value)
 
         instance._loaded = set_loaded
+        instance.source = source
+        instance.source_context = source_context
         return instance
 
 
@@ -319,7 +329,7 @@ class Post(ITDBaseModel):
 
         return Post._from_dict(post, client=client)
 
-    def view(self, client: Client | None = None, entered_at: datetime | None = None, duration: int = 250, view_source: ViewSource = ViewSource.POST_PAGE, reason: ViewReason = ViewReason.NORMAL) -> None:
+    def view(self, client: Client | None = None, entered_at: datetime | None = None, duration: int = 250, reason: ViewReason = ViewReason.NORMAL) -> None:
         """Просмотреть пост
 
         Args:
@@ -330,7 +340,7 @@ class Post(ITDBaseModel):
             if self.vs is None:
                 self.refresh(c)
                 assert self.vs
-            c.dwell_tracker.record(self.id, self.vs, duration, entered_at or datetime.now() - timedelta(seconds=duration), view_source, reason)
+            c.dwell_tracker.record(self.id, self.vs, duration, entered_at or datetime.now() - timedelta(seconds=duration), self.source, self.source_context, reason)
         else:
             view_post(c, self.id)
         if c == self.client:
@@ -448,7 +458,7 @@ class _PostValidate(BaseModel, Post): # BaseModel MUST be first or you ll have s
     def validate_original_post(cls, post: dict | None = None):
         if post is None:
             return
-        return Post._from_dict(post, False)
+        return Post._from_dict(post, set_loaded=False)
 
     @field_validator('poll', mode='plain')
     @classmethod
@@ -486,6 +496,8 @@ class _PostValidate(BaseModel, Post): # BaseModel MUST be first or you ll have s
 
 class _BasePosts(ITDList[Post]):
     _limit = 50
+    source: ViewSource
+    source_context: str | None = None
 
     @staticmethod
     def _get_cursor(data: dict):
@@ -500,7 +512,7 @@ class _BasePosts(ITDList[Post]):
         return data['posts']
 
     def _extend(self, objects: list, client: Client):
-        self.extend([Post._from_dict(post, client=client) for post in objects])
+        self.extend([Post._from_dict(post, self.source, self.source_context, client=client) for post in objects])
 
     def __setattr__(self, name: str, value) -> None:
         if name == '_client':
@@ -516,6 +528,13 @@ class Posts(_BasePosts):
     def __init__(self, tab: PostsTab = PostsTab.POPULAR, client: Client | None = None) -> None:
         super().__init__(client)
         self.tab = tab
+        match tab:
+            case PostsTab.POPULAR:
+                self.source = ViewSource.FEED_GLOBAL
+            case PostsTab.FOLLOWING:
+                self.source = ViewSource.FEED_FOLLOWING
+            case PostsTab.CLAN:
+                self.source = ViewSource.FEED_CLAN
 
     def _fetch(self, client: Client, limit: int) -> dict:
         return get_posts(client, self.cursor, limit, self.tab).json()['data']
@@ -541,6 +560,7 @@ class UserPosts(_BasePosts):
     _load_with_parent = False
     cursor: datetime | None = None
     _force_remove_pinned_post: bool = False
+    source = ViewSource.PROFILE
 
     # ! not includes posts from other users (wall posts)
     # def _get_total(self, data: dict):
@@ -558,6 +578,7 @@ class UserPosts(_BasePosts):
             raise ValueError('User must be instance of User or Me class')
 
         self.sorting = sorting # sort is busy
+        self.source_context = str(self.user.id)
 
     def _fetch(self, client: Client, limit: int) -> dict:
         if self.sorting == UserPostSorting.NEW and client.config.userposts_add_pinned_post and not self._force_remove_pinned_post:
@@ -619,6 +640,7 @@ class LikedPosts(_BasePosts): # [] if forbidden
 class HashtagPosts(_BasePosts):
     hashtag: Hashtag
     cursor: UUID | None = None
+    source = ViewSource.HASHTAG
 
     def __init__(self, hashtag: Hashtag | str, client: Client | None = None) -> None:
         super().__init__(client)
@@ -626,12 +648,13 @@ class HashtagPosts(_BasePosts):
         if isinstance(hashtag, str):
             hashtag = Hashtag(hashtag, self.client)
         self.hashtag = hashtag
+        self.source_context = self.hashtag.name
 
     def _fetch(self, client: Client, limit: int) -> dict:
         return get_posts_by_hashtag(client, self.hashtag.name, self.cursor, limit).json()['data']
 
     def _extend(self, objects: list, client: Client):
-        self.extend([Post._from_dict(post, False, client=client) for post in objects])
+        self.extend([Post._from_dict(post, self.source, self.source_context, set_loaded=False, client=client) for post in objects])
 
     def _get_total(self, data: dict):
         return data['hashtag']['postsCount']

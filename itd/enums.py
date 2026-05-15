@@ -14,8 +14,8 @@ class ViewSource(Enum):
 class ViewReason(Enum):
     NORMAL = 0 # стандартное
     BLUR = 1 # страница скрыта (listener blur)
-    HIDDEN = 2 # тоже страница скрыты (listener visibilitychange и доп.проверка что document.hidden)
-    PAGE_HIDE = 3 # тоже страница скрыта (listener pagehiden)
+    HIDDEN = 2 # тоже страница скрыта (listener visibilitychange и доп.проверка что document.hidden)
+    PAGE_HIDE = 3 # и это тоже страница скрыта (listener pagehiden)
     UNOBSERVE = 4 # что то заумное на фронтедерском
     THRESHOLD_MET = 5 # трэшхолд типо плавный просмотр, я не осбо понял для чего это
 

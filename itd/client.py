@@ -69,6 +69,7 @@ class Config:
     dwell_enabled: bool = True
     dwell_max_buffer: int = 20
     dwell_send_interval: float = 2
+    dwell_save_on_quit: bool = True
 
     def __post_init__(self):
         if self.rate_limit_default:
@@ -138,6 +139,7 @@ class Client:
 
         if self.auth_level > AuthLevel.NO and self.config.dwell_enabled:
             self.dwell_tracker = DwellTracker(self)
+            self.dwell_tracker._start_timer()
         else:
             self.dwell_tracker = None
 
