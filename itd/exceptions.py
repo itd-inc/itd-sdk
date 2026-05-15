@@ -95,6 +95,21 @@ class AccessTokenExpiredError(AuthError):
     json_check = staticmethod(lambda json: json.get('error') == 'token expired')
 
 
+class LoginError(AuthError): pass
+
+class InvalidCredentials(LoginError):
+    code = 'ACCOUNT_INVALID_CREDENTIALS'
+    text = 'Invalid login credentials'
+
+class CaptchaFailedError(LoginError):
+    code = 'TURNSTILE_VERIFICATION_FAILED'
+    text = 'Captcha check failed'
+
+class EmailDomainNotAllowed(LoginError):
+    code = 'ACCOUNT_EMAIL_DOMAIN_NOT_ALLOWED'
+    text = 'Email domain not allowed'
+
+
 class PasswordError(ITDException): pass
 
 class SamePasswordError(PasswordError, ValidateError):
@@ -247,13 +262,21 @@ class TargetUserBannedError(ITDException): # target banned (eg if you try to fol
     message = 'Этот аккаунт заблокирован'
     text = 'Target user has been deactivated'
 
-class AccountBannedError(ITDException): # you are banned
-    code = 'ACCOUNT_BANNED'
+class AccountBannedError(LoginError): # you are banned
+    json_check = staticmethod(lambda json: json.get('error', {}).get('code') in ('ACCOUNT_BANNED', 'ACCOUNT_DEACTIVATED'))
     text = 'Account has been deactivated'
+
+class AccountTemporarilyBannedError(LoginError):
+    code = 'ACCOUNT_DEACTIVATED'
+    text = 'Account has been temporarily deactivated'
 
 class ProfileRequiredError(ITDException):
     code = 'PROFILE_REQUIRED'
     text = 'No profile. Please create your profile first'
 
 
-DEFAULT_ERRORS = (RateLimitError(), InvalidAccessTokenError(), UnauthorizedError(), AccessTokenExpiredError(), AccountBannedError(), InternalError(), ProfileRequiredError(), RefreshTokenMissingError())
+DEFAULT_ERRORS = (
+    RateLimitError(), InvalidAccessTokenError(), UnauthorizedError(), AccessTokenExpiredError(),
+    AccountBannedError(), AccountTemporarilyBannedError(), InternalError(),
+    ProfileRequiredError(), RefreshTokenMissingError()
+)
