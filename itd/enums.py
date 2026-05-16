@@ -99,7 +99,7 @@ class AttachType(Enum):
     AUDIO = 'audio'
     IMAGE = 'image'
     VIDEO = 'video'
-    FILE = 'file'
+    MEDIA = 'media'
 
 class PostsTab(Enum):
     FOLLOWING = 'following'
