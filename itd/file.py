@@ -120,6 +120,16 @@ class PostAttach(ITDBaseModel):
         assert self.type == AttachType.VIDEO, 'Recording video progress allowed only for videos'
         c.dwell_tracker.record_video_progress(self._post.vs, self._post.source, self.id, played or duration, duration)
 
+    @property
+    def extension(self):
+        match self.type:
+            case AttachType.IMAGE:
+                return 'jpg'
+            case AttachType.VIDEO:
+                return 'mp4'
+            case AttachType.AUDIO:
+                return 'mp3'
+
 
 class _PostAttachValidate(BaseModel, PostAttach):
     pass
