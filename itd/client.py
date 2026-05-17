@@ -14,6 +14,7 @@ from itd.hashtag import Hashtag
 from itd.request import fetch, decode_jwt_payload
 from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent, AuthLevel
 from itd.user import Me, User
+from itd.post import DwellTracker
 from itd.api.auth import refresh_token, change_password, logout
 from itd.api.search import search
 from itd.api.users import get_follow_status
@@ -29,30 +30,46 @@ class Config:
     rate_limit: RateLimitMode = RateLimitMode.MID
     rate_limit_default: int | None = None # overrides ratelimit mode  # rate limit for standard actions
     rate_limit_actions: dict[str, float | int] = field(default_factory=lambda: {}) # overrides ratelimit mode  # custom rate limits for specific actions (eg. {'add_comment': 10})
+
     # is_logging_enabled: bool = True # TODO
     # logging_level = 'DEBUG'
+
     is_default: bool = False
+
     userposts_add_pinned_post: bool = True
+
     auto_load: bool = True
     load_on_getitem: int | All | Batch | None = 1
     load_on_iter: int | All | Batch | None = BATCH
     force_load_lists: bool = False # load lists even if has_more is False
+
     debug_response: DebugResponseMode = DebugResponseMode.NO
+
     timeout: float = 30
     timeout_file: float = 120
+
     url: str = 'xn--d1ah4a.com'
     url_api: str | None = None
     user_agent: UserAgent | str = UserAgent.BROWSER
     solve_challenge: bool = True
+
     load_comments_from_post: bool = False
+
     parse_mode: ParseMode = ParseMode.NO
+
     rate_limit_wait: int | None = None # DEPRECATED
     retry_on_rate_limits: bool | None = None # DEPRECATED
     retry_enabled: bool = True
     retry_delay: float = 10 # delay before next attempt (after rate limit error) if retry_after is not provided in request
     retry_max_retries: int | None = None # none for no limit
     retry_exceptions: tuple[type[Exception]] | list[type[Exception]] | None = None
+
     bypass_auth_level: bool = False
+
+    dwell_enabled: bool = True
+    dwell_max_buffer: int = 20
+    dwell_send_interval: float = 2
+    dwell_save_on_quit: bool = True
 
     def __post_init__(self):
         if self.rate_limit_default:
@@ -119,6 +136,12 @@ class Client:
 
         if _default_client is None or config.is_default:
             set_default_client(self)
+
+        if self.auth_level > AuthLevel.NO and self.config.dwell_enabled:
+            self.dwell_tracker = DwellTracker(self)
+            self.dwell_tracker._start_timer()
+        else:
+            self.dwell_tracker = None
 
     def request(self, method: str, url: str, params: dict = {}, files: dict[str, tuple[str, BufferedReader | bytes]] = {}, level=AuthLevel.ACCESS):
         """Сделать запрос

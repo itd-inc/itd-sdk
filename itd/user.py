@@ -210,6 +210,14 @@ class _UserBase(ITDBaseModel):
             self._liked_posts = LikedPosts(self, client=self.client)
         return self._liked_posts
 
+    @property
+    def url(self) -> str:
+        return f'https://xn--d1ah4a.com/@{self.username}'
+
+    @property
+    def link(self) -> str:
+        return self.url
+
 
 
 class User(_UserBase):

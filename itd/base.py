@@ -53,6 +53,9 @@ class ITDBaseModel:
             value._client = client
         object.__setattr__(self, name, value)
 
+    def _post_refresh(self):
+        pass
+
     @property
     def client(self) -> Client:
         return self._client
@@ -264,6 +267,7 @@ def refresh_wrapper(func):
 
         # self._loading = False
         self._loaded = True
+        self._post_refresh()
 
     return wrapper
 
@@ -292,6 +296,8 @@ def catch_errors(*exceptions: ITDException):
 
             assert isinstance(res, Response)
             if res.status_code == 204:
+                if client.config.debug_response != DebugResponseMode.NO:
+                    l.debug('no response')
                 return res
 
             if client.config.debug_response == DebugResponseMode.BEFORE:

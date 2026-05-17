@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build"]
+requires = ["uv_build~=0.11"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -14,7 +14,7 @@ version_provider = "uv"
 
 [project]
 name = "itd-sdk"
-version = "2.1.2"
+version = "2.3.0"
 description = "ITD client for python"
 readme = "README.md"
 authors = [
@@ -25,8 +25,7 @@ classifiers = [
     'Natural Language :: Russian',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Framework :: Pydantic :: 2',
-    'License :: OSI Approved :: MIT License'
+    'Framework :: Pydantic :: 2'
 ]
 keywords = ['itd', 'itdsocial']
 license = "MIT"
