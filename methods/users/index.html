@@ -11,6 +11,10 @@
         <link rel="canonical" href="https://itdsdk.qzz.io/docs/methods/users/">
       
       
+        <link rel="prev" href="../posts/">
+      
+      
+        <link rel="next" href="../../api/client/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>Пользователи / Аккаунт - itd-sdk</title>
+        <title>Пользователь - itd-sdk</title>
       
     
     
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Пользователи / Аккаунт
+              Пользователь
             
           </span>
         </div>
@@ -295,18 +299,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -327,7 +333,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -389,6 +395,543 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Пользователь
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Пользователь
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить пользователя
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Получить пользователя">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить пользователя по ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#username" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить пользователя по username
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить текущего пользователя
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Параметры
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Параметры">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#username_or_id-str-uuid-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        username_or_id | str | UUID Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Пожаловаться
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Пожаловаться">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Параметры
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Параметры">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reason-reportreason-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reason ReportReason Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        description str
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Подписаться
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Подписаться">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Отписаться
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Отписаться">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Заблокировать
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Заблокировать">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Разблокировать
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Разблокировать">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Пост на стене
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Пост на стене">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Параметры
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Параметры">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-str-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        content str One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spans-listspan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spans list[Span]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wall_recipient-uuid-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wall_recipient | UUID | User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attachments-listuuid-file-file-uuid-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        attachments [ | ] | | list[UUID | File] | File | UUID One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poll-newpoll-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poll NewPoll One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Обновить
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Обновить">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить ссылку на пользователя
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Выполнить действия для постов на стену
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Выполнить действия для просмотра лайков
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Список подписчиков
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Список подписок
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Список постов
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Список лайкнутых постов
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -970,7 +1513,40 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить пользователя по ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#username" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить пользователя по username
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Получить текущего пользователя
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         Параметры
@@ -982,10 +1558,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#username-str-required" class="md-nav__link">
+  <a href="#username_or_id-str-uuid-required" class="md-nav__link">
     <span class="md-ellipsis">
       
-        username str Required
+        username_or_id | str | UUID Required
       
     </span>
   </a>
@@ -994,17 +1570,6 @@
         
       </ul>
     </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ошибки
-      
-    </span>
-  </a>
   
 </li>
         
@@ -1017,12 +1582,12 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Обновить профиль
+        Пожаловаться
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Обновить профиль">
+    <nav class="md-nav" aria-label="Пожаловаться">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1038,10 +1603,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#username-str" class="md-nav__link">
+  <a href="#reason-reportreason-required" class="md-nav__link">
     <span class="md-ellipsis">
       
-        username str
+        reason ReportReason Required
       
     </span>
   </a>
@@ -1049,32 +1614,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#display_name-str" class="md-nav__link">
+  <a href="#description-str" class="md-nav__link">
     <span class="md-ellipsis">
       
-        display_name str
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bio-str" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        bio str
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#banner_id-uuid" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        banner_id UUID
+        description str
       
     </span>
   </a>
@@ -1106,84 +1649,6 @@
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Получить текущего пользователя
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Обновить настройки приватности
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Обновить настройки приватности">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#privacy-userprivacydata-required" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        privacy UserPrivacyData Required
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#userprivacydata" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Параметры UserPrivacyData
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#accesstype" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        AccessType
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
         Подписаться
       
     </span>
@@ -1193,22 +1658,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-required_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username str Required
+        Ошибки
       
     </span>
   </a>
@@ -1219,6 +1672,46 @@
     </nav>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Отписаться
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Отписаться">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ошибки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Заблокировать
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Заблокировать">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_13" class="md-nav__link">
@@ -1240,46 +1733,18 @@
   <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Отписаться
+        Разблокировать
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Отписаться">
+    <nav class="md-nav" aria-label="Разблокировать">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-required_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username str Required
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
-    <span class="md-ellipsis">
-      
         Ошибки
       
     </span>
@@ -1293,56 +1758,94 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Получить подписчиков
+        Пост на стене
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Получить подписчиков">
+    <nav class="md-nav" aria-label="Пост на стене">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Параметры
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Параметры">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-str-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        content str One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spans-listspan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spans list[Span]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wall_recipient-uuid-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wall_recipient | UUID | User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attachments-listuuid-file-file-uuid-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        attachments [ | ] | | list[UUID | File] | File | UUID One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#poll-newpoll-one-of-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        poll NewPoll One of required
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-required_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username str Required
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#limit-int" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        limit int
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#page-int" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        page int
+        Ошибки
       
     </span>
   </a>
@@ -1353,9 +1856,21 @@
     </nav>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Обновить
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Обновить">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         Ошибки
@@ -1371,80 +1886,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_20" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Получить подписки
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Получить подписки">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#_21" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-required_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username str Required
+        Получить ссылку на пользователя
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#limit-int_1" class="md-nav__link">
-    <span class="md-ellipsis">
       
-        limit int
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#page-int_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        page int
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
+        <li class="md-nav__item">
   <a href="#_22" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ошибки
+        Выполнить действия для постов на стену
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1452,55 +1911,32 @@
   <a href="#_23" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Заблокировать пользователя
+        Выполнить действия для просмотра лайков
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Заблокировать пользователя">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_24" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-uuid-required" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username | str | UUID Required
+        Список подписчиков
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#_25" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ошибки
+        Список подписок
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1508,167 +1944,21 @@
   <a href="#_26" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Разблокировать пользователя
+        Список постов
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Разблокировать пользователя">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_27" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Параметры
+        Список лайкнутых постов
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#username-str-uuid-required_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        username | str | UUID Required
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_28" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ошибки
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_29" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Получить список заблокированных пользователей
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Получить список заблокированных пользователей">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_30" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Параметры
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Параметры">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#limit-int_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        limit int
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#page-int_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        page int
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_31" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Удалить аккаунт
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Удалить аккаунт">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_32" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ошибки
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_33" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Восстановить аккаунт
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Восстановить аккаунт">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_34" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ошибки
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1692,266 +1982,306 @@
   
 
 
-<h1 id="_1">Пользователи / Аккаунт</h1>
+<h1 id="_1"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span> Пользователь</h1>
 <h2 id="_2">Получить пользователя</h2>
-<div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_user</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;itd_sdk&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="id">Получить пользователя по ID</h3>
+<div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">by_id</span><span class="p">(</span><span class="s1">&#39;587167e9-25ad-4948-afc0-2ee5bc9097ea&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="username">Получить пользователя по username</h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">by_username</span><span class="p">(</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">)</span>
+</code></pre></div>
+или
+<div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">by_u</span><span class="p">(</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="_3">Получить текущего пользователя</h3>
+<p><div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">me</span><span class="p">()</span>
+</code></pre></div>
+или
+<div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">Me</span><span class="p">()</span>
+</code></pre></div></p>
+<h3 id="_4">Параметры</h3>
+<h4 id="username_or_id-str-uuid-required">username_or_id <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span></span><span class="mdx-badge__text">str | UUID</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
+<p>Username или ID пользователя.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Для проверки на существование (<code>NotFoundError</code>) вызовите <a href="#_9"><code>user.refresh()</code></a> или любой аттрибут (если не включен <a href="../../config/#auto_load-bool"><code>config.auto_load</code></a>)</p>
+</div>
+<hr />
+<h2 id="_5"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.75.75 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0M9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg></span> Пожаловаться</h2>
+<p><div class="highlight"><pre><span></span><code><span class="n">report</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">report</span><span class="p">(</span>
+    <span class="n">reason</span><span class="o">=</span><span class="n">ReportReason</span><span class="o">.</span><span class="n">SPAM</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;описание&#39;</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="_3">Параметры</h3>
-<h4 id="username-str-required">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username пользователя или <code>"me"</code> для текущего пользователя.</p>
-<h3 id="_4">Ошибки</h3>
+Пожаловаться на пользователя</p>
+<h3 id="_6">Параметры</h3>
+<h4 id="reason-reportreason-required">reason <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.75.75 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0M9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg></span></span><span class="mdx-badge__text">ReportReason</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
+<p>Причина жалобы.
+ - <code>ReportReason.SPAM</code>: Спам или нежелательный контент
+ - <code>ReportReason.VIOLENCE</code>: Насилие или опасные действия
+ - <code>ReportReason.HATE</code>: Ненависть или травля
+ - <code>ReportReason.ADULT</code>: Контент для взрослых (18+)
+ - <code>ReportReason.FRAUD</code>: Дезинформация или обман
+ - <code>ReportReason.OTHER</code>: Другое</p>
+<h4 id="description-str">description <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
+<p>Описание жалобы.</p>
+<h3 id="_7">Ошибки</h3>
 <ul>
-<li><code>NotFound</code> - пользователь не найден.</li>
-<li><code>UserBanned</code> - пользователь заблокирован.</li>
+<li><code>NotFoundError</code> - пользователь не найден.</li>
+<li><code>AlreadyReportedError</code> - вы уже оставляли жалобу на этого пользователя.</li>
+<li><code>ValidationError</code> - ошибка валидации (слишком длинное описание).</li>
 </ul>
 <hr />
-<h2 id="_5">Обновить профиль</h2>
-<div class="highlight"><pre><span></span><code><span class="n">profile</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">update_profile</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;username12345&#39;</span><span class="p">,</span>
-    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;Имя&#39;</span><span class="p">,</span>
-    <span class="n">bio</span><span class="o">=</span><span class="s1">&#39;Био 123&#39;</span><span class="p">,</span>
-    <span class="n">banner_id</span><span class="o">=</span><span class="kc">None</span>
+<h2 id="_8"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M136 128a120 120 0 1 1 240 0 120 120 0 1 1-240 0M48 482.3C48 383.8 127.8 304 226.3 304h59.4c98.5 0 178.3 79.8 178.3 178.3 0 16.4-13.3 29.7-29.7 29.7H77.7C61.3 512 48 498.7 48 482.3M544 96c13.3 0 24 10.7 24 24v48h48c13.3 0 24 10.7 24 24s-10.7 24-24 24h-48v48c0 13.3-10.7 24-24 24s-24-10.7-24-24v-48h-48c-13.3 0-24-10.7-24-24s10.7-24 24-24h48v-48c0-13.3 10.7-24 24-24"/></svg></span> Подписаться</h2>
+<p><div class="highlight"><pre><span></span><code><span class="n">followers_count</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">follow</span><span class="p">()</span>
+</code></pre></div>
+Подписаться на пользователя.</p>
+<h3 id="_9">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> - пользователь не найден.</li>
+<li><code>AlreadyFollowingError</code> - вы уже подписаны на этого пользователя.</li>
+<li><code>TooLargeError</code> - слишком длинный юзернейм.</li>
+<li><code>CantFollowYouself</code> - нельзя подписываться на самого себя.</li>
+<li><code>UserBlockedError</code> - пользователь заблокирован (или вы заблокировали его).</li>
+<li><code>TargetUserBannedError</code> - пользователь забанен.</li>
+</ul>
+<hr />
+<h2 id="_10"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M136 128a120 120 0 1 1 240 0 120 120 0 1 1-240 0M48 482.3C48 383.8 127.8 304 226.3 304h59.4c98.5 0 178.3 79.8 178.3 178.3 0 16.4-13.3 29.7-29.7 29.7H77.7C61.3 512 48 498.7 48 482.3M472 168h144c13.3 0 24 10.7 24 24s-10.7 24-24 24H472c-13.3 0-24-10.7-24-24s10.7-24 24-24"/></svg></span> Отписаться</h2>
+<p><div class="highlight"><pre><span></span><code><span class="n">followers_count</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">unfollow</span><span class="p">()</span>
+</code></pre></div>
+Отписаться от пользователя.</p>
+<h3 id="_11">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> - пользователь не найден.</li>
+<li><code>TooLargeError</code> - слишком длинный юзернейм.</li>
+<li><code>TargetUserBannedError</code> - пользователь забанен.</li>
+</ul>
+<hr />
+<h2 id="_12"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0a12 12 0 0 1 12 12 12 12 0 0 1-12 12A12 12 0 0 1 0 12 12 12 0 0 1 12 0m0 2A10 10 0 0 0 2 12c0 2.4.85 4.6 2.26 6.33L18.33 4.26A10 10 0 0 0 12 2m0 20a10 10 0 0 0 10-10c0-2.4-.85-4.6-2.26-6.33L5.67 19.74A10 10 0 0 0 12 22"/></svg></span> Заблокировать</h2>
+<div class="highlight"><pre><span></span><code><span class="n">user</span><span class="o">.</span><span class="n">block</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="_13">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> - пользователь не найден.</li>
+<li><code>TooLargeError</code> - слишком длинный юзернейм.</li>
+<li><code>AlreadyBlockedError</code> - пользователь итак заблокирован.</li>
+<li><code>CantBlockYourselfError</code> - нельзя заблокировать самого себя.</li>
+<li><code>TargetUserBannedError</code> - пользователь забанен.</li>
+</ul>
+<hr />
+<h2 id="_14">Разблокировать</h2>
+<div class="highlight"><pre><span></span><code><span class="n">user</span><span class="o">.</span><span class="n">unblock</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="_15">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> - пользователь не найден.</li>
+<li><code>TooLargeError</code> - слишком длинный юзернейм.</li>
+<li><code>NotBlockedError</code> - пользователь итак не заблокирован.</li>
+<li><code>TargetUserBannedError</code> - пользователь забанен.</li>
+</ul>
+<hr />
+<h2 id="_16"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z"/></svg></span> Пост на стене</h2>
+<div class="highlight"><pre><span></span><code><span class="n">user</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">content</span><span class="o">=</span><span class="s1">&#39;содержание&#39;</span><span class="p">,</span>
+    <span class="n">spans</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">attachments</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">poll</span><span class="o">=</span><span class="n">NewPoll</span><span class="p">(</span>
+        <span class="n">question</span><span class="o">=</span><span class="s1">&#39;тест&#39;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">],</span>
+        <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="_6">Параметры</h3>
+<h3 id="_17">Параметры</h3>
+<h4 id="content-str-one-of-required">content <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_one_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">One of required</span></span></h4>
+<p>Содержание поста.</p>
+<h4 id="spans-listspan">spans <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 9h16v2H4zm0 4h10v2H4z"/></svg></span></span><span class="mdx-badge__text">list[Span]</span></span></h4>
+<p>Стилизация (жирный, курсив, подчеркивание итд). Автоматически заполняется, если установлен <a href="../../config/#parse_mode-parsemode">parse_mode</a>. У ручного заполнения приоритет большем, чем у дефолтного (если у вас стоит parse_mode в конфиге, и вы напишите свой spans, применится ваш вариант).</p>
+<h4 id="wall_recipient-uuid-user">wall_recipient <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span></span><span class="mdx-badge__text">UUID | User</span></span></h4>
+<p>Получатель поста (для постов на стене). Может быть объектом пользователя или UUID.<br />
+Для поста на стене также можно использовать <code>user.post()</code>.</p>
+<h4 id="attachments-listuuid-file-file-uuid-one-of-required">attachments <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> [<span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg></span>] | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg></span></span><span class="mdx-badge__text">list[UUID | File] | File | UUID</span></span> <span class="mdx-badge mdx-badge_one_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">One of required</span></span></h4>
+<p>Вложения. Может быть списком, объектом файла или UUID.</p>
+<h4 id="poll-newpoll-one-of-required">poll <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 22V8h4v14zm7 0V2h4v20zm7 0v-8h4v8z"/></svg></span></span><span class="mdx-badge__text">NewPoll</span></span> <span class="mdx-badge mdx-badge_one_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">One of required</span></span></h4>
+<p>Опросник.</p>
+<h3 id="_18">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> - получатель поста не найден.</li>
+<li><code>ForbiddenError</code> - некоторые вложения не принадлежат клиенту или не существуют. Вложения должны быть загружены одним и тем же клиентом через <code>upload_file</code>.</li>
+<li><code>ValidationError</code> - ошибка валидации, скорее всего из-за слишком большого количества символов.</li>
+<li><code>RequiresSubscriptionError</code> - для публикации видео нужна верификация или НУКСТА.</li>
+<li><code>BannedWordError</code> - в посте содержатся <a href="https://itdsdk.qzz.io/banned-words">запрещенные слова</a>.</li>
+</ul>
+<hr />
+<h2 id="_19"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 0 0-8 8 8 8 0 0 0 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></svg></span> Обновить</h2>
+<div class="highlight"><pre><span></span><code><span class="n">user</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="_20">Ошибки</h3>
+<ul>
+<li><code>NotFoundError</code> (<code>User</code>) - пользователь не найден.</li>
+<li><code>TooLargeError</code> - слишком дилнный юзернейм.</li>
+<li><code>NotFoundError</code> (<code>Profile</code>) - профиль не найден (пользователь только привязал почту, но еще не добавил эмоджи клан и имя)</li>
+<li><code>TargetUserBannedError</code> - пользователь забанен.</li>
+</ul>
+<hr />
+<h2 id="_21"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1M8 13h8v-2H8zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4a5 5 0 0 0 5-5 5 5 0 0 0-5-5"/></svg></span> Получить ссылку на пользователя</h2>
+<p><div class="highlight"><pre><span></span><code><span class="n">link</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">url</span>
+</code></pre></div>
+или
+<div class="highlight"><pre><span></span><code><span class="n">link</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">link</span>
+</code></pre></div></p>
+<hr />
+<h2 id="_22">Выполнить действия для постов на стену</h2>
+<div class="highlight"><pre><span></span><code><span class="n">is_succeed</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">complete_actions_for_wall_access</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="_23">Выполнить действия для просмотра лайков</h2>
+<div class="highlight"><pre><span></span><code><span class="n">is_success</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">complete_actions_for_likes_visibility</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="_24"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span> Список подписчиков</h2>
+<div class="highlight"><pre><span></span><code><span class="n">followers</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">followers</span> <span class="c1"># list</span>
+</code></pre></div>
+<h2 id="_25"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span> Список подписок</h2>
+<div class="highlight"><pre><span></span><code><span class="n">following</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">following</span> <span class="c1"># list</span>
+</code></pre></div>
+<h2 id="_26"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z"/></svg></span> Список постов</h2>
+<div class="highlight"><pre><span></span><code><span class="n">posts</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">posts</span> <span class="c1"># UserPosts</span>
+<span class="n">posts</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="_27"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 21.35-1.45-1.32C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z"/></svg></span> Список лайкнутых постов</h2>
+<p><div class="highlight"><pre><span></span><code><span class="n">posts</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_posts</span> <span class="c1"># LikedPosts</span>
+<span class="n">post</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+Если нет доступа, вернетсся пустой список.</p>
+<hr />
+<h1 id="_28">Текущий пользователь</h1>
+<h2 id="_29"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256.1 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56c-98.5 0-178.3 79.8-178.3 178.3 0 16.4 13.3 29.7 29.7 29.7h196.5l10.9-54.5c4.3-21.7 15-41.6 30.6-57.2l67.3-67.3c-28-18.3-61.4-28.9-97.4-28.9h-59.4zm105.9 162.9-11.9 59.6c-.2.9-.3 1.9-.3 2.9 0 8 6.5 14.6 14.6 14.6 1 0 1.9-.1 2.9-.3l59.6-11.9c12.4-2.5 23.8-8.6 32.7-17.5l118.9-118.9-80-80-118.9 118.9c-8.9 8.9-15 20.3-17.5 32.7zm267.8-123c22.1-22.1 22.1-57.9 0-80s-57.9-22.1-80 0l-28.8 28.8 80 80z"/></svg></span> Обновить профиль</h2>
+<div class="highlight"><pre><span></span><code><span class="n">profile</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">bio</span><span class="o">=</span><span class="s1">&#39;био&#39;</span><span class="p">,</span>
+    <span class="n">display_name</span><span class="o">=</span><span class="s1">&#39;имя&#39;</span><span class="p">,</span>
+    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;username&#39;</span><span class="p">,</span>
+    <span class="n">banner_id</span><span class="o">=</span><span class="n">UNSET</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="_30">Обновить из текущих аттрибутов</h3>
+<div class="highlight"><pre><span></span><code><span class="n">me</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;username2&#39;</span>
+<span class="n">me</span><span class="o">.</span><span class="n">bio</span> <span class="o">=</span> <span class="s1">&#39;другое био&#39;</span>
+<span class="n">me</span><span class="o">.</span><span class="n">update_from_fields</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="_31">Параметры</h3>
 <h4 id="username-str">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
-<p>Новый username.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>При смене username старый освобождается и может быть занят другими пользователями.</p>
-</div>
+<p>Новый юзернейм.</p>
 <h4 id="display_name-str">display_name <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
 <p>Новое имя.</p>
 <h4 id="bio-str">bio <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span></h4>
 <p>Биография (о себе).</p>
-<h4 id="banner_id-uuid">banner_id <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span></span><span class="mdx-badge__text">UUID</span></span></h4>
+<h4 id="banner_id-unsetuuid-unset">banner_id <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span> | UNSET</span><span class="mdx-badge__text">UUID | Unset</span></span></h4>
 <p>ID баннера (должен быть загружен через <code>upload_file</code>).</p>
 <div class="admonition tip">
-<p class="admonition-title">Удалить баннер</p>
+<p class="admonition-title">Tip</p>
 <p>Для удаления баннера используйте <code>UNSET</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">itd.models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNSET</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">itd.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNSET</span>
 
-<span class="n">c</span><span class="o">.</span><span class="n">update_profile</span><span class="p">(</span><span class="n">banner_id</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span>
+<span class="n">me</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">banner_id</span><span class="o">=</span><span class="n">UNSET</span><span class="p">)</span>
 </code></pre></div>
 </div>
-<h3 id="_7">Ошибки</h3>
+<h3 id="_32">Ошибки</h3>
 <ul>
 <li><code>ValidationError</code> - ошибка валидации (например слишком длинное имя).</li>
-<li><code>InvalidFileType</code> - баннер может быть только изображением.</li>
-<li><code>RequiresVerification</code> - требуется верификация для GIF-баннера.</li>
-<li><code>UsernameTaken</code> - username уже занят.</li>
+<li><code>RequiresVerificationError</code> - требуется верификация для загрузки GIF-баннера.</li>
+<li><code>UsernameTakenError</code> - username уже занят.</li>
 </ul>
 <hr />
-<h2 id="_8">Получить текущего пользователя</h2>
-<p><div class="highlight"><pre><span></span><code><span class="n">user</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_me</span><span class="p">()</span>
-</code></pre></div>
-Тоже самое, что и <code>c.get_user('me')</code>.</p>
-<hr />
-<h2 id="_9">Обновить настройки приватности</h2>
+<h2 id="_33"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 8a120 120 0 1 1 0 240 120 120 0 1 1 0-240m-29.7 296h59.4c29.7 0 57.7 7.3 82.3 20.1v4.3c-19.6 17.6-32 43.1-32 71.5v96c0 5.5.5 10.9 1.3 16.1H45.7C29.3 512 16 498.7 16 482.3 16 383.8 95.8 304 194.3 304m301.7.1c0-17.7-14.3-32-32-32s-32 14.3-32 32V352h64zM352 400c0-20.9 13.4-38.7 32-45.3v-50.6c0-44.2 35.8-80 80-80s80 35.8 80 80v50.6c18.6 6.6 32 24.4 32 45.3v96c0 26.5-21.5 48-48 48H400c-26.5 0-48-21.5-48-48z"/></svg></span> Обновить настройки приватности</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">itd.models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserPrivacyData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itd.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessType</span>
 
-<span class="n">privacy</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">update_privacy_new</span><span class="p">(</span>
-    <span class="n">privacy</span><span class="o">=</span><span class="n">UserPrivacyData</span><span class="p">(</span>
-        <span class="n">private</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">wall_access</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">EVERYONE</span><span class="p">,</span>
-        <span class="n">likes_visibility</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">EVERYONE</span><span class="p">,</span>
-        <span class="n">show_last_seen</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
+<span class="n">privacy</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">update_privacy</span><span class="p">(</span>
+    <span class="n">is_private</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">wall_access</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">EVERYONE</span><span class="p">,</span>
+    <span class="n">likes_visibility</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">FOLLOWERS</span><span class="p">,</span>
+    <span class="n">show_last_seen</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="_10">Параметры</h3>
-<h4 id="privacy-userprivacydata-required">privacy <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5zm0 4a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3m5.13 12A9.7 9.7 0 0 1 12 20.92 9.7 9.7 0 0 1 6.87 17c-.34-.5-.63-1-.87-1.53 0-1.65 2.71-3 6-3s6 1.32 6 3c-.24.53-.53 1.03-.87 1.53"/></svg></span></span><span class="mdx-badge__text">UserPrivacyData</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Объект с настройками приватности.</p>
-<div class="admonition example">
-<p class="admonition-title">Example</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">itd.models.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserPrivacyData</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">itd.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessType</span>
-
-<span class="n">c</span><span class="o">.</span><span class="n">update_privacy_new</span><span class="p">(</span><span class="n">UserPrivacyData</span><span class="p">(</span>
-    <span class="n">private</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">wall_access</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">NOBODY</span><span class="p">,</span>
-    <span class="n">likes_visibility</span><span class="o">=</span><span class="n">AccessType</span><span class="o">.</span><span class="n">NOBODY</span><span class="p">,</span>
-    <span class="n">show_last_seen</span><span class="o">=</span><span class="kc">False</span>
-<span class="p">))</span>
-</code></pre></div>
-</div>
-<h4 id="userprivacydata">Параметры UserPrivacyData</h4>
+<h3 id="_34">Параметры</h3>
+<h4 id="is_private-bool">is_private <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
+<p>Приватный профиль. Посты не будут попадать в ленту, профиль будет виден только для подписчиков.</p>
+<h4 id="wall_access-accesstype">wall_access <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 5h3l-1.5 2zM5 2h14a2 2 0 0 1 2 2v16c0 1.11-.89 2-2 2H5a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2m0 2v4h14V4zm0 16h14V10H5zm2-8h10v2H7zm0 4h10v2H7z"/></svg></span></span><span class="mdx-badge__text">AccessType</span></span></h4>
+<p>Доступ к стене.</p>
 <ul>
-<li><code>private</code> <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> - Закрыть профиль (Скрыть от неподписчиков).</li>
-<li><code>wall_access</code> <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 5h3l-1.5 2zM5 2h14a2 2 0 0 1 2 2v16c0 1.11-.89 2-2 2H5a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2m0 2v4h14V4zm0 16h14V10H5zm2-8h10v2H7zm0 4h10v2H7z"/></svg></span></span><span class="mdx-badge__text">AccessType</span></span> - Доступ к стен.</li>
-<li><code>likes_visibility</code> <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 5h3l-1.5 2zM5 2h14a2 2 0 0 1 2 2v16c0 1.11-.89 2-2 2H5a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2m0 2v4h14V4zm0 16h14V10H5zm2-8h10v2H7zm0 4h10v2H7z"/></svg></span></span><span class="mdx-badge__text">AccessType</span></span> - Видимость лайков.</li>
-<li><code>show_last_seen</code> <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span> - Показывать время последнего посещения.</li>
+<li><code>AccessType.NOBODY</code> - никто</li>
+<li><code>AccessType.MUTUAL</code> - взаимные подписки</li>
+<li><code>AccessType.FOLLOWERS</code> - подписчики</li>
+<li><code>AccessType.EVERYONE</code> - все</li>
 </ul>
-<h4 id="accesstype">AccessType</h4>
+<h4 id="likes_visibility-accesstype">likes_visibility <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 5h3l-1.5 2zM5 2h14a2 2 0 0 1 2 2v16c0 1.11-.89 2-2 2H5a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2m0 2v4h14V4zm0 16h14V10H5zm2-8h10v2H7zm0 4h10v2H7z"/></svg></span></span><span class="mdx-badge__text">AccessType</span></span></h4>
+<p>Доступ к лайкнутым постам.</p>
+<h4 id="show_last_seen-bool">show_last_seen <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg></span></span><span class="mdx-badge__text">bool</span></span></h4>
+<p>Показывать дату последнего захода.</p>
+<h3 id="_35">Ошибки</h3>
 <ul>
-<li><code>NOBODY</code> - никто</li>
-<li><code>MUTUAL</code> - взаимные подписки</li>
-<li><code>FOLLOWERS</code> - подписчики</li>
-<li><code>EVERYONE</code> - все</li>
+<li><code>ValidationError</code> (скорее всего ошибка в sdk)</li>
 </ul>
 <hr />
-<h2 id="_11">Подписаться</h2>
-<div class="highlight"><pre><span></span><code><span class="n">followers_count</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">follow</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;itd_sdk&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_12">Параметры</h3>
-<h4 id="username-str-required_1">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username пользователя.</p>
-<h3 id="_13">Ошибки</h3>
-<ul>
-<li><code>NotFound</code> - пользователь не найден.</li>
-<li><code>AlreadyFollowing</code> - вы уже подписаны.</li>
-<li><code>CantFollowYourself</code> - нельзя подписаться на самого себя.</li>
-<li><code>UserBlocked</code> - вы заблокировали пользователя или он заблокировал вас.</li>
-</ul>
-<hr />
-<h2 id="_14">Отписаться</h2>
-<div class="highlight"><pre><span></span><code><span class="n">followers_count</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">unfollow</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;itd_sdk&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_15">Параметры</h3>
-<h4 id="username-str-required_2">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username пользователя.</p>
-<h3 id="_16">Ошибки</h3>
-<ul>
-<li><code>NotFound</code> - пользователь не найден.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Если вы заблокировали пользователя или он заблокировал вас, при отписке вернется <code>0</code> (количество подписчиков после отписки).
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">unfollow</span><span class="p">(</span><span class="s1">&#39;nowkie&#39;</span><span class="p">))</span> <span class="c1"># 0, если вы заблокировали nowkie</span>
-</code></pre></div></p>
-</div>
-<hr />
-<h2 id="_17">Получить подписчиков</h2>
-<div class="highlight"><pre><span></span><code><span class="n">followers</span><span class="p">,</span> <span class="n">pagination</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_followers</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">,</span>
-    <span class="n">limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">page</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_18">Параметры</h3>
-<h4 id="username-str-required_3">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username пользователя.</p>
-<h4 id="limit-int">limit <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Лимит подписчиков.</p>
-<h4 id="page-int">page <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Номер страницы для пагинации.</p>
-<div class="admonition example получить всех подписчиков">
-<p class="admonition-title">Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">all_followers</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="n">followers</span><span class="p">,</span> <span class="n">pagination</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_followers</span><span class="p">(</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">)</span>
-    <span class="n">all_followers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">followers</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">pagination</span><span class="o">.</span><span class="n">has_more</span><span class="p">:</span>
-        <span class="k">break</span>
-    <span class="n">page</span> <span class="o">+=</span> <span class="mi">1</span>
-</code></pre></div>
-</div>
-<h3 id="_19">Ошибки</h3>
-<ul>
-<li><code>NotFound</code> - пользователь не найден.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Если вы заблокировали пользователя или он заблокировал вас, вернется ошибка <code>NotFound</code>.</p>
-</div>
-<hr />
-<h2 id="_20">Получить подписки</h2>
-<div class="highlight"><pre><span></span><code><span class="n">following</span><span class="p">,</span> <span class="n">pagination</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_following</span><span class="p">(</span>
-    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;itd_sdk&#39;</span><span class="p">,</span>
-    <span class="n">limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">page</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_21">Параметры</h3>
-<h4 id="username-str-required_4">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span></span><span class="mdx-badge__text">str</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username пользователя.</p>
-<h4 id="limit-int_1">limit <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Лимит пользователей.</p>
-<h4 id="page-int_1">page <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Номер страницы для пагинации.</p>
-<h3 id="_22">Ошибки</h3>
-<ul>
-<li><code>NotFound</code> - пользователь не найден.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Если вы заблокировали пользователя или он заблокировал вас, вернется ошибка <code>NotFound</code>.</p>
-</div>
-<hr />
-<h2 id="_23">Заблокировать пользователя</h2>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">unblock</span><span class="p">(</span>
-    <span class="n">username_or_id</span><span class="o">=</span><span class="s1">&#39;nowkie&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_24">Параметры</h3>
-<h4 id="username-str-uuid-required">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span></span><span class="mdx-badge__text">str | UUID</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username или UUID пользователя.</p>
-<h3 id="_25">Ошибки</h3>
-<ul>
-<li><code>AlreadyBlocked</code> - пользователь уже заблокирован.</li>
-<li><code>NotFound</code> - пользователь не найден.</li>
-<li><code>CantBlockYourself</code> - нельзя заблокировать самого себя.</li>
-</ul>
-<hr />
-<h2 id="_26">Разблокировать пользователя</h2>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">block</span><span class="p">(</span>
-    <span class="n">username_or_id</span><span class="o">=</span><span class="s1">&#39;nowkie&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_27">Параметры</h3>
-<h4 id="username-str-uuid-required_1">username <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 7v2H9v6h1v2H6v-2h1V9H6V7zm6 0a2 2 0 0 1 2 2v6c0 1.11-.89 2-2 2h-4V7m4 2h-2v6h2z"/></svg></span></span><span class="mdx-badge__text">str | UUID</span></span> <span class="mdx-badge mdx-badge_required"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg></span></span><span class="mdx-badge__text">Required</span></span></h4>
-<p>Username или UUID пользователя.</p>
-<h3 id="_28">Ошибки</h3>
-<ul>
-<li><code>NotBlocked</code> - пользователь итак не заблокирован.</li>
-<li><code>NotFound</code> - пользователь не найден.</li>
-</ul>
-<hr />
-<h2 id="_29">Получить список заблокированных пользователей</h2>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">get_blocked</span><span class="p">(</span>
-    <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">page</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-</code></pre></div>
-<h3 id="_30">Параметры</h3>
-<h4 id="limit-int_2">limit <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Лимит пользователей.</p>
-<h4 id="page-int_2">page <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9 4.75A.75.75 0 0 1 9.75 4h4a.75.75 0 0 1 .53 1.28l-1.89 1.892c.312.076.604.18.867.319.742.391 1.244 1.063 1.244 2.005 0 .653-.231 1.208-.629 1.627-.386.408-.894.653-1.408.777-1.01.243-2.225.063-3.124-.527a.751.751 0 0 1 .822-1.254c.534.35 1.32.474 1.951.322.306-.073.53-.201.67-.349.129-.136.218-.32.218-.596 0-.308-.123-.509-.444-.678-.373-.197-.98-.318-1.806-.318a.75.75 0 0 1-.53-1.28l1.72-1.72H9.75A.75.75 0 0 1 9 4.75m-3.587 5.763c-.35-.05-.77.113-.983.572a.75.75 0 1 1-1.36-.632c.508-1.094 1.589-1.565 2.558-1.425 1 .145 1.872.945 1.872 2.222 0 1.433-1.088 2.192-1.79 2.681-.308.216-.571.397-.772.573H7a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75c0-.69.3-1.211.67-1.61.348-.372.8-.676 1.15-.92.8-.56 1.18-.904 1.18-1.474 0-.473-.267-.69-.587-.737M5.604.089A.75.75 0 0 1 6 .75v4.77h.711a.75.75 0 0 1 0 1.5H3.759a.75.75 0 0 1 0-1.5H4.5V2.15l-.334.223a.75.75 0 0 1-.832-1.248l1.5-1a.75.75 0 0 1 .77-.037Z"/></svg></span></span><span class="mdx-badge__text">int</span></span></h4>
-<p>Номер страницы для пагинации.</p>
-<hr />
-<h2 id="_31">Удалить аккаунт</h2>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">delete_account</span><span class="p">()</span>
+<h2 id="_36"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z"/></svg></span> Удалить аккаунт</h2>
+<div class="highlight"><pre><span></span><code><span class="n">me</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 </code></pre></div>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
 <p>У вас будет 30 дней на восстановление аккаунта (см. восстановление аккунта ниже). После этого аккаунт безвозратно удалится.</p>
 </div>
-<h3 id="_32">Ошибки</h3>
+<h3 id="_37">Ошибки</h3>
 <ul>
-<li><code>AccountAlreadyDeleted</code>: Аккаунт уже удален.</li>
+<li><code>AlreadyDeletedError</code> - аккаунт уже удален.</li>
 </ul>
 <hr />
-<h2 id="_33">Восстановить аккаунт</h2>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">restore_account</span><span class="p">()</span>
+<h2 id="_38"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5.27 3.28 4 5 5.72l.28.28 1 1L18 18.72l2 2L18.73 22l-1.46-1.46c-.34.29-.77.46-1.27.46H8c-1.1 0-2-.9-2-2V9.27zM19 4v2H7.82l-2-2H8.5l1-1h5l1 1zm-1 3v9.18L8.82 7z"/></svg></span> Восстановить аккаунт</h2>
+<div class="highlight"><pre><span></span><code><span class="n">me</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="_34">Ошибки</h3>
+<h3 id="_39">Ошибки</h3>
 <ul>
-<li><code>AccountNotDeleted</code>: Аккаунт итак не удален.</li>
+<li><code>NotDeletedError</code>: Аккаунт итак не удален.</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Здесь также должна быть ошибка, что уже слишком поздно, но к сожалению у меня нет дополнительного аккаунта для удаления, чтобы посмотреть как она называется 🫤.</p>
 </div>
+<hr />
+<h2 id="_40"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z"/></svg></span> Установить пин</h2>
+<div class="highlight"><pre><span></span><code><span class="n">me</span><span class="o">.</span><span class="n">set_pin</span><span class="p">(</span><span class="n">me</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="_41">Параметры</h3>
+<h4 id="pin-str-pin">pin <span class="mdx-badge"><span class="mdx-badge__icon"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 6v2H3V6zM3 18h9v-2H3zm0-5h18v-2H3z"/></svg></span> | <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z"/></svg></span></span><span class="mdx-badge__text">str | Pin</span></span></h4>
+<p>Объект пина или слаг. Если None - устанавливается первый из списка.</p>
+<h3 id="_42">Ошибки</h3>
+<ul>
+<li><code>ValueError</code> - список пинов пустой (если pin is None).</li>
+<li><code>PinNotOwnedError</code> - пин не принадлежит вам.</li>
+</ul>
+<hr />
+<h2 id="_43"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5.27 3.28 4 20 20.72 18.73 22l-5.93-5.93V22h-1.6v-6H6v-2l2-2v-.73zM16 12l2 2v2h-.18L8 6.18V4H7V2h10v2h-1z"/></svg></span> Снять пин</h2>
+<div class="highlight"><pre><span></span><code><span class="n">me</span><span class="o">.</span><span class="n">remove_pin</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="_44"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span> Список подписчиков</h2>
+<div class="highlight"><pre><span></span><code><span class="n">followers</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">followers</span> <span class="c1"># Followers</span>
+<span class="n">followers</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="_45"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240m-29.7 56C95.8 304 16 383.8 16 482.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3z"/></svg></span> Список подписок</h2>
+<div class="highlight"><pre><span></span><code><span class="n">following</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">following</span> <span class="c1"># Following</span>
+<span class="n">following</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="_46"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z"/></svg></span> Список пинов</h2>
+<div class="highlight"><pre><span></span><code><span class="n">pins</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">pins</span> <span class="c1"># list</span>
+</code></pre></div>
+<h2 id="_47"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2m1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0M2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg></span> <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0a12 12 0 0 1 12 12 12 12 0 0 1-12 12A12 12 0 0 1 0 12 12 12 0 0 1 12 0m0 2A10 10 0 0 0 2 12c0 2.4.85 4.6 2.26 6.33L18.33 4.26A10 10 0 0 0 12 2m0 20a10 10 0 0 0 10-10c0-2.4-.85-4.6-2.26-6.33L5.67 19.74A10 10 0 0 0 12 22"/></svg></span> Список заблокированных пользователей</h2>
+<div class="highlight"><pre><span></span><code><span class="n">blocked</span> <span class="o">=</span> <span class="n">me</span><span class="o">.</span><span class="n">blocked</span>
+<span class="n">blocked</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">blocked</span><span class="o">.</span><span class="n">load_all</span><span class="p">()</span>
+</code></pre></div>
 
 
 
@@ -1976,6 +2306,44 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../posts/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Пост">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Пост
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../api/client/" class="md-footer__link md-footer__link--next" aria-label="Next: Клиент">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Клиент
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
