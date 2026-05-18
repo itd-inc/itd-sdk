@@ -349,14 +349,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../methods/auth/" class="md-nav__link">
+      <a href="../../methods/client/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Авторизация
+    Клиент
   
 
     
@@ -683,6 +683,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#itd.client.Client.visible_posts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;visible_posts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#itd.client.Client.change_password" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -786,6 +797,17 @@
     <span class="md-ellipsis">
       
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;search_users
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Client.update_post_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;update_post_stats
       
     </span>
   </a>
@@ -946,6 +968,28 @@
     <span class="md-ellipsis">
       
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;parse_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Config.post_update_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;post_update_stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Config.post_update_stats_interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;post_update_stats_interval
       
     </span>
   </a>
@@ -1763,6 +1807,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#itd.client.Client.visible_posts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;visible_posts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#itd.client.Client.change_password" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1866,6 +1921,17 @@
     <span class="md-ellipsis">
       
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;search_users
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Client.update_post_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;update_post_stats
       
     </span>
   </a>
@@ -2026,6 +2092,28 @@
     <span class="md-ellipsis">
       
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;parse_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Config.post_update_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;post_update_stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itd.client.Config.post_update_stats_interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;post_update_stats_interval
       
     </span>
   </a>
@@ -2485,6 +2573,24 @@
 
 </div>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="itd.client.Client.visible_posts" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">visible_posts</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">visible_posts</span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><a class="autorefs autorefs-internal" title="            Post (itd.post.Post)" href="../post/#itd.post.Post">Post</a></span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
 
 
 
@@ -2824,6 +2930,45 @@
             </td>
             <td>
                   <code>{}</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>level</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            AuthLevel (itd.enums.AuthLevel)" href="../enums/#itd.enums.AuthLevel">AuthLevel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>УРовень авторизации для выполнения. Defaults to AuthLevel.ACCESS.</p>
+              </div>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            ACCESS (itd.enums.AuthLevel.ACCESS)" href="../enums/#itd.enums.AuthLevel.ACCESS">ACCESS</a></code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            InsufficientAuthLevelError (itd.exceptions.InsufficientAuthLevelError)" href="../exceptions/#itd.exceptions.InsufficientAuthLevelError">InsufficientAuthLevelError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Недостаточный уровень авторизации</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -3268,6 +3413,24 @@
 
 </div>
 
+<div class="doc doc-object doc-function">
+
+
+<h4 id="itd.client.Client.update_post_stats" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">update_post_stats</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">update_post_stats</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
 
 
   </div>
@@ -3535,6 +3698,42 @@
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="n">parse_mode</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" title="            ParseMode (itd.enums.ParseMode)" href="../enums/#itd.enums.ParseMode">ParseMode</a></span> <span class="o">=</span> <span class="n"><a class="autorefs autorefs-internal" title="            NO (itd.enums.ParseMode.NO)" href="../enums/#itd.enums.ParseMode.NO">NO</a></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="itd.client.Config.post_update_stats" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">post_update_stats</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">post_update_stats</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="itd.client.Config.post_update_stats_interval" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">post_update_stats_interval</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">post_update_stats_interval</span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">3</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
