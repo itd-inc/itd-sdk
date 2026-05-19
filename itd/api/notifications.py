@@ -36,4 +36,4 @@ def stream_notifications(client: Client):
     Returns:
         Response: Streaming response для SSE
     """
-    return fetch_stream(client.token, 'notifications/stream', session=client.session)
+    return client.request_sse('notifications/stream')

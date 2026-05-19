@@ -15,7 +15,7 @@ from requests.exceptions import RequestException
 from itd._default import _default_client, set_default_client
 from itd.exceptions import InsufficientAuthLevelError, RateLimitError, InternalError, NotFoundError
 from itd.hashtag import Hashtag
-from itd.request import fetch, decode_jwt_payload
+from itd.request import fetch, decode_jwt_payload, fetch_stream
 from itd.enums import RateLimitMode, All, DebugResponseMode, ParseMode, Batch, BATCH, UserAgent, AuthLevel
 from itd.user import Me, User
 from itd.post import DwellTracker, Post
@@ -194,6 +194,14 @@ class Client:
             self.refresh_auth()
 
         return fetch(self, method, url, params, files)
+
+    def request_sse(self, url: str):
+        l.debug('sse %s', url)
+
+        if self.access_token is None and url != 'v1/auth/refresh':
+            self.refresh_auth()
+
+        return fetch_stream(self, url)
 
 
     def update_post_stats(self):

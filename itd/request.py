@@ -125,15 +125,15 @@ def fetch(client: 'Client', method: str, url: str, params: dict = {}, files: dic
     return res
 
 
-def fetch_stream(token: str, url: str, *, session: Session):
+def fetch_stream(client: Client, url: str):
     """Fetch для SSE streaming запросов"""
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
         "Accept": "text/event-stream",
-        "Authorization": 'Bearer ' + token,
+        "Authorization": 'Bearer ' + client.token,
         "Cache-Control": "no-cache",
         'Sec-WebSocket-Extensions': 'permessage-deflate',
         'Sec-WebSocket-Key': '3tMaiXFWtq34tenKN/+T4Q==',
         'Sec-WebSocket-Version': '13'
     }
-    return session.get(base, headers=headers, stream=True, timeout=None)
+    return client.session.get(base, headers=headers, stream=True, timeout=None)
