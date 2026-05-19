@@ -140,35 +140,24 @@ class Notifications(ITDList[Notification]):
 
 
     # redefine this for your needs (eg notifications.on_like = my_function)
-    def on_like(self, notification: Notification) -> None:
-        pass
+    def on_like(self, notification: Notification, /) -> None: ...
 
-    def on_comment(self, notification: Notification) -> None:
-        pass
+    def on_comment(self, notification: Notification, /) -> None: ...
 
-    def on_reply(self, notification: Notification) -> None:
-        pass
+    def on_reply(self, notification: Notification, /) -> None: ...
 
-    def on_repost(self, notification: Notification) -> None:
-        pass
+    def on_repost(self, notification: Notification, /) -> None: ...
 
-    def on_mention(self, notification: Notification) -> None:
-        pass
+    def on_mention(self, notification: Notification, /) -> None: ...
 
-    def on_follow(self, notification: Notification) -> None:
-        pass
+    def on_follow(self, notification: Notification, /) -> None: ...
 
-    def on_follow_request(self, notification: Notification) -> None:
-        pass
+    def on_follow_request(self, notification: Notification, /) -> None: ...
 
-    def on_follow_accepted(self, notification: Notification) -> None:
-        pass
+    def on_follow_accepted(self, notification: Notification, /) -> None: ...
 
-    def on_comment_like(self, notification: Notification) -> None:
-        pass
+    def on_comment_like(self, notification: Notification, /) -> None: ...
 
-    def on_comment_mention(self, notification: Notification) -> None:
-        pass
+    def on_comment_mention(self, notification: Notification, /) -> None: ...
 
-    def on_wall_post(self, notification: Notification) -> None:
-        pass
+    def on_wall_post(self, notification: Notification, /) -> None: ...
