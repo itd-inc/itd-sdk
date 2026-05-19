@@ -394,7 +394,7 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
                     return func(client, *args, **kwargs)
                 except (client.config._retry_exceptions) as e:
                     retry_after = getattr(e, 'retry_after', client.config.rate_limit_wait) or client.config.retry_delay
-                    l.info('%s on %s: wait %ss', e.__class__.__name__, func.__name__, retry_after)
+                    l.warning('%s on %s: wait %ss', e.__class__.__name__, func.__name__, retry_after)
                     sleep(retry_after)
 
         return wrapper

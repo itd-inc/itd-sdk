@@ -1,6 +1,6 @@
 # itd-sdk
 Клиент ITD для python  
-Документация (beta): https://firedotguy.github.io/itd-sdk
+Документация (beta): https://itdsdk.qzz.io/docs
 
 ## Установка
 
@@ -98,7 +98,7 @@ fetch(c, 'метод', 'эндпоинт', {'данные': 'данные'})
 ## Прочее
  - Лицезия: [MIT](./LICENSE)
  - Автор:
-   - ИТД: [itd_sdk](https://xn--d1ah4a.com/@itd_sdk) или [@fdg](https://xn--d1ah4a.com/@pingbot)
+   - ИТД: [@itd_sdk](https://xn--d1ah4a.com/@itd_sdk) или [@fdg](https://xn--d1ah4a.com/@pingbot)
    - ТГ: [@desicars](https://t.me/desicars)
 
 [![Star History Chart](https://api.star-history.com/chart?repos=itd-sdk/itd-sdk&type=date&legend=top-left)](https://www.star-history.com/?repos=itd-sdk%2Fitd-sdk&type=date&legend=top-left)
