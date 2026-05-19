@@ -44,7 +44,7 @@ res = c.request(
 #### params <span class="mdx-badge"><span class="mdx-badge__icon">:material-code-braces:</span><span class="mdx-badge__text">dict</span></span>
 Параметры к запросу.
 
-#### files <span class="mdx-badge"><span class="mdx-badge__icon">:material-code-braces: :material-text:, :material-code-parentheses: :material-file:</span><span class="mdx-badge__text">dict[str, tuple[str, BufferedReader | bytes]]</span></span>
+#### files <span class="mdx-badge"><span class="mdx-badge__icon">:material-code-braces: [:material-text:, :material-code-parentheses:] :material-file:</span><span class="mdx-badge__text">dict[str, tuple[str, BufferedReader | bytes]]</span></span>
 Файл для загрузке в формате `{'file': ('имя файла', 'содержание')}`
 
 #### level <span class="mdx-badge"><span class="mdx-badge__icon">:material-code-braces:</span><span class="mdx-badge__text">dict</span></span>
@@ -65,6 +65,46 @@ c.update_post_stats()
 
 ### Ошибки
  - `NotFoundError` - пост(ы) не найден(ы)
+
+---
+
+## Поиск
+```py
+users, hashtags = c.search(
+    query='itd_sdk',
+    hashtags_limit=20,
+    users_limit=20
+)
+```
+
+### Параметры
+#### query <span class="mdx-badge"><span class="mdx-badge__icon">:material-text:</span><span class="mdx-badge__text">str</span></span>
+Запрос.
+
+#### hashtags_limit <span class="mdx-badge"><span class="mdx-badge__icon">:octicons-number-16:</span><span class="mdx-badge__text">int</span></span>
+Лимит хэштэгов (от 1 до 20).
+
+#### users_limit <span class="mdx-badge"><span class="mdx-badge__icon">:octicons-number-16:</span><span class="mdx-badge__text">int</span></span>
+Лимит пользователей (от 1 до 20).
+
+---
+
+## Получить статус подписок
+```py
+is_following = c.get_follow_status('14040bb6-5359-455e-a9b6-86b033bc33be')
+```
+или
+```py
+follow_dict = c.get_follow_status(['549bf2fa-7648-43a7-97aa-b49e9baf5814', '2ddc1460-bdf2-4e5d-82f4-0eca0186bc91'])
+is_following1 = follow_dict['549bf2fa-7648-43a7-97aa-b49e9baf5814']
+is_following2 = follow_dict['2ddc1460-bdf2-4e5d-82f4-0eca0186bc91']
+```
+Проверить статус подписки на пользователей. В ответе выдается `dict[UUID, bool]` (если было запрошено несколько пользователей) или `bool` (если один).
+
+### Параметры
+#### users <span class="mdx-badge"><span class="mdx-badge__icon">:material-code-brackets:[:material-identifier: | :fontawesome-solid-user:] | :material-identifier: | :fontawesome-solid-user:</span><span class="mdx-badge__text">list[UUID | User] | UUID | User</span></span>
+Пользователи для проверки.
+
 
 ---
 
