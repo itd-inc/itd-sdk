@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, cast, Iterator
+from typing import TYPE_CHECKING, Literal, cast, Iterator
 from uuid import UUID
 from datetime import datetime
 from json import loads
@@ -57,6 +57,52 @@ class Notification(ITDBaseModel):
 
         self.is_read = True
         self.read_at = datetime.now()
+
+    def get_text(self, avatar: bool = False) -> str:
+        text = ''
+        if avatar:
+            text += self.actor.avatar + ' '
+        text += self.actor.display_name + ' '
+
+        match self.type:
+            case NotificationType.FOLLOW:
+                text += 'подписался(-ась) на вас'
+            case NotificationType.FOLLOW_REQUEST:
+                text += 'хочет подписаться на вас'
+            case NotificationType.FOLLOW_ACCEPTED:
+                text += 'принял(а) вашу заявку на подписку'
+            case NotificationType.LIKE:
+                text += 'оценил(а) ваш пост'
+            case NotificationType.COMMENT:
+                text += 'прокомментировал(а) ваш пост'
+            case NotificationType.REPOST:
+                text += 'сделал(а) репост вашего поста'
+            case NotificationType.COMMENT_LIKE:
+                text += 'оценил(а) ваш комментарий'
+            case NotificationType.REPLY:
+                text += 'ответил(а) на ваш комментарий'
+            case NotificationType.MENTION:
+                text += 'упомянул(а) вас в посте'
+            case NotificationType.COMMENT_MENTION:
+                text += 'упомянул(а) вас в комментарии'
+            case NotificationType.WALL_POST:
+                text += 'написал(а) на вашей стене'
+
+        return text
+
+    def get_color(self) -> Literal['blue'] | Literal['green'] | Literal['red'] | Literal['purple']:
+        match self.type:
+            case NotificationType.FOLLOW | NotificationType.FOLLOW_REQUEST | NotificationType.REPOST | NotificationType.WALL_POST:
+                return 'blue'
+
+            case NotificationType.FOLLOW_ACCEPTED | NotificationType.COMMENT | NotificationType.REPLY:
+                return 'green'
+
+            case NotificationType.LIKE | NotificationType.COMMENT_LIKE:
+                return 'red'
+
+            case NotificationType.MENTION | NotificationType.COMMENT_MENTION:
+                return 'purple'
 
 
 class _NotificationValidate(BaseModel, Notification):
