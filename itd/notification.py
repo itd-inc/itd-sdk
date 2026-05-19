@@ -116,8 +116,9 @@ class Notifications(ITDList[Notification]):
             notification = Notification(data, self, self.client)
             self.insert(0, notification)
 
-            l.info('call %s', notification.type.value)
+            l.info('new notification type=%s', notification.type.value)
             exec(f'self.on_{notification.type.value}(notification)')
+            self.on_notification(notification)
 
             yield notification
 
@@ -161,3 +162,5 @@ class Notifications(ITDList[Notification]):
     def on_comment_mention(self, notification: Notification, /) -> None: ...
 
     def on_wall_post(self, notification: Notification, /) -> None: ...
+
+    def on_notification(self, notification: Notification, /) -> None: ...
