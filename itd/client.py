@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from atexit import register
 from time import sleep
 from threading import Thread
+from typing import overload
 
 from requests import Session
 from requests.utils import default_user_agent
@@ -330,6 +331,12 @@ class Client:
         hashtag = self.search_hashtags(query, 1)
         if hashtag:
             return hashtag[0]
+
+    @overload
+    def get_follow_status(self, users: list[User | UUID | str]) -> dict[UUID, bool]: ...
+
+    @overload
+    def get_follow_status(self, users: User | UUID | str) -> bool: ...
 
     def get_follow_status(self, users: list[User | UUID | str] | User | UUID | str) -> dict[UUID, bool] | bool:
         """Получить статус подписки
