@@ -380,7 +380,7 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
             else:
                 delay = client.config._rate_limit_default
 
-            if datetime.now() - timedelta(seconds=delay) < client.last_actions.get(func.__name__, datetime(2013, 2, 16)):  # my birthday actually
+            if datetime.now() - timedelta(seconds=delay) < client.last_actions.get(func.__name__, datetime(1990, 1, 1)):
                 delay -= (datetime.now() - client.last_actions[func.__name__]).seconds
                 l.debug('anti rate limit on %s; wait %ss', func.__name__, delay)
                 sleep(max(delay, 0))
@@ -393,7 +393,11 @@ def rate_limit(delay_min: float | None = None, delay_mid: float | None = None, d
                 try:
                     return func(client, *args, **kwargs)
                 except (client.config._retry_exceptions) as e:
-                    retry_after = getattr(e, 'retry_after', client.config.rate_limit_wait) or client.config.retry_delay
+                    if getattr(e, 'retry_after', 0) > client.config.retry_max_retry_after:
+                        l.error('too large rate limit')
+                        raise
+
+                    retry_after = getattr(e, 'retry_after', client.config.retry_delay)
                     l.warning('%s on %s: wait %ss', e.__class__.__name__, func.__name__, retry_after)
                     sleep(retry_after)
 
