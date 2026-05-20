@@ -125,7 +125,7 @@ def fetch(client: 'Client', method: str, url: str, params: dict = {}, files: dic
     return res
 
 
-def fetch_stream(client: Client, url: str):
+def fetch_stream(client: 'Client', url: str):
     """Fetch для SSE streaming запросов"""
     base = f'https://xn--d1ah4a.com/api/{url}'
     headers = {
