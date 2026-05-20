@@ -7,3 +7,10 @@ itd_sdk.egg-info
 nowkie.gif
 nowkie.webm
 g.gif
+.env
+*.gif
+*.mp3
+*.mp4
+*.txt
+*.json
+examples/upload_gif.py
